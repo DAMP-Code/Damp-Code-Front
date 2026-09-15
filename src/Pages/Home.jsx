@@ -1,17 +1,17 @@
 import React from 'react'
-import Header from '../Componentes/Header'
+import Header from '../app-components/Header'
 import "../style.css"
-import Banner from '../Componentes/Home/banner'
-import Cards from '../Componentes/Home/Cards'
-import Ranking_Home from '../Componentes/Home/Ranking_Home'
-import Banner_empresa from '../Componentes/Home/banner_empresa'
-import Game from '@/Componentes/Home/Game'
-import Comunidade_home from '@/Componentes/Home/Comunidade_home'
-import Footer from '@/Componentes/Footer'
+import Banner from '../app-components/home/Banner'
+import Cards from '../app-components/home/Cards'
+import HomeRanking from '../app-components/home/HomeRanking'
+import CompanyBanner from '../app-components/home/CompanyBanner'
+import Game from '@/app-components/home/Game'
+import HomeCommunity from '@/app-components/home/HomeCommunity'
+import Footer from '@/app-components/Footer'
 
 const Home = () => {
   return (
-    <div className='bg-fundo w-full min-h-screen'>
+    <div className='bg-surface w-full min-h-screen'>
       <Header />
 
       <section id="inicio">
@@ -23,11 +23,11 @@ const Home = () => {
       </section>
 
       <section id="ranking">
-        <Ranking_Home />
+        <HomeRanking />
       </section>
 
       <section id="empresas">
-        <Banner_empresa />
+        <CompanyBanner />
       </section>
 
       <section id="game">
@@ -35,7 +35,7 @@ const Home = () => {
       </section>
 
       <section id="comunidade">
-        <Comunidade_home />
+        <HomeCommunity />
       </section>
 
       <Footer />

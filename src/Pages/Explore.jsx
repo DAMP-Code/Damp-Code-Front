@@ -1,23 +1,23 @@
-import Melhores from '@/Componentes/Explorar/Melhores'
-import Niveis from '@/Componentes/Explorar/NIveis'
-import Search from '@/Componentes/Explorar/Search'
-import SideBar from '@/Componentes/Explorar/SideBar'
-import Footer from '@/Componentes/Footer'
-import Header from '@/Componentes/Header'
-import Criar_Desafio from '@/Componentes/Explorar/Criar_Desafio'
+import WeeklyHighlights from '@/app-components/explore/WeeklyHighlights'
+import Levels from '@/app-components/explore/Levels'
+import Search from '@/app-components/explore/Search'
+import Sidebar from '@/app-components/explore/Sidebar'
+import Footer from '@/app-components/Footer'
+import Header from '@/app-components/Header'
+import CreateChallenge from '@/app-components/explore/CreateChallenge'
 import React from 'react'
 
 const Explore = () => {
   return (
-    <div className='bg-fundo w-full min-h-screen'>
+    <div className='bg-surface w-full min-h-screen'>
         <Header />
-        <div className='flex w-full'>
-          <SideBar />
+        <div className='mx-auto flex w-full max-w-[1600px]'>
+          <Sidebar />
           <div className='flex flex-col w-full'>
             <Search />
-            <Melhores />
-            <Niveis />
-            <Criar_Desafio />
+            <WeeklyHighlights />
+            <Levels />
+            <CreateChallenge />
           </div>
         </div>
         <Footer />

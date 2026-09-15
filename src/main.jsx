@@ -3,15 +3,15 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
-import { CadastroProvider } from "./Componentes/utilidades/CadastroContext"
-import { AuthProvider } from "./Componentes/utilidades/AuthContext"
+import { RegistrationProvider } from "./app-components/utilities/RegistrationContext"
+import { AuthProvider } from "./app-components/utilities/AuthContext"
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <CadastroProvider>
+  <RegistrationProvider>
     <BrowserRouter>
       <AuthProvider>
         <App />
       </AuthProvider>
     </BrowserRouter>
-  </CadastroProvider>
+  </RegistrationProvider>
 )

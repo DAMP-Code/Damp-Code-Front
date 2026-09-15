@@ -1,12 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import BackButton from "@/Componentes/BackButton";
-import TitleHackaton from "@/Componentes/Criacao_Hackaton/TitleHackaton";
-import SubTitleHackaton from "@/Componentes/Criacao_Hackaton/SubTitleHackaton";
+import BackButton from "@/app-components/BackButton";
+import HackathonTitle from "@/app-components/hackathon-creation/HackathonTitle";
+import HackathonSubtitle from "@/app-components/hackathon-creation/HackathonSubtitle";
 
 const HackathonPage = () => {
-  function getDescricaoMetodo(metodo) {
-    switch (metodo) {
+  function getMethodDescription(method) {
+    switch (method) {
       case "Autodata":
         return "O desempenho dos participantes será avaliado automaticamente com base em métricas de atividade, entregas e engajamento na plataforma.";
 
@@ -17,7 +17,7 @@ const HackathonPage = () => {
         return "Os projetos serão avaliados manualmente por uma equipe especializada da empresa.";
 
       default:
-        return metodo;
+        return method;
     }
   }
 
@@ -26,7 +26,7 @@ const HackathonPage = () => {
   const [hackathon, setHackathon] = useState(null);
 
   useEffect(() => {
-    async function carregarHackathon() {
+    async function loadHackathon() {
       const response = await fetch(
         `https://localhost:7092/api/Hackathons/${id}`,
       );
@@ -36,11 +36,11 @@ const HackathonPage = () => {
       setHackathon(data);
     }
 
-    carregarHackathon();
+    loadHackathon();
   }, [id]);
 
   if (!hackathon) {
-    return <p>Carregando...</p>;
+    return <p className="flex min-h-screen items-center justify-center bg-surface text-lg font-semibold text-brand-light">Carregando...</p>;
   }
 
   return (
@@ -50,33 +50,34 @@ const HackathonPage = () => {
       w-full
       min-h-screen
       text-white
-      px-6
+      px-5
       lg:px-10
       py-8
       flex
       flex-col
-      gap-y-10
+      gap-y-8
+      overflow-hidden
     "
     >
       {/* VOLTAR */}
-      <div className="w-fit">
+      <div className="mx-auto w-full max-w-7xl">
         <BackButton />
       </div>
 
       {/* HEADER */}
-      <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-        <div className="flex items-center gap-x-5 w-full lg:w-3/4">
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-8 rounded-3xl border border-white/10 bg-black/15 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:flex-row lg:items-center">
+        <div className="flex w-full flex-col items-start gap-5 sm:flex-row sm:items-center lg:w-3/4">
           <img
-            className="w-32 lg:w-60"
+            className="max-h-36 w-32 rounded-2xl object-contain lg:w-52"
             src={hackathon.logo || "/src/assets/DAMPCode.svg"}
             alt=""
           />
 
-          <TitleHackaton
-            texto1={hackathon.titulo}
-            texto2={` - ${hackathon.empresa}`}
-            cor1={hackathon.corPrincipal}
-            cor2={hackathon.corSecundaria}
+          <HackathonTitle
+            text1={hackathon.titulo}
+            text2={` - ${hackathon.empresa}`}
+            color1={hackathon.corPrincipal}
+            color2={hackathon.corSecundaria}
           />
         </div>
 
@@ -91,7 +92,7 @@ const HackathonPage = () => {
           font-semibold
           text-lg
           shadow-lg
-          hover:scale-105
+          hover:-translate-y-1 hover:brightness-110
           transition-all
         "
         >
@@ -100,7 +101,7 @@ const HackathonPage = () => {
       </div>
 
       {/* INFO */}
-      <div className="flex flex-wrap gap-10 text-sm text-zinc-300 border-b border-zinc-700 pb-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap gap-3 border-b border-white/10 pb-6 text-sm text-zinc-300 [&_p]:rounded-full [&_p]:border [&_p]:border-white/10 [&_p]:bg-black/15 [&_p]:px-4 [&_p]:py-2">
         <p>
           Área:
           <b>{hackathon.area}</b>
@@ -119,15 +120,15 @@ const HackathonPage = () => {
       </div>
 
       {/* CONTEÚDO */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 lg:grid-cols-2">
         {/* ESQUERDA */}
-        <div className="flex flex-col gap-y-10">
-          <div>
-            <SubTitleHackaton
-              texto1="DESCRIÇÃO"
-              texto2=" DO HACKATHON"
-              cor1={hackathon.corPrincipal}
-              cor2={hackathon.corSecundaria}
+        <div className="flex flex-col gap-y-6">
+          <div className="rounded-2xl border border-white/10 bg-black/15 p-6 backdrop-blur-sm">
+            <HackathonSubtitle
+              text1="DESCRIÇÃO"
+              text2=" DO HACKATHON"
+              color1={hackathon.corPrincipal}
+              color2={hackathon.corSecundaria}
             />
 
             <p className="text-zinc-300 leading-relaxed mt-3">
@@ -135,31 +136,31 @@ const HackathonPage = () => {
             </p>
           </div>
 
-          <div>
-            <SubTitleHackaton
-              texto1="MÉTODO DE"
-              texto2=" AVALIAÇÃO"
-              cor1={hackathon.corPrincipal}
-              cor2={hackathon.corSecundaria}
+          <div className="rounded-2xl border border-white/10 bg-black/15 p-6 backdrop-blur-sm">
+            <HackathonSubtitle
+              text1="MÉTODO DE"
+              text2=" AVALIAÇÃO"
+              color1={hackathon.corPrincipal}
+              color2={hackathon.corSecundaria}
             />
 
             <p className="text-zinc-300 mt-3">
-              {getDescricaoMetodo(hackathon.metodo)}
+              {getMethodDescription(hackathon.metodo)}
             </p>
           </div>
         </div>
 
         {/* DIREITA */}
-        <div>
-          <SubTitleHackaton
-            texto1="TECNOLOGIAS"
-            texto2=" UTILIZADAS"
-            cor1={hackathon.corPrincipal}
-            cor2={hackathon.corSecundaria}
+        <div className="rounded-2xl border border-white/10 bg-black/15 p-6 backdrop-blur-sm">
+          <HackathonSubtitle
+            text1="TECNOLOGIAS"
+            text2=" UTILIZADAS"
+            color1={hackathon.corPrincipal}
+            color2={hackathon.corSecundaria}
           />
 
           <div className="flex flex-wrap gap-4 mt-5">
-            {hackathon.tecnologias?.map((tec, index) => (
+            {hackathon.tecnologias?.map((technology, index) => (
               <span
                 key={index}
                 style={{
@@ -169,10 +170,10 @@ const HackathonPage = () => {
                 border
                 px-4
                 py-2
-                rounded-lg
+                rounded-full bg-black/15
               "
               >
-                {tec}
+                {technology}
               </span>
             ))}
           </div>
