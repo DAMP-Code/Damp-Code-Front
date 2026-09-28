@@ -91,8 +91,8 @@ export default function UserLogin() {
         
         }
       />
-      <section className="flex min-h-screen w-full flex-col items-center justify-center px-5 py-24 md:w-1/2">
-        <div className="flex w-full max-w-md flex-col items-center justify-center rounded-3xl border border-white/10 bg-surface-light/60 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:p-10">
+      <section className="flex min-h-screen w-full flex-col items-start justify-start px-5 py-24 md:w-1/2">
+        <div className="flex w-full gap-y-6 max-w-md flex-col items-start justify-start rounded-3xl border border-white/10 bg-surface-light/60 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:p-10">
           <BackButton />
           <div className="flex gap-x-4">
             <h2 className="text-4xl text-brand font-extrabold">Pressione</h2>
@@ -109,7 +109,7 @@ export default function UserLogin() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-lg font-semibold text-content focus:border-highlight"
+              className="w-full rounded-xl border-none border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
             />
 
             <input
@@ -117,7 +117,7 @@ export default function UserLogin() {
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-lg font-semibold text-content focus:border-highlight"
+              className="w-full rounded-xl border-none border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
             />
 
             <button

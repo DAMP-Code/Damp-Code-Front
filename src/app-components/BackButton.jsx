@@ -4,12 +4,25 @@ import { useNavigate } from "react-router-dom";
 const BackButton = () => {
   const navigate = useNavigate();
   return (
-    <button
-      onClick={() => navigate(-1)}
-      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-light/30 bg-brand px-5 py-2.5 font-semibold text-white shadow-[0_8px_24px_rgba(108,72,197,0.25)] hover:-translate-y-0.5 hover:bg-brand-hover hover:shadow-[0_12px_28px_rgba(108,72,197,0.35)] active:translate-y-0"
+    
+    <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    stroke-width="2" 
+    stroke-linecap="round" 
+    stroke-linejoin="round" 
+    class="lucide lucide-move-left preview-icon"
+    onClick = {() => navigate(-1)}
+    className="cursor-pointer text-white hover:text-brand hover:drop-shadow-[0_0_8px_currentColor] transition-all duration-200"
     >
-      Voltar
-    </button>
+      <path d="M6 8L2 12L6 16" />
+      <path d="M2 12H22" />
+    </svg>     
+    
   );
 };
 
