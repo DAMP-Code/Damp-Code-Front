@@ -24,7 +24,6 @@ const AccountTypeSelection = () => {
       bandWidth={6}
       transparent
       autoRotate={0}
-      color="#A855F7"
     />
   </div>
 
