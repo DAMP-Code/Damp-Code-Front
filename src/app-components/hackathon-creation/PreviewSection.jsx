@@ -104,7 +104,7 @@ const PreviewSection = ({ hackathon }) => {
             />
 
             <p className='text-content-secondary leading-relaxed mt-3 text-base'>
-              Nesse hackaton, está escolhido o top{' '}
+              Nesse hackathon, está escolhido o top{' '}
               <span style={{color: hackathon.corPrincipal}} className=' font-bold'>100</span>,
               os 100 mais dedicados terão os benefícios,
               de mais de{' '}
