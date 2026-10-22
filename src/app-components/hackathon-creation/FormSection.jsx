@@ -398,7 +398,7 @@ function handleLogoChange(e) {
     hackathon.Metodo === item.name
       ? `
         border-highlight
-        bg-[#241042]
+        bg-surface
         shadow-[0_0_25px_rgba(255,204,0,0.18)]
         scale-[1.02]
       `
@@ -421,7 +421,7 @@ function handleLogoChange(e) {
               </div>
 
               {/* DESCRIÇÃO */}
-              <p className="text-zinc-300 text-sm leading-relaxed">
+              <p className="text-content-secondary text-sm leading-relaxed">
                 {item.description}
               </p>
             </div>

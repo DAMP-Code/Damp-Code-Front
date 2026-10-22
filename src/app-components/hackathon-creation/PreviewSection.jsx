@@ -4,7 +4,7 @@ import HackathonSubtitle from './HackathonSubtitle'
 
 const PreviewSection = ({ hackathon }) => {
   return (
-    <section style={{backgroundColor: hackathon.corFundo}} className='sticky top-20 hidden h-[calc(100vh-5rem)] w-1/2 flex-col gap-y-8 overflow-y-auto border-l border-white/10 bg-[#070012] px-6 py-8 text-white md:flex lg:px-10'>
+    <section style={{backgroundColor: hackathon.corFundo}} className='sticky top-20 hidden h-[calc(100vh-5rem)] w-1/2 flex-col gap-y-8 overflow-y-auto border-l border-white/10 bg-surface px-6 py-8 text-white md:flex lg:px-10'>
 
       {/* HEADER */}
       <div className='flex-col lg:flex justify-between items-start w-full'>
@@ -30,7 +30,7 @@ const PreviewSection = ({ hackathon }) => {
       </div>
 
       {/* INFORMAÇÕES */}
-      <div className='flex flex-wrap gap-x-10 text-sm text-zinc-300 border-b border-zinc-700 pb-6'>
+      <div className='flex flex-wrap gap-x-10 text-sm text-content-secondary border-b border-white/10 pb-6'>
 
         <p>Área:<b>{hackathon.Area}</b></p>
 
@@ -73,7 +73,7 @@ const PreviewSection = ({ hackathon }) => {
                 color2={hackathon.corSecundaria}
             />
 
-            <p className='text-zinc-300 leading-relaxed mt-3 text-base wrap-break-word max-w-full'>
+            <p className='text-content-secondary leading-relaxed mt-3 text-base wrap-break-word max-w-full'>
               {hackathon.Descricao}
             </p>
           </div>
@@ -86,7 +86,7 @@ const PreviewSection = ({ hackathon }) => {
                 color2={hackathon.corSecundaria}
             />
 
-            <p className='text-zinc-300 leading-relaxed mt-3 text-base'>
+            <p className='text-content-secondary leading-relaxed mt-3 text-base'>
               {hackathon.Metodo}
             </p>
           </div>
@@ -103,7 +103,7 @@ const PreviewSection = ({ hackathon }) => {
                 color2={hackathon.corSecundaria}
             />
 
-            <p className='text-zinc-300 leading-relaxed mt-3 text-base'>
+            <p className='text-content-secondary leading-relaxed mt-3 text-base'>
               Nesse hackaton, está escolhido o top{' '}
               <span style={{color: hackathon.corPrincipal}} className=' font-bold'>100</span>,
               os 100 mais dedicados terão os benefícios,

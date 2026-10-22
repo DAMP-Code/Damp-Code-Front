@@ -62,12 +62,12 @@ const ManageChallenges = () => {
   }
 
   return (
-    <div className="min-h-screen w-full max-w-7xl bg-[#170A36] px-4 py-8 text-content sm:px-6 lg:p-8">
+    <div className="min-h-screen w-full max-w-7xl bg-surface px-4 py-8 text-content sm:px-6 lg:p-8">
       <button
         onClick={generatePdf}
         className="
-      bg-[#6C48C5]
-      hover:bg-[#7c57d8]
+      bg-brand
+      hover:bg-brand-hover
       px-5
       py-3
       rounded-xl
@@ -79,9 +79,9 @@ const ManageChallenges = () => {
       >
         📄 Gerar Relatório PDF
       </button>
-      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#22114D] shadow-[0_20px_55px_rgba(0,0,0,0.24)]">
+      <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface-light shadow-[0_20px_55px_rgba(0,0,0,0.24)]">
         <table className="min-w-[760px] w-full border-collapse">
-          <thead className="bg-[#170A36] text-[#FFEA00]">
+          <thead className="bg-surface text-highlight">
             <tr className="text-left text-sm uppercase tracking-wider">
               <th className="px-6 py-4">Nome</th>
               <th className="px-6 py-4">Status</th>
@@ -95,38 +95,38 @@ const ManageChallenges = () => {
             {hackathons.map((hackathon) => (
               <tr
                 key={hackathon.hackathonId}
-                className="border-t border-[#30363d] transition hover:bg-[#2a1761]"
+                className="border-t border-border transition hover:bg-white/5"
               >
                 <td className="px-6 py-5 font-medium">{hackathon.titulo}</td>
                 <td className="px-6 py-5">
                   <span
                     className={`rounded-full px-3 py-1 text-sm font-semibold ${
                       hackathon.status
-                        ? "bg-[#3fb950]/20 text-[#3fb950]"
-                        : "bg-red-500/20 text-red-400"
+                        ? "bg-success/20 text-success"
+                        : "bg-danger/20 text-danger"
                     }`}
                   >
                     {hackathon.status ? "Ativo" : "Inativo"}
                   </span>
                 </td>
 
-                <td className="px-6 py-5 text-[#8b949e]">100</td>
+                <td className="px-6 py-5 text-content-secondary">100</td>
 
-                <td className="px-6 py-5 text-[#8b949e]">
+                <td className="px-6 py-5 text-content-secondary">
                   {new Date(hackathon.dataFinal).toLocaleDateString("pt-BR")}
                 </td>
                 <td className="px-6 py-5">
                   <div className="flex flex-wrap gap-2">
-                    <button className="rounded-lg bg-[#ef4444]/20 px-4 py-2 text-sm font-medium text-[#ef4444] transition hover:bg-[#ef4444] hover:text-white">
+                    <button className="rounded-lg bg-danger/20 px-4 py-2 text-sm font-medium text-danger transition hover:bg-danger hover:text-white">
                       Delete
                     </button>
 
-                    <button className="rounded-lg bg-[#facc15]/20 px-4 py-2 text-sm font-medium text-[#facc15] transition hover:bg-[#facc15] hover:text-black">
+                    <button className="rounded-lg bg-warning/20 px-4 py-2 text-sm font-medium text-warning transition hover:bg-warning hover:text-surface">
                       Edit
                     </button>
 
                     <button
-                      className="rounded-lg bg-[#6C48C5]/20 px-4 py-2 text-sm font-medium text-[#C68FE6] transition hover:bg-[#6C48C5] hover:text-white"
+                      className="rounded-lg bg-brand/20 px-4 py-2 text-sm font-medium text-brand-light transition hover:bg-brand hover:text-white"
                       onClick={() =>
                         navigate(`/hackathon/${hackathon.hackathonId}`)
                       }
