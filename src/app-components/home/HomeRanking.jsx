@@ -15,8 +15,8 @@ const HomeRanking = () => {
             </div>
             <div className='flex min-h-60 w-full flex-col items-center justify-center rounded-2xl border border-highlight/25 bg-[linear-gradient(145deg,var(--color-surface-light),rgba(108,72,197,0.25))] p-6 text-center text-content shadow-xl xl:min-h-72'>
                 <h1 className='text-xl'><b>TOP 5 FOODLOVERS</b></h1>
-                <p className='px-3'>Este é o top 5 do nosso hackaton em parceria com a ifood.</p>
-                <h2 className='px-3 flex md:hidden xl:flex'>Se dedique nos hackatons em parceria com ifood e ganhe oportunidades.</h2>
+                <p className='px-3'>Este é o top 5 do nosso hackathon em parceria com a ifood.</p>
+                <h2 className='px-3 flex md:hidden xl:flex'>Se dedique nos hackathons em parceria com ifood e ganhe oportunidades.</h2>
             </div>
             <div className='flex min-h-60 w-full flex-col items-center justify-center rounded-2xl border border-white/10 bg-surface-light p-6 text-center text-content shadow-xl xl:min-h-72'>
                 <h1 className='text-xl'><b>TOP 5 NATIVES</b></h1>
