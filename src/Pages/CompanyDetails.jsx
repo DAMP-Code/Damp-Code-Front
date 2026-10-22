@@ -68,8 +68,8 @@ const CompanyDetails = () => {
   {/* 🔹 FUNDO */}
   <div className="absolute inset-0 z-0">
     <LightPillar
-      topColor="#5227FF"
-      bottomColor="#FF9FFC"
+      topColor="#6C48C5"
+      bottomColor="#C68FE6"
       intensity={1}
       rotationSpeed={0.3}
       glowAmount={0.002}
