@@ -109,7 +109,7 @@ export default function UserLogin() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border-none border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
+              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
             />
 
             <input
@@ -117,7 +117,7 @@ export default function UserLogin() {
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border-none border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
+              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
             />
 
             <button

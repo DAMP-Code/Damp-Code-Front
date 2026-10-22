@@ -24,7 +24,6 @@ const AccountTypeSelection = () => {
       bandWidth={6}
       transparent
       autoRotate={0}
-      color="#A855F7"
     />
   </div>
 
@@ -86,8 +85,9 @@ const AccountTypeSelection = () => {
 
       font-bold
 
-      bg-brand/95
-      hover:bg-brand-hover hover:shadow-[0_12px_30px_rgba(108,72,197,0.35)]
+      bg-highlight
+      text-surface
+      hover:brightness-110 hover:shadow-[0_12px_30px_rgba(255,234,0,0.18)]
 
       rounded-xl
 
@@ -149,8 +149,9 @@ const AccountTypeSelection = () => {
 
       font-bold
 
-      bg-brand/95
-      hover:bg-brand-hover hover:shadow-[0_12px_30px_rgba(108,72,197,0.35)]
+      bg-highlight
+      text-surface
+      hover:brightness-110 hover:shadow-[0_12px_30px_rgba(255,234,0,0.18)]
 
       rounded-xl
 

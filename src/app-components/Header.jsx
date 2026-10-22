@@ -23,7 +23,7 @@ const Header = () => {
         <img
           src="/src/assets/DAMPCode.svg"
           className="h-auto w-36 sm:w-44 md:max-w-3/12"
-          alt="damp-code-logo"
+          alt="Damp Code"
         />
         {/* Modo large -> extra large */}
         <div className="hidden lg:flex w-4/6 items-center xl:w-4/7">
@@ -64,11 +64,11 @@ const Header = () => {
         <div className="hidden md:flex lg:hidden">
           <nav className="w-5/6 text-lg text-content flex items-center justify-center gap-x-3">
             {user ? (
-              <Link to="/" className="hover:text-brand-hover">
+              <Link to="/" className="hover:text-highlight">
                 Explore
               </Link>
             ) : (
-              <a className="text-content hover:text-brand-hover" href="#explore">
+              <a className="text-content hover:text-highlight" href="#explore">
                 Explorar
               </a>
             )}
@@ -76,29 +76,29 @@ const Header = () => {
             {user ? (
               <Link
                 to="/dashboard/ranking"
-                className="hover:text-brand-hover"
+                className="hover:text-highlight"
               >
                 Ranking
               </Link>
             ) : (
-              <a href="#ranking" className="hover:text-brand-hover">
+              <a href="#ranking" className="hover:text-highlight">
                 Ranking
               </a>
             )}
             {!user && (
-              <a className="hover:text-brand-hover" href="#empresas">
+              <a className="hover:text-highlight" href="#empresas">
                 Para Empresas
               </a>
             )}
 
             {/* verifica se usuario está logado */}
             {!user && (
-              <Link className="hover:text-brand-hover" to={"/loginUser"}>
+              <Link className="hover:text-highlight" to={"/loginUser"}>
                 Entrar
               </Link>
             )}
             {!user && (
-              <Link className="hover:text-brand-hover" to={"/escolha"}>
+              <Link className="hover:text-highlight" to={"/escolha"}>
                 Criar Conta
               </Link>
             )}
@@ -129,7 +129,7 @@ const Header = () => {
           <Link
             to="/"
             className="w-full p-4 text-center text-content
-           hover:text-brand-hover transition-all cursor-pointer"
+           hover:text-highlight transition-all cursor-pointer"
           >
             Explore
           </Link>
@@ -137,7 +137,7 @@ const Header = () => {
           <a
             href="#explore"
             className="w-full p-4 text-center text-content
-           hover:text-brand-hover transition-all cursor-pointer"
+           hover:text-highlight transition-all cursor-pointer"
           >
             {" "}
             Explorar{" "}
@@ -145,14 +145,14 @@ const Header = () => {
         )}
 
         {user ? (
-          <Link to="/dashboard/ranking" className="hover:text-brand-hover">
+          <Link to="/dashboard/ranking" className="hover:text-highlight">
             Ranking
           </Link>
         ) : (
           <a
             href="#ranking"
             className="w-full p-4 text-center text-content
-           hover:text-brand-hover transition-all cursor-pointer"
+           hover:text-highlight transition-all cursor-pointer"
           >
             {" "}
             Ranking{" "}
@@ -163,7 +163,7 @@ const Header = () => {
           <a
             href="#empresas"
             className="w-full p-4 text-center text-content
-           hover:text-brand-hover transition-all cursor-pointer"
+           hover:text-highlight transition-all cursor-pointer"
           >
             {" "}
             Para Empresas{" "}
@@ -174,7 +174,7 @@ const Header = () => {
           <Link
             to={"/loginUser"}
             className={`w-full p-4 text-center text-content
-           hover:text-brand-hover transition-all cursor-pointer`}
+           hover:text-highlight transition-all cursor-pointer`}
           >
             Entrar
           </Link>
@@ -183,7 +183,7 @@ const Header = () => {
           <Link
             to={"/escolha"}
             className={`w-full p-4 text-center text-content
-           hover:text-brand-hover transition-all cursor-pointer`}
+           hover:text-highlight transition-all cursor-pointer`}
           >
             {" "}
             Criar Conta{" "}

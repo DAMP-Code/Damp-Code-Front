@@ -10,15 +10,15 @@ const HomeCommunity = () => {
         <div className='grid w-9/10 max-w-6xl grid-cols-1 gap-5 text-center text-content md:grid-cols-2'>
             <div className='flex min-h-52 flex-col justify-center rounded-2xl border border-white/10 bg-surface-light p-7 shadow-lg hover:-translate-y-1 hover:border-brand-light/40'>
                 <h1 className='text-xl bg-surface-light '>Comunidades por tecnologia</h1>
-                <p>Comunidades divididas por tecnologias para interagir, tirar duvidas e fazer networking, também são divididas por hackatons.</p>
+                <p>Comunidades divididas por tecnologias para interagir, tirar duvidas e fazer networking, também são divididas por hackathons.</p>
             </div>
             <div className='flex min-h-52 flex-col justify-center rounded-2xl border border-white/10 bg-surface-light p-7 shadow-lg hover:-translate-y-1 hover:border-brand-light/40'>
                 <h1 className='text-xl '>Lives exclusivas</h1>
-                <p>Lives exclusivas pro nível, comunidade ou hackaton, trazendo muito conteúdo, conversa e networking.</p>
+                <p>Lives exclusivas pro nível, comunidade ou hackathon, trazendo muito conteúdo, conversa e networking.</p>
             </div>
             <div className='flex min-h-52 flex-col justify-center rounded-2xl border border-white/10 bg-surface-light p-7 shadow-lg hover:-translate-y-1 hover:border-brand-light/40'>
                 <h1 className='text-xl '>Tutoriais integrados</h1>
-                <p>Tutorias integrados juntos de pontos específicos dos hackatons, para guiar os candidatos a trazerem exatamento o que a empresa pede.</p>
+                <p>Tutorias integrados juntos de pontos específicos dos hackathons, para guiar os candidatos a trazerem exatamento o que a empresa pede.</p>
             </div>
             <div className='flex min-h-52 flex-col justify-center rounded-2xl border border-white/10 bg-surface-light p-7 shadow-lg hover:-translate-y-1 hover:border-brand-light/40'>
                 <h1 className='text-xl '>Movimentação de pessoas</h1>

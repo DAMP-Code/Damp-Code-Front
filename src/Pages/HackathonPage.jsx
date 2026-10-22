@@ -70,7 +70,7 @@ const HackathonPage = () => {
           <img
             className="max-h-36 w-32 rounded-2xl object-contain lg:w-52"
             src={hackathon.logo || "/src/assets/DAMPCode.svg"}
-            alt=""
+            alt={hackathon.titulo || "Damp Code"}
           />
 
           <HackathonTitle
@@ -101,7 +101,7 @@ const HackathonPage = () => {
       </div>
 
       {/* INFO */}
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap gap-3 border-b border-white/10 pb-6 text-sm text-zinc-300 [&_p]:rounded-full [&_p]:border [&_p]:border-white/10 [&_p]:bg-black/15 [&_p]:px-4 [&_p]:py-2">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap gap-3 border-b border-white/10 pb-6 text-sm text-content-secondary [&_p]:rounded-full [&_p]:border [&_p]:border-white/10 [&_p]:bg-black/15 [&_p]:px-4 [&_p]:py-2">
         <p>
           Área:
           <b>{hackathon.area}</b>
@@ -131,7 +131,7 @@ const HackathonPage = () => {
               color2={hackathon.corSecundaria}
             />
 
-            <p className="text-zinc-300 leading-relaxed mt-3">
+            <p className="text-content-secondary leading-relaxed mt-3">
               {hackathon.descricao}
             </p>
           </div>
@@ -144,7 +144,7 @@ const HackathonPage = () => {
               color2={hackathon.corSecundaria}
             />
 
-            <p className="text-zinc-300 mt-3">
+            <p className="text-content-secondary mt-3">
               {getMethodDescription(hackathon.metodo)}
             </p>
           </div>

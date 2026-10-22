@@ -37,14 +37,14 @@ const CreateCompany = () => {
       <div className="w-full flex-col items-center h-full hidden md:flex">
         <Design 
           text1={
-            "Transforme desafios reais da sua empresa em competições de tecnologia que atraem os melhores talentos. Na DAMPCode, você cria hackathons personalizados, avalia habilidades práticas e conecta-se com desenvolvedores prontos para inovar e solucionar problemas de verdade."
+            "Transforme desafios reais da sua empresa em competições de tecnologia que atraem os melhores talentos. Na Damp Code, você cria hackathons personalizados, avalia habilidades práticas e conecta-se com desenvolvedores prontos para inovar e solucionar problemas de verdade."
           } text2={
-            "Reduza custos de recrutamento, acelere a inovação e fortaleça sua marca empregadora. Nossa plataforma oferece analytics detalhados, engajamento autêntico e um pipeline de talentos qualificados. Grandes empresas já usam a DAMPCode para identificar, testar e contratar devs que realmente fazem a diferença."
+            "Reduza custos de recrutamento, acelere a inovação e fortaleça sua marca empregadora. Nossa plataforma oferece analytics detalhados, engajamento autêntico e um pipeline de talentos qualificados. Grandes empresas já usam a Damp Code para identificar, testar e contratar devs que realmente fazem a diferença."
           } showCard={false} 
           />
         <div className=" hidden lg:flex flex-col items-center justify-center w-2/3 p-5 gap-5">
           <p className="text-content">Crie uma conta de equipe parceira e tenha acesso a recursos personalizados, e muito mais!</p>
-          <a className="w-full lg:w-1/2 h-20 flex items-center justify-center bg-brand-light rounded-full text-xl font-bold text-surface" href="">TRABALHE CONOSCO</a>
+          <a className="flex h-20 w-full items-center justify-center rounded-xl bg-highlight text-xl font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] hover:-translate-y-0.5 hover:brightness-110 lg:w-1/2" href="">TRABALHE CONOSCO</a>
         </div>
       </div>
       <section className="flex min-h-screen w-full flex-col items-center justify-center px-5 py-24">

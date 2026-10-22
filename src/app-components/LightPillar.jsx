@@ -3,8 +3,8 @@ import * as THREE from 'three';
 import '../index.css';
 
 const LightPillar = ({
-  topColor = '#5227FF',
-  bottomColor = '#FF9FFC',
+  topColor = '#6C48C5',
+  bottomColor = '#C68FE6',
   intensity = 1.0,
   rotationSpeed = 0.3,
   interactive = false,
