@@ -70,7 +70,7 @@ const HackathonPage = () => {
           <img
             className="max-h-36 w-32 rounded-2xl object-contain lg:w-52"
             src={hackathon.logo || "/src/assets/DAMPCode.svg"}
-            alt=""
+            alt={hackathon.titulo || "Damp Code"}
           />
 
           <HackathonTitle

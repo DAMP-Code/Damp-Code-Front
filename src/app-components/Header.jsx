@@ -23,7 +23,7 @@ const Header = () => {
         <img
           src="/src/assets/DAMPCode.svg"
           className="h-auto w-36 sm:w-44 md:max-w-3/12"
-          alt="damp-code-logo"
+          alt="Damp Code"
         />
         {/* Modo large -> extra large */}
         <div className="hidden lg:flex w-4/6 items-center xl:w-4/7">

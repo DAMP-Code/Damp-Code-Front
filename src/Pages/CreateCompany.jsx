@@ -37,9 +37,9 @@ const CreateCompany = () => {
       <div className="w-full flex-col items-center h-full hidden md:flex">
         <Design 
           text1={
-            "Transforme desafios reais da sua empresa em competições de tecnologia que atraem os melhores talentos. Na DAMPCode, você cria hackathons personalizados, avalia habilidades práticas e conecta-se com desenvolvedores prontos para inovar e solucionar problemas de verdade."
+            "Transforme desafios reais da sua empresa em competições de tecnologia que atraem os melhores talentos. Na Damp Code, você cria hackathons personalizados, avalia habilidades práticas e conecta-se com desenvolvedores prontos para inovar e solucionar problemas de verdade."
           } text2={
-            "Reduza custos de recrutamento, acelere a inovação e fortaleça sua marca empregadora. Nossa plataforma oferece analytics detalhados, engajamento autêntico e um pipeline de talentos qualificados. Grandes empresas já usam a DAMPCode para identificar, testar e contratar devs que realmente fazem a diferença."
+            "Reduza custos de recrutamento, acelere a inovação e fortaleça sua marca empregadora. Nossa plataforma oferece analytics detalhados, engajamento autêntico e um pipeline de talentos qualificados. Grandes empresas já usam a Damp Code para identificar, testar e contratar devs que realmente fazem a diferença."
           } showCard={false} 
           />
         <div className=" hidden lg:flex flex-col items-center justify-center w-2/3 p-5 gap-5">

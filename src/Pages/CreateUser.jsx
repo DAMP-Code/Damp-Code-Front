@@ -61,7 +61,7 @@ const CreateUser = () => {
 
   return (
     <div className="relative grid min-h-screen w-full bg-surface md:flex">
-      <Design text1={"Participe de hackathons criados por empresas, comunidades e especialistas, com rankings, recompensas e reconhecimento profissional. Na DAMPCode, você não só aprende — você resolve problemas reais, compete e interage com outros devs e constrói um portfólio que importa"} text2={"Descubra desafios alinhados às tecnologias mais demandadas do mercado, evolua com feedbacks reais e acompanhe seu progresso através de níveis, XP e conquistas. Seja você iniciante ou avançado, a DAMPCode te coloca no caminho certo para crescer, se destacar e transformar aprendizado em oportunidade."} showCard={true}/>
+      <Design text1={"Participe de hackathons criados por empresas, comunidades e especialistas, com rankings, recompensas e reconhecimento profissional. Na Damp Code, você não só aprende — você resolve problemas reais, compete e interage com outros devs e constrói um portfólio que importa"} text2={"Descubra desafios alinhados às tecnologias mais demandadas do mercado, evolua com feedbacks reais e acompanhe seu progresso através de níveis, XP e conquistas. Seja você iniciante ou avançado, a Damp Code te coloca no caminho certo para crescer, se destacar e transformar aprendizado em oportunidade."} showCard={true}/>
                 
       <section className="flex min-h-screen w-full flex-col items-center justify-center px-5 py-24 md:w-full">
         <div className="flex w-full max-w-md flex-col gap-y-2 rounded-3xl border border-white/10 bg-surface-light/60 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:p-10">
