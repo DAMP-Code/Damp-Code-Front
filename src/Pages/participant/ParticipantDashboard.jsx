@@ -1,9 +1,9 @@
 import WeeklyHighlights from '@/app-components/explore/WeeklyHighlights'
 import Levels from '@/app-components/explore/Levels'
+import Search from '@/app-components/explore/Search'
 import Sidebar from '@/app-components/explore/Sidebar'
 import Footer from '@/app-components/Footer'
 import Header from '@/app-components/Header'
-import { Search } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
 
