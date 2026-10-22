@@ -4,6 +4,7 @@ import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "@/app-components/utilities/AuthContext"
 import BackButton from "@/app-components/BackButton";
+import { MOCK_ACCOUNTS } from "@/mock/seed";
 
 // 🧠 RESUMO DO FLUXO
 // Usuário envia form
@@ -134,6 +135,16 @@ export default function UserLogin() {
               Não tenho uma conta. Cadastre-se.
             </Link>
           </form>
+          {import.meta.env.DEV && import.meta.env.VITE_USE_MOCK !== "false" ? (
+            <div className="mt-4 w-full rounded-xl border border-white/10 bg-surface px-4 py-3 text-sm leading-relaxed text-content-secondary">
+              <p className="font-medium text-content">Contas de teste</p>
+              {MOCK_ACCOUNTS.map((account) => (
+                <p key={account.email}>
+                  {account.label}: {account.email} / {account.password}
+                </p>
+              ))}
+            </div>
+          ) : null}
           {message && (
   <p className="text-danger text-lg font-semibold">
     {message}

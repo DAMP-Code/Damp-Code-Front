@@ -1,38 +1,75 @@
-import React from 'react'
-import Title from '../Title'
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Title from "../Title";
+import HackathonCard from "../HackathonCard";
+import EmptyState from "../EmptyState";
 
 const Cards = () => {
-  return (
-    <section className='flex h-auto w-full flex-col items-center justify-center py-12 text-content md:flex lg:py-16'>
-        <div className='w-9/10 max-w-7xl items-start justify-center'>
-            <Title text1={"COMEÇE A"} text2={"CRESCER"} />
-        </div>
-        <div className='grid w-9/10 max-w-7xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4'>
-        <div className='flex min-h-64 flex-col justify-center rounded-2xl border border-white/10 bg-[url(/src/assets/cards-start.svg)] bg-cover bg-center bg-no-repeat p-5 text-center shadow-[0_16px_40px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-light/50 xl:min-h-72'>
-            <h1 className='text-xl'><b>COMEÇE</b></h1>
-            <h2 className='p-3'>Escolha um hackathon, entre na 
-                competição e desenvolva sua solução
-            </h2>
-            <h2 className='px-3 flex md:hidden xl:flex'>Participe de desafios reais, colabore com outros devs e transforme aprendizado em prática.</h2>
-        </div>
-        <div className='flex min-h-64 flex-col justify-center rounded-2xl border border-white/10 bg-[url(/src/assets/cards-ranking.svg)] bg-cover bg-center bg-no-repeat p-5 text-center shadow-[0_16px_40px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-light/50 xl:min-h-72'>
-            <h1 className='text-xl'><b>Suba no Ranking</b></h1>
-            <h2 className='p-3'>Ganhe pontos, níveis e reconhecimento público</h2>
-            <h2 className='px-3 flex md:hidden xl:flex'>Acompanhe sua evolução, compare seu desempenho e conquiste destaque na comunidade.</h2>
-        </div>
-        <div className='flex min-h-64 flex-col justify-center rounded-2xl border border-white/10 bg-[url(/src/assets/cards-prizes.svg)] bg-cover bg-center bg-no-repeat p-5 text-center shadow-[0_16px_40px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-light/50 xl:min-h-72'>
-            <h1 className='text-xl'><b>Conquiste Prêmios</b></h1>
-            <h2 className='p-3'>Dinheiro, oportunidades, contratação e visibilidade.</h2>
-            <h2 className='px-3 flex md:hidden xl:flex'>Se destaque nas competições e tenha acesso a recompensas, visibilidade e oportunidades reais.</h2>
-        </div>
-        <div className='flex min-h-64 flex-col justify-center rounded-2xl border border-white/10 bg-[url(/src/assets/cards-reputation.svg)] bg-cover bg-center bg-no-repeat p-5 text-center shadow-[0_16px_40px_rgba(0,0,0,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-brand-light/50 xl:min-h-72'>
-            <h1 className='text-xl'><b>Construa sua Reputação</b></h1>
-            <h2 className='p-3'>Seu perfil vira um portfólio competitivo.</h2>
-            <h2 className='px-3 flex md:hidden xl:flex'>Crie um histórico sólido com seus projetos e aumente suas chances no mercado.</h2>
-        </div>
-        </div>
-    </section>
-  )
-}
+  const [hackathons, setHackathons] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default Cards
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadHackathons() {
+      try {
+        const response = await fetch("https://localhost:7092/api/Hackathons");
+        const data = await response.json();
+        if (!cancelled) {
+          setHackathons(Array.isArray(data) ? data.slice(0, 4) : []);
+        }
+      } catch {
+        if (!cancelled) setHackathons([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadHackathons();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <section className="flex h-auto w-full flex-col items-center justify-center py-12 text-content lg:py-16">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-end justify-between gap-4 px-5">
+        <Title text1="Hackathons" text2="em destaque" />
+        <Link
+          to="/explore"
+          className="mb-5 shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-brand-light hover:bg-white/5 hover:text-highlight"
+        >
+          Ver todos
+        </Link>
+      </div>
+
+      {loading ? (
+        <p className="w-full max-w-7xl px-5 text-content-secondary">Carregando hackathons.</p>
+      ) : null}
+
+      {!loading && hackathons.length === 0 ? (
+        <div className="flex w-full max-w-7xl justify-start px-5">
+          <EmptyState
+            title="Nenhum hackathon em destaque"
+            text="Quando houver desafios publicados, eles aparecem aqui com prêmio, tecnologias e empresa."
+            actionLabel="Criar conta"
+            to="/escolha"
+          />
+        </div>
+      ) : null}
+
+      {!loading && hackathons.length > 0 ? (
+        <div className="flex w-full max-w-7xl flex-col flex-wrap items-center justify-start gap-6 px-5 md:flex-row">
+          {hackathons.map((hackathon) => (
+            <HackathonCard
+              key={hackathon.hackathonId || hackathon.HackathonId}
+              hackathon={hackathon}
+            />
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+};
+
+export default Cards;

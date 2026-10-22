@@ -1,6 +1,7 @@
 import FormSection from '@/app-components/hackathon-creation/FormSection'
 import PreviewSection from '@/app-components/hackathon-creation/PreviewSection'
 import Header from '@/app-components/Header'
+import Footer from '@/app-components/Footer'
 import { m } from 'motion/react'
 import React, {useState} from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -108,6 +109,7 @@ const [hackathon, setHackathon] = useState({
             <FormSection handleSubmit={handleSubmit} message={message} hackathon={hackathon} handleChange={handleChange} setHackathon={setHackathon}/>
             <PreviewSection hackathon={hackathon}/>
         </section>
+        <Footer />
     </div>
   )
 }

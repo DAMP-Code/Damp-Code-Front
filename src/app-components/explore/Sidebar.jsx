@@ -44,7 +44,7 @@ const Sidebar = () => {
                 </label>
             </div>
         </nav>
-        <button className='mt-2 w-full rounded-xl bg-highlight px-4 py-3 text-sm font-extrabold text-surface shadow-[0_10px_25px_rgba(255,234,0,0.12)] hover:-translate-y-0.5 hover:brightness-110'><b>CRIE SEU DESAFIO</b></button>
+        <button className='mt-2 w-full rounded-xl bg-highlight px-4 py-3 text-sm font-bold text-surface shadow-[0_10px_25px_rgba(255,234,0,0.12)] hover:-translate-y-0.5 hover:brightness-110'>Crie seu desafio</button>
     </section>
 )
 }

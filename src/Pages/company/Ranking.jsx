@@ -1,4 +1,6 @@
 import BackButton from "@/app-components/BackButton";
+import Footer from "@/app-components/Footer";
+import Header from "@/app-components/Header";
 import PrizeChart from "@/app-components/charts/PrizeChart";
 import StatusChart from "@/app-components/charts/StatusChart";
 import TechnologyChart from "@/app-components/charts/TechnologyChart";
@@ -37,7 +39,9 @@ const Ranking = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-surface px-4 py-8 sm:px-6 lg:p-10">
+    <div className="min-h-screen bg-surface">
+      <Header />
+      <div className="px-4 py-8 sm:px-6 lg:p-10">
 
       <div className="mx-auto mb-10 flex max-w-7xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <Title text1={"Dashboard"} text2={"Da empresa"}></Title>
@@ -59,7 +63,8 @@ const Ranking = () => {
       <div className="mx-auto mt-6 max-w-7xl rounded-2xl border border-white/10 bg-surface-light p-5 shadow-xl">
         <TechnologyChart hackathons={hackathons} />
       </div>
-
+      </div>
+      <Footer />
     </div>
   );
 };
