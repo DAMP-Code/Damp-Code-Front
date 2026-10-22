@@ -19,9 +19,9 @@ const Levels = () => {
            </div>
         </div>
         <div className='flex w-9/10 flex-col items-center justify-center gap-4 lg:hidden'>
-            <div href="" className='flex min-h-18 w-full max-w-md items-center justify-center rounded-xl border border-highlight/30 bg-highlight text-center text-xl text-surface shadow-lg'><a href=""><b>Iniciante</b></a></div>
-            <div href="" className='flex min-h-18 w-full max-w-md items-center justify-center rounded-xl border border-highlight/30 bg-highlight text-center text-xl text-surface shadow-lg'><a href=""><b>Intermediário</b></a></div>
-            <div href="" className='flex min-h-18 w-full max-w-md items-center justify-center rounded-xl border border-highlight/30 bg-highlight text-center text-xl text-surface shadow-lg'><a href=""><b>Avançado</b></a></div>
+            <div className='flex min-h-18 w-full max-w-md items-center justify-center rounded-xl border border-brand-light/40 bg-surface-light text-center text-xl text-brand-light shadow-[0_14px_35px_rgba(0,0,0,0.16)]'><a href=""><b>Iniciante</b></a></div>
+            <div className='flex min-h-18 w-full max-w-md items-center justify-center rounded-xl border border-brand-light/40 bg-surface-light text-center text-xl text-brand-light shadow-[0_14px_35px_rgba(0,0,0,0.16)]'><a href=""><b>Intermediário</b></a></div>
+            <div className='flex min-h-18 w-full max-w-md items-center justify-center rounded-xl border border-brand-light/40 bg-surface-light text-center text-xl text-brand-light shadow-[0_14px_35px_rgba(0,0,0,0.16)]'><a href=""><b>Avançado</b></a></div>
         </div>
     </section>
   )
