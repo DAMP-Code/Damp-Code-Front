@@ -1,6 +1,6 @@
 export const MOCK_ACCOUNTS = [
   {
-    email: "anna@dampcode.dev",
+    email: "ana@dampcode.dev",
     password: "123456",
     role: "participante",
     label: "participante",

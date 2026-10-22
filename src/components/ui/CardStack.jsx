@@ -47,7 +47,7 @@ export const CardStack = ({ items, offset = 10, scaleFactor = 0.06 }) => {
 
           {/* HEADER */}
           <div>
-            <h2 className="text-highlight text-xl font-bold">
+            <h2 className="text-xl font-semibold text-content">
               Empresa:{" "}
               <span className="italic text-brand">
                 {card.company}

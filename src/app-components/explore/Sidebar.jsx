@@ -3,7 +3,7 @@ import React from 'react'
 const Sidebar = () => {
   return (
     <section className='sticky top-24 m-5 hidden h-fit w-3/12 min-w-56 max-w-72 flex-col gap-5 rounded-2xl border border-white/10 bg-surface-light/90 p-6 shadow-[0_16px_40px_rgba(0,0,0,0.18)] md:flex'>
-        <h1 className='text-2xl text-highlight'><b>Hackathons</b></h1>
+        <h1 className='text-2xl font-semibold text-content'><b>Hackathons</b></h1>
         <nav className='flex flex-col gap-1 text-content-secondary [&_a]:rounded-lg [&_a]:px-3 [&_a]:py-2 [&_a:hover]:bg-white/5 [&_a:hover]:text-content'>
             <a href="">Front-End</a>
             <a href="">Back-End</a>
@@ -11,13 +11,13 @@ const Sidebar = () => {
             <a href="">Desenvolvimento API</a>
             <a href="">Logica</a>
         </nav>
-        <h1 className='text-2xl text-highlight'><b>Plano</b></h1>
+        <h1 className='text-2xl font-semibold text-content'><b>Plano</b></h1>
         <nav className='flex flex-col gap-1 text-content-secondary [&_a]:rounded-lg [&_a]:px-3 [&_a]:py-2 [&_a:hover]:bg-white/5 [&_a:hover]:text-content'>
             <a href="">Plano Básico</a>
             <a href="">Plano Regular</a>
             <a href="">Plano Avançado</a>
         </nav>
-        <h1 className='text-2xl text-highlight'><b>Empresa</b></h1>
+        <h1 className='text-2xl font-semibold text-content'><b>Empresa</b></h1>
         <nav className='flex flex-col gap-3'>
             <div className="flex items-center gap-2">
                 <input type="checkbox" id="opcao1" className="w-4 h-4" />

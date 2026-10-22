@@ -81,7 +81,7 @@ const ManageChallenges = () => {
       </button>
       <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface-light shadow-[0_20px_55px_rgba(0,0,0,0.24)]">
         <table className="min-w-[760px] w-full border-collapse">
-          <thead className="bg-surface text-highlight">
+          <thead className="bg-surface text-content">
             <tr className="text-left text-sm uppercase tracking-wider">
               <th className="px-6 py-4">Nome</th>
               <th className="px-6 py-4">Status</th>

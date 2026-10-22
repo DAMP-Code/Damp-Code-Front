@@ -22,7 +22,7 @@ const WeeklyHighlights = ({ hackathons = [] }) => {
           />
         </div>
       ) : (
-        <div className="flex w-9/10 max-w-7xl flex-col flex-wrap items-center justify-center gap-6 md:flex-row">
+        <div className="flex w-full min-w-0 max-w-7xl flex-wrap items-stretch justify-start gap-6">
           {list.map((hackathon) => (
             <HackathonCard
               key={hackathon.hackathonId || hackathon.HackathonId}

@@ -1,6 +1,4 @@
-import BackButton from "@/app-components/BackButton";
-import Footer from "@/app-components/Footer";
-import Design from "@/app-components/customer-form/Design";
+import AuthShell, { AuthField, authButtonClass } from "@/app-components/auth/AuthShell";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -60,75 +58,72 @@ const CreateUser = () => {
   }
 
   return (
-    <div className="relative grid min-h-screen w-full bg-surface md:flex">
-      <Design text1={"Participe de hackathons criados por empresas, comunidades e especialistas, com rankings, recompensas e reconhecimento profissional. Na Damp Code, você não só aprende — você resolve problemas reais, compete e interage com outros devs e constrói um portfólio que importa"} text2={"Descubra desafios alinhados às tecnologias mais demandadas do mercado, evolua com feedbacks reais e acompanhe seu progresso através de níveis, XP e conquistas. Seja você iniciante ou avançado, a Damp Code te coloca no caminho certo para crescer, se destacar e transformar aprendizado em oportunidade."} showCard={true}/>
-                
-      <section className="flex min-h-screen w-full flex-col items-center justify-center px-5 py-24 md:w-full">
-        <div className="flex w-full max-w-md flex-col gap-y-2 rounded-3xl border border-white/10 bg-surface-light/60 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:p-10">
-        <BackButton/>
-          <div className="flex gap-x-4">
-            <h2 className="text-4xl text-brand font-extrabold">Pressione</h2>
-            <h2 className="text-4xl text-highlight font-extrabold">Start</h2>
-          </div>
-          <p className="text-brand text-xl font-medium">Preencha seus dados</p>
-          <form className="mt-8 flex w-full flex-col items-center justify-center gap-y-6" onSubmit={handleSubmit}>
-            <input
-              placeholder="nome completo"
-              value={name}
-              required
-              minLength={8}
-              maxLength={150}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
-            />
-
-            <input
-              type="email"
-              placeholder="melhor @email"
-              value={email}
-              required
-              minLength={8}
-              maxLength={150}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
-            />
-
-            <input
-              type="password"
-              placeholder="senha"
-              value={password}
-              required
-              minLength={10}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
-
-            />
-            
-            <input
-              type="password"
-              placeholder="confirmar senha"
-              value={password}
-              required
-              minLength={10}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
-
-            />
-
-            <button type="submit" disabled={loading} className="w-full rounded-xl bg-highlight px-8 py-4 text-lg font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] hover:-translate-y-0.5 hover:brightness-110">
-              <b>{loading ? "Criando..." : "Criar Usuário"}</b>
-            </button>
-
-            <Link to={'/loginUser'} className="text-center font-medium text-brand-light hover:text-highlight">Já tenho conta. Fazer Login.</Link>
-          </form>
-
-          {message && <p className="mt-5 rounded-xl border border-white/10 bg-surface px-4 py-3 text-center text-content">{message}</p>}
-        </div>
-      </section>
-        <div className="absolute bottom-0 w-full">
-          <Footer />
-        </div>
-    </div>
+    <AuthShell
+      title="Criar conta"
+      lede="Para participar dos hackathons, com ranking e reconhecimento."
+      asideTitle="Entre nos desafios e construa portfólio."
+      asideText="Empresas publicam o problema. Você entra com prazo, prêmio e stack à vista."
+      points={["Hackathons de empresas e comunidades", "Progresso visível no ranking", "Uma conta para todos os desafios"]}
+    >
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+        <AuthField
+          label="Nome completo"
+          name="name"
+          autoComplete="name"
+          placeholder="Seu nome"
+          value={name}
+          required
+          minLength={8}
+          maxLength={150}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <AuthField
+          label="Email"
+          type="email"
+          name="email"
+          autoComplete="email"
+          placeholder="voce@email.com"
+          value={email}
+          required
+          minLength={8}
+          maxLength={150}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <AuthField
+          label="Senha"
+          type="password"
+          name="password"
+          autoComplete="new-password"
+          placeholder="Mínimo de 10 caracteres"
+          value={password}
+          required
+          minLength={10}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <AuthField
+          label="Confirmar senha"
+          type="password"
+          name="confirm-password"
+          autoComplete="new-password"
+          placeholder="Repita a senha"
+          value={password}
+          required
+          minLength={10}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit" disabled={loading} className={authButtonClass}>
+          {loading ? "Criando..." : "Criar conta"}
+        </button>
+        <Link to="/loginUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
+          Já tenho conta. Fazer login.
+        </Link>
+      </form>
+      {message ? (
+        <p className="mt-5 rounded-xl border border-white/10 bg-surface px-4 py-3 text-center text-sm text-content">
+          {message}
+        </p>
+      ) : null}
+    </AuthShell>
   );
 };
 

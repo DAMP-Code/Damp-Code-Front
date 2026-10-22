@@ -1,9 +1,7 @@
-import Footer from "@/app-components/Footer";
-import Design from "@/app-components/customer-form/Design";
+import AuthShell, { AuthField, authButtonClass } from "@/app-components/auth/AuthShell";
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "@/app-components/utilities/AuthContext"
-import BackButton from "@/app-components/BackButton";
 import { MOCK_ACCOUNTS } from "@/mock/seed";
 
 // 🧠 RESUMO DO FLUXO
@@ -82,79 +80,53 @@ export default function UserLogin() {
   }
 
   return (
-    <div className="relative grid min-h-screen w-full bg-surface md:flex">
-      <Design
-        text1={
-          "Entre em sua conta e retorne a Criar ou integrar desafios, tendo todas as vantagens sem ficar para trás, voltando de onde parou e tendo acesso a novas oportunidades de criar seu portfólio."
-        }
-        text2={
-          "Continue evoluindo suas habilidades com novos desafios, acompanhe seu progresso em tempo real e destaque seus projetos para conquistar ainda mais oportunidades no mercado."
-        
-        }
-      />
-      <section className="flex min-h-screen w-full flex-col items-start justify-start px-5 py-24 md:w-1/2">
-        <div className="flex w-full gap-y-6 max-w-md flex-col items-start justify-start rounded-3xl border border-white/10 bg-surface-light/60 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:p-10">
-          <BackButton />
-          <div className="flex gap-x-4">
-            <h2 className="text-4xl text-brand font-extrabold">Pressione</h2>
-            <h2 className="text-4xl text-highlight font-extrabold">Return</h2>
-          </div>
-          <p className="text-brand text-xl font-medium">
-            Preencha seus dados
-          </p>
-          <form
-            className="flex w-full flex-col items-center justify-center gap-y-6 py-8"
-            onSubmit={handleLogin}
-          >
-            <input
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
-            />
-
-            <input
-              type="password"
-              placeholder="Senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-surface px-4 py-3.5 text-sm font-semibold text-content focus:border-highlight"
-            />
-
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-highlight px-8 py-4 text-lg font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] hover:-translate-y-0.5 hover:brightness-110"
-            >
-              Entrar
-            </button>
-
-            <Link
-              to={"/cadastroUser"}
-              className="text-center font-medium text-brand-light hover:text-highlight"
-            >
-              Não tenho uma conta. Cadastre-se.
-            </Link>
-          </form>
-          {import.meta.env.DEV && import.meta.env.VITE_USE_MOCK !== "false" ? (
-            <div className="mt-4 w-full rounded-xl border border-white/10 bg-surface px-4 py-3 text-sm leading-relaxed text-content-secondary">
-              <p className="font-medium text-content">Contas de teste</p>
-              {MOCK_ACCOUNTS.map((account) => (
-                <p key={account.email}>
-                  {account.label}: {account.email} / {account.password}
-                </p>
-              ))}
-            </div>
-          ) : null}
-          {message && (
-  <p className="text-danger text-lg font-semibold">
-    {message}
-  </p>
-)}
+    <AuthShell
+      title="Entrar"
+      lede="O mesmo acesso vale para participante e empresa."
+      asideTitle="Volte para os desafios de onde parou."
+      asideText="Acompanhe ranking, prêmios e os hackathons em que você já entrou."
+      points={["Retome um desafio ativo", "Acesse o dashboard da sua conta", "Participe com o mesmo login"]}
+    >
+      <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+        <AuthField
+          label="Email"
+          type="email"
+          name="email"
+          autoComplete="email"
+          placeholder="ana@dampcode.dev"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <AuthField
+          label="Senha"
+          type="password"
+          name="password"
+          autoComplete="current-password"
+          placeholder="Sua senha"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit" className={authButtonClass}>
+          Entrar
+        </button>
+        <Link to="/cadastroUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
+          Não tenho uma conta. Cadastre-se.
+        </Link>
+        <Link to="/cadastroEmpresa" className="text-center text-sm font-medium text-content-secondary hover:text-content">
+          Quero publicar como empresa.
+        </Link>
+      </form>
+      {import.meta.env.DEV && import.meta.env.VITE_USE_MOCK !== "false" ? (
+        <div className="mt-6 rounded-xl border border-white/10 bg-surface px-4 py-3 text-sm leading-relaxed text-content-secondary">
+          <p className="font-medium text-content">Contas de teste</p>
+          {MOCK_ACCOUNTS.map((account) => (
+            <p key={account.email}>
+              {account.label}: {account.email} / {account.password}
+            </p>
+          ))}
         </div>
-      </section>
-      <div className="w-full absolute bottom-0">
-        <Footer />
-      </div>
-    </div>
+      ) : null}
+      {message ? <p className="mt-4 text-sm font-semibold text-danger">{message}</p> : null}
+    </AuthShell>
   );
 }

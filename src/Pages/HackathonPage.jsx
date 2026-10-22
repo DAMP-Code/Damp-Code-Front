@@ -127,7 +127,7 @@ const HackathonPage = () => {
         </p>
 
         <p>
-          Termina em {new Date(hackathon.dataFinal).toLocaleDateString("pt-BR")}
+          Termina em {new Date(hackathon.dataFinal).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
         </p>
       </div>
 

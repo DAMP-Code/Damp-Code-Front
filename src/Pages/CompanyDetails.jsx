@@ -1,7 +1,7 @@
+import AuthShell, { authButtonClass, authFieldClass } from "@/app-components/auth/AuthShell";
 import React, { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import { RegistrationContext } from "@/app-components/utilities/RegistrationContext";
-import Footer from "@/app-components/Footer";
-import LightPillar from '@/app-components/LightPillar';
 
 const CompanyDetails = () => {
   // pega um contexto e usa
@@ -59,123 +59,102 @@ const CompanyDetails = () => {
     }
   }
   if (!registrationData?.email) {
-    return <p>Volte e preencha o cadastro primeiro</p>;
+    return (
+      <AuthShell
+        title="Cadastro incompleto"
+        lede="Os dados de acesso ainda não foram preenchidos."
+        asideTitle="A conta de empresa começa pelo acesso."
+        asideText="Nome, email e senha ficam guardados neste navegador até você concluir o cadastro."
+        points={["Volte um passo", "Preencha nome, email e senha", "Depois informe a empresa"]}
+      >
+        <Link to="/cadastroEmpresa" className={authButtonClass}>
+          Voltar ao cadastro
+        </Link>
+      </AuthShell>
+    );
   }
+
   return (
-    
-    <div className="relative w-full min-h-screen bg-surface overflow-hidden">
-
-  {/* 🔹 FUNDO */}
-  <div className="absolute inset-0 z-0">
-    <LightPillar
-      topColor="#6C48C5"
-      bottomColor="#C68FE6"
-      intensity={1}
-      rotationSpeed={0.3}
-      glowAmount={0.002}
-      pillarWidth={3}
-      pillarHeight={0.4}
-      noiseIntensity={0.5}
-      pillarRotation={25}
-      interactive={false}
-      mixBlendMode="screen"
-      quality="high"
-    />
-  </div>
-
-  {/* 🔹 CONTEÚDO */}
-  <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16">
-
-    <form className="flex w-full max-w-xl flex-col gap-y-8 rounded-3xl border border-white/20 bg-surface-light/75 p-6
-    shadow-[0_28px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:p-10"
-        onSubmit={handleSubmit}  > 
-        <h2 className="text-3xl text-highlight font-bold text-center">
-          Complete seu cadastro empresarial
-        </h2>
-
-        {/* 🔹 Dados do usuário (vindos do Context) */}
-        <div className="flex flex-col gap-y-4">
-          <h3 className="text-xl text-brand font-semibold">Dados Básicas</h3>
-
-          <input
-            value={registrationData.name || ""}
-            disabled
-            className="rounded-xl border border-white/10 bg-surface/60 px-4 py-3 text-lg text-content-secondary disabled:opacity-70"
-          />
-
-          <input
-            value={registrationData.email || ""}
-            disabled
-            className="rounded-xl border border-white/10 bg-surface/60 px-4 py-3 text-lg text-content-secondary disabled:opacity-70"
-          />
+    <AuthShell
+      wide
+      title="Dados da empresa"
+      lede="Esses dados completam a conta. Nome e email já vieram do passo anterior."
+      asideTitle="Falta o perfil da empresa."
+      asideText="CNPJ, área e uma descrição curta. As tecnologias entram separadas por vírgula."
+      points={["CNPJ com ou sem pontuação", "Área de atuação", "Stack que a empresa usa"]}
+    >
+      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-2 text-sm font-medium text-content">
+            Nome
+            <input value={registrationData.name || ""} disabled className={authFieldClass} />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-medium text-content sm:col-span-1">
+            Email
+            <input value={registrationData.email || ""} disabled className={authFieldClass} />
+          </label>
         </div>
 
-        {/* 🔹 Dados da empresa */}
-        <div className="flex flex-col gap-y-4">
-          <h3 className="text-xl text-brand font-semibold">
-            Dados Avançados
-          </h3>
-
+        <label className="flex flex-col gap-2 text-sm font-medium text-content">
+          CNPJ
           <input
-            placeholder="CNPJ"
+            placeholder="00.000.000/0000-00"
             value={cnpj}
             onChange={(e) => setCnpj(e.target.value)}
-            //verificações
             required
             minLength={14}
             maxLength={18}
             pattern="\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}"
-            className="rounded-xl border border-white/10 bg-surface px-4 py-3 text-lg text-content focus:border-highlight invalid:border-danger"
+            className={`${authFieldClass} invalid:border-danger`}
           />
+        </label>
 
+        <label className="flex flex-col gap-2 text-sm font-medium text-content">
+          Área de atuação
           <input
-            placeholder="Área de atuação (ex: Fintech, SaaS...)"
+            placeholder="Fintech, SaaS, logística"
             value={area}
             required
             minLength={3}
             maxLength={50}
             onChange={(e) => setArea(e.target.value)}
-            className="rounded-xl border border-white/10 bg-surface px-4 py-3 text-lg text-content focus:border-highlight invalid:border-danger"
+            className={`${authFieldClass} invalid:border-danger`}
           />
+        </label>
 
+        <label className="flex flex-col gap-2 text-sm font-medium text-content">
+          Descrição
           <textarea
-            placeholder="Descrição da empresa"
+            placeholder="O que a empresa faz"
             value={description}
             required
             minLength={10}
             maxLength={300}
             onChange={(e) => setDescription(e.target.value)}
-            className="min-h-32 resize-y rounded-xl border border-white/10 bg-surface px-4 py-3 text-lg text-content focus:border-highlight invalid:border-danger"
+            className={`${authFieldClass} min-h-32 resize-y invalid:border-danger`}
           />
+        </label>
 
+        <label className="flex flex-col gap-2 text-sm font-medium text-content">
+          Tecnologias
           <input
-            placeholder="Tecnologias (separadas por vírgula: React, .NET, Node)"
+            placeholder="React, .NET, Node"
             value={technologies}
             required
             minLength={2}
             onChange={(e) => setTechnologies(e.target.value)}
-            className="rounded-xl border border-white/10 bg-surface px-4 py-3 text-lg text-content focus:border-highlight invalid:border-danger"
+            className={`${authFieldClass} invalid:border-danger`}
           />
-        </div>
+        </label>
 
-        {/* 🔹 Botão */}
-        <button
-          type="submit"
-          className="rounded-xl bg-highlight py-4 text-xl font-bold text-surface shadow-[0_14px_35px_rgba(255,234,0,0.16)] hover:-translate-y-0.5 hover:brightness-110"
-        >
+        <button type="submit" className={authButtonClass}>
           Finalizar cadastro
-        </button>    </form>
-
-    {message && <p className="mt-5 rounded-xl border border-white/10 bg-surface-light/90 px-5 py-3 text-lg text-content shadow-lg">{message}</p>}
-
-  </div>
-
-  {/* 🔹 FOOTER */}
-  <div className="relative z-10">
-    <Footer />
-  </div>
-
-</div>
+        </button>
+      </form>
+      {message ? (
+        <p className="mt-5 rounded-xl border border-white/10 bg-surface px-4 py-3 text-sm text-content">{message}</p>
+      ) : null}
+    </AuthShell>
   );
 };
 

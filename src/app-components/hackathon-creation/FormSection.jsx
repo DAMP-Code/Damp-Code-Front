@@ -113,7 +113,7 @@ function handleLogoChange(e) {
       <form className="flex flex-col gap-y-6 rounded-3xl border border-white/10 bg-surface-light/35 p-5 shadow-[0_20px_55px_rgba(0,0,0,0.2)] sm:p-7" onSubmit={handleSubmit}>
         {/* Nome */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Nome do Hackathon</label>
+          <label className="text-content font-semibold">Nome do Hackathon</label>
 
           <input
             type="text"
@@ -139,7 +139,7 @@ function handleLogoChange(e) {
 
         {/* Empresa */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Empresa Parceira</label>
+          <label className="text-content font-semibold">Empresa Parceira</label>
 
           <input
             type="text"
@@ -163,7 +163,7 @@ function handleLogoChange(e) {
         </div>
 
         <div className="flex flex-col gap-y-4 rounded-2xl border border-white/10 bg-surface/40 p-4">
-          <label className="text-highlight font-bold">Cores do Tema</label>
+          <label className="text-content font-semibold">Cores do Tema</label>
 
           <div className="flex flex-wrap gap-6">
             <div className="flex flex-col gap-y-2">
@@ -206,7 +206,7 @@ function handleLogoChange(e) {
 
         {/* Upload Logo */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Logo do Hackathon</label>
+          <label className="text-content font-semibold">Logo do Hackathon</label>
 
           <input
             type="file"
@@ -226,7 +226,7 @@ function handleLogoChange(e) {
 
         {/* Status */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Status</label>
+          <label className="text-content font-semibold">Status</label>
 
           <select
             name="status"
@@ -247,7 +247,7 @@ function handleLogoChange(e) {
 
         {/* DataFim */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Data Final:</label>
+          <label className="text-content font-semibold">Data Final:</label>
 
           <input
             name="DataFinal"
@@ -269,7 +269,7 @@ function handleLogoChange(e) {
 
         {/* Área */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Área</label>
+          <label className="text-content font-semibold">Área</label>
 
           <select
             name="Area"
@@ -292,7 +292,7 @@ function handleLogoChange(e) {
 
         {/* Descrição */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Descrição</label>
+          <label className="text-content font-semibold">Descrição</label>
 
           <textarea
             name="Descricao"
@@ -315,7 +315,7 @@ function handleLogoChange(e) {
         </div>
 
         <div className="flex flex-col gap-y-2">
-          <label className="text-highlight font-bold">Premiação Total</label>
+          <label className="text-content font-semibold">Premiação Total</label>
 
           <input
             type="number"
@@ -336,7 +336,7 @@ function handleLogoChange(e) {
         </div>
 
         <div className="flex flex-col gap-y-4">
-          <label className="text-highlight font-bold">Tecnologias</label>
+          <label className="text-content font-semibold">Tecnologias</label>
 
           <div className="grid grid-cols-2 gap-4">
             {technologies.map((technology) => (
@@ -356,7 +356,7 @@ function handleLogoChange(e) {
         </div>
 
         <div className="flex flex-col gap-y-4">
-          <label className="text-highlight font-bold">Quantos Ganham?</label>
+          <label className="text-content font-semibold">Quantos Ganham?</label>
           <div className="grid grid-cols-3 gap-4">
             {rankings.map((item) => (
               <button
@@ -415,7 +415,7 @@ function handleLogoChange(e) {
             >
               {/* HEADER */}
               <div className="flex items-center justify-between">
-                <p className="text-highlight font-bold text-xl ">{item.name} </p>
+                <p className="text-content font-semibold text-xl ">{item.name} </p>
 
                 <div className="w-3 h-3 rounded-full bg-brand group-hover:bg-highlight transition" />
               </div>
