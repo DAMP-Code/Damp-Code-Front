@@ -44,7 +44,7 @@ const CreateCompany = () => {
           />
         <div className=" hidden lg:flex flex-col items-center justify-center w-2/3 p-5 gap-5">
           <p className="text-content">Crie uma conta de equipe parceira e tenha acesso a recursos personalizados, e muito mais!</p>
-          <a className="flex h-20 w-full items-center justify-center rounded-xl bg-highlight text-xl font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] hover:-translate-y-0.5 hover:brightness-110 lg:w-1/2" href="">TRABALHE CONOSCO</a>
+          <a className="flex h-20 w-full items-center justify-center rounded-xl bg-highlight text-xl font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] hover:-translate-y-0.5 hover:brightness-110 lg:w-1/2" href="">Trabalhe conosco</a>
         </div>
       </div>
       <section className="flex min-h-screen w-full flex-col items-center justify-center px-5 py-24">

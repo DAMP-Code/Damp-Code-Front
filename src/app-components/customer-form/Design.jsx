@@ -27,7 +27,7 @@ const Design = ({text1, text2, showCard = false}) => {
             <p className='hidden w-4/5 max-w-2xl text-base leading-relaxed text-content-secondary xl:flex xl:text-lg'>
                 {text2}
             </p>
-            <button className='mt-5 w-2/3 rounded-xl bg-highlight py-4 text-lg text-surface shadow-[0_12px_30px_rgba(255,234,0,0.14)] hover:-translate-y-0.5 hover:brightness-110'><b>NÃO PERCA OPORTUNIDADES</b></button>
+            <button className='mt-5 w-2/3 rounded-xl bg-highlight py-4 text-lg font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.14)] hover:-translate-y-0.5 hover:brightness-110'>Comece agora</button>
           </div>
             <div className={`card w-full lg:w-2/3 h-2/5 lg:1/5 items-start ${showCard ? 'hidden lg:flex' : 'hidden'}`}>
                 <CardStack items={cards}/>

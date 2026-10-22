@@ -1,8 +1,14 @@
 import React from "react"
 
-const Search = () => {
+const Search = ({ onSearch }) => {
+  function handleSubmit(event) {
+    event.preventDefault()
+    const value = new FormData(event.currentTarget).get("q")
+    onSearch?.(String(value || ""))
+  }
+
   return (
-    <form className="mx-auto my-7 w-[calc(100%-2rem)] max-w-2xl">
+    <form className="mx-auto my-7 w-[calc(100%-2rem)] max-w-2xl" onSubmit={handleSubmit}>
       <label htmlFor="search" className="sr-only">
         Buscar hackathons
       </label>
@@ -29,6 +35,7 @@ const Search = () => {
         <input
           type="search"
           id="search"
+          name="q"
           placeholder="Buscar hackathons..."
           className="
             w-full 

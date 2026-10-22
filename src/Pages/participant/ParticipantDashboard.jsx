@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 
 const ParticipantDashboard = () => {
   const [hackathons, setHackathons] = useState([])
+  const [query, setQuery] = useState("")
 
   async function fetchHackathons() {
   try {
@@ -17,11 +18,7 @@ const ParticipantDashboard = () => {
     )
 
     const data = await response.json()
-
-    console.log("Dados vindos da API:")
-    console.log(data)
-
-    setHackathons(data)
+    setHackathons(Array.isArray(data) ? data : [])
 
   } catch (error) {
     console.error(error)
@@ -32,10 +29,14 @@ useEffect(() => {
   fetchHackathons()
 }, [])
 
-useEffect(() => {
-  console.log("Estado hackathons:")
-  console.log(hackathons)
-}, [hackathons])
+  const visibleHackathons = hackathons.filter((hackathon) => {
+    const term = query.trim().toLowerCase()
+    if (!term) return true
+    const haystack = [hackathon.titulo, hackathon.empresa, ...(hackathon.tecnologias || [])]
+      .join(" ")
+      .toLowerCase()
+    return haystack.includes(term)
+  })
 
   return (
     <div className='bg-surface w-full min-h-screen'>
@@ -43,8 +44,8 @@ useEffect(() => {
         <div className='mx-auto flex w-full max-w-[1600px]'>
           <Sidebar />
           <div className='flex flex-col w-full'>
-            <Search />
-            <WeeklyHighlights hackathons={hackathons} />
+            <Search onSearch={setQuery} />
+            <WeeklyHighlights hackathons={visibleHackathons} />
             <Levels />
           </div>
         </div>

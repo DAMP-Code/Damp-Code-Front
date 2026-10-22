@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import BackButton from "@/app-components/BackButton";
+import Footer from "@/app-components/Footer";
+import Header from "@/app-components/Header";
 import HackathonTitle from "@/app-components/hackathon-creation/HackathonTitle";
 import HackathonSubtitle from "@/app-components/hackathon-creation/HackathonSubtitle";
 
@@ -40,10 +42,20 @@ const HackathonPage = () => {
   }, [id]);
 
   if (!hackathon) {
-    return <p className="flex min-h-screen items-center justify-center bg-surface text-lg font-semibold text-brand-light">Carregando...</p>;
+    return (
+      <div className="min-h-screen bg-surface">
+        <Header />
+        <p className="mx-auto flex min-h-[50vh] w-11/12 max-w-7xl items-center text-lg text-content-secondary">
+          Carregando o hackathon.
+        </p>
+        <Footer />
+      </div>
+    );
   }
 
   return (
+    <div className="min-h-screen bg-surface">
+      <Header />
     <section
       style={{ backgroundColor: hackathon.corFundo }}
       className="
@@ -65,7 +77,7 @@ const HackathonPage = () => {
       </div>
 
       {/* HEADER */}
-      <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-8 rounded-3xl border border-white/10 bg-black/15 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:flex-row lg:items-center">
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-8 rounded-3xl border border-white/10 bg-surface/40 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:flex-row lg:items-center">
         <div className="flex w-full flex-col items-start gap-5 sm:flex-row sm:items-center lg:w-3/4">
           <img
             className="max-h-36 w-32 rounded-2xl object-contain lg:w-52"
@@ -101,7 +113,7 @@ const HackathonPage = () => {
       </div>
 
       {/* INFO */}
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap gap-3 border-b border-white/10 pb-6 text-sm text-content-secondary [&_p]:rounded-full [&_p]:border [&_p]:border-white/10 [&_p]:bg-black/15 [&_p]:px-4 [&_p]:py-2">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap gap-3 border-b border-white/10 pb-6 text-sm text-content-secondary [&_p]:rounded-full [&_p]:border [&_p]:border-white/10 [&_p]:bg-surface/40 [&_p]:px-4 [&_p]:py-2">
         <p>
           Área:
           <b>{hackathon.area}</b>
@@ -123,7 +135,7 @@ const HackathonPage = () => {
       <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 lg:grid-cols-2">
         {/* ESQUERDA */}
         <div className="flex flex-col gap-y-6">
-          <div className="rounded-2xl border border-white/10 bg-black/15 p-6 backdrop-blur-sm">
+          <div className="rounded-2xl border border-white/10 bg-surface/40 p-6 backdrop-blur-sm">
             <HackathonSubtitle
               text1="DESCRIÇÃO"
               text2=" DO HACKATHON"
@@ -136,7 +148,7 @@ const HackathonPage = () => {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/15 p-6 backdrop-blur-sm">
+          <div className="rounded-2xl border border-white/10 bg-surface/40 p-6 backdrop-blur-sm">
             <HackathonSubtitle
               text1="MÉTODO DE"
               text2=" AVALIAÇÃO"
@@ -151,7 +163,7 @@ const HackathonPage = () => {
         </div>
 
         {/* DIREITA */}
-        <div className="rounded-2xl border border-white/10 bg-black/15 p-6 backdrop-blur-sm">
+        <div className="rounded-2xl border border-white/10 bg-surface/40 p-6 backdrop-blur-sm">
           <HackathonSubtitle
             text1="TECNOLOGIAS"
             text2=" UTILIZADAS"
@@ -170,7 +182,7 @@ const HackathonPage = () => {
                 border
                 px-4
                 py-2
-                rounded-full bg-black/15
+                rounded-full bg-surface/40
               "
               >
                 {technology}
@@ -180,6 +192,8 @@ const HackathonPage = () => {
         </div>
       </div>
     </section>
+      <Footer />
+    </div>
   );
 };
 

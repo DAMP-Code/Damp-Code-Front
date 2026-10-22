@@ -7,7 +7,7 @@ const Game = () => {
   return (
     <div className='w-full flex flex-col items-center justify-center pt-5'>
         <div className='flex w-9/10 items-start'>
-            <Title text1="GAMEFICAÇÃO" />
+            <Title text1="Gamificação" />
         </div>
         <Timeline data={timelineData}/>
     </div>
