@@ -434,18 +434,18 @@ function handleLogoChange(e) {
             value="Criar Hackathon"
             className="
       w-full
-      bg-brand
-      hover:bg-brand-hover
-      text-white
+      bg-highlight
+      hover:brightness-110
+      text-surface
       font-bold
       text-lg
       py-4
-      rounded-2xl
+      rounded-xl
       cursor-pointer
       transition-all
       duration-300
-      hover:scale-[1.01]
-      hover:shadow-[0_0_25px_rgba(108,72,197,0.35)]
+      hover:-translate-y-0.5
+      shadow-[0_12px_30px_rgba(255,234,0,0.15)]
     "
           />
         </div>
