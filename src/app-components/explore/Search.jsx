@@ -50,7 +50,7 @@ const Search = () => {
           className="
             absolute right-1.5 bottom-1.5 
             bg-highlight 
-            text-black 
+            text-surface 
             font-medium 
             px-4 py-1.5 
             rounded-md 

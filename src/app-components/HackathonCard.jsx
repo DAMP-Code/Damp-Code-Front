@@ -58,7 +58,7 @@ const HackathonCard = ({ hackathon }) => {
           </h3>
         </div>
 
-        <button className="rounded-lg bg-highlight px-3 py-2 text-sm font-bold text-surface hover:-translate-y-0.5 hover:brightness-110" onClick={() => navigate(`/hackathon/${hackathon.hackathonId}`)}>
+        <button className="rounded-xl bg-highlight px-3 py-2 text-sm font-bold text-surface hover:-translate-y-0.5 hover:brightness-110" onClick={() => navigate(`/hackathon/${hackathon.hackathonId}`)}>
           Ver detalhes
         </button>
       </div>
