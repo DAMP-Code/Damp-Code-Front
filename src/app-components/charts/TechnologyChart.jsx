@@ -104,12 +104,12 @@ const TechnologyChart = ({ hackathons }) => {
   return (
     <div
       className="
-        bg-[#22114D]
+        bg-surface-light
         rounded-2xl
         p-6
         shadow-lg
         border
-        border-[#6C48C5]
+        border-brand
       "
     >
       <Chart
