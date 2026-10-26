@@ -35,7 +35,7 @@ const [hackathon, setHackathon] = useState({
   DataCriacao: today,
   DataFinal: today, // <- aqui
 
-  status: false,
+  status: "ativo", // mesmo valor da primeira opção do select
 })
 
    const [message, setMessage] = useState("");
@@ -78,7 +78,8 @@ const [hackathon, setHackathon] = useState({
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(hackathonData)
+          // a API espera status como booleano (true = ativo)
+          body: JSON.stringify({ ...hackathonData, status: hackathonData.status === "ativo" })
         }
       );
 
