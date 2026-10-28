@@ -17,10 +17,17 @@ export const MOCK_ACCOUNTS = [
     role: "empresa",
     label: "empresa Nubank",
   },
+  {
+    email: "bruno@dampcode.dev",
+    password: "123456",
+    role: "participante",
+    label: "participante Bruno",
+  },
 ];
 
 export const seedDatabase = {
-  nextUserId: 4,
+  nextUserId: 5,
+  nextInvitationId: 1,
   nextHackathonId: 5,
   users: [
     {
@@ -47,7 +54,32 @@ export const seedDatabase = {
       role: "empresa",
       tecnologias: ["Kotlin", "Java"],
     },
+    {
+      id: 4,
+      name: "Bruno Martins",
+      email: "bruno@dampcode.dev",
+      password: "123456",
+      role: "participante",
+      tecnologias: ["Java", "Spring"],
+    },
   ],
+  // Empresas e vínculos espelham as tabelas companies / company_memberships / company_invitations da API.
+  companies: [
+    {
+      companyId: "c-ifood",
+      accountId: 2,
+      name: "iFood",
+      verificationStatus: "Verified",
+    },
+    {
+      companyId: "c-nubank",
+      accountId: 3,
+      name: "Nubank",
+      verificationStatus: "Pending",
+    },
+  ],
+  memberships: [],
+  invitations: [],
   hackathons: [
     {
       hackathonId: 1,
