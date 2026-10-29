@@ -121,6 +121,9 @@ const JoinHackathon = ({ hackathon, onChanged }) => {
         <p className="rounded-xl border border-success/40 bg-success/10 px-5 py-3 font-semibold text-success">
           {participation.equipe ? `Sua equipe: ${participation.equipe.nome}` : "Inscrito ✓"}
         </p>
+        <Link to={`/hackathon/${hackathonId}/entrega`} style={style} className={buttonClass}>
+          Entregar código
+        </Link>
         {participation.equipe && (
           <Link to="/dashboard/participante" className="text-sm underline text-content-secondary hover:text-content">
             Gerenciar no painel

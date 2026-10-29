@@ -11,6 +11,7 @@ import CompanyDashboard from "./Pages/company/CompanyDashboard";
 import CreateHackathon from "./Pages/company/CreateHackathon";
 import ParticipantDashboard from "./Pages/participant/ParticipantDashboard";
 import HackathonPage from "./Pages/HackathonPage";
+import SubmissionPage from "./Pages/SubmissionPage";
 import Ranking from "./Pages/company/Ranking";
 
 const App = () => {
@@ -32,6 +33,7 @@ const App = () => {
       <Route path="/cadastroHackaton" element={<CreateHackathon key="novo" />}></Route>
       <Route path="/cadastroHackaton/:id" element={<CreateHackathon key="editar" />}></Route>
       <Route path="/hackathon/:id" element={<HackathonPage />} />
+      <Route path="/hackathon/:id/entrega" element={<SubmissionPage />} />
       <Route path="/dashboard/ranking" element={<Ranking />} />
     </Routes>
   );

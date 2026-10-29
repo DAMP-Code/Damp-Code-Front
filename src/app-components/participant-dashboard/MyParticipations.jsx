@@ -213,17 +213,27 @@ const MyParticipations = () => {
                       {participation.dataInicio && ` · começa em ${new Date(participation.dataInicio).toLocaleDateString("pt-BR")}`}
                     </span>
                   </span>
-                  {!participation.equipe && participation.fase === "Publicado" && (
-                    <button
-                      onClick={() =>
-                        window.confirm("Cancelar sua inscrição neste Hackathon?") &&
-                        send(`${API}/Hackathons/${encodeURIComponent(participation.hackathonId)}/inscricao`, "DELETE")
-                      }
-                      className={dangerClass}
-                    >
-                      Cancelar inscrição
-                    </button>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {participation.fase !== "Cancelado" && (
+                      <Link
+                        to={`/hackathon/${encodeURIComponent(participation.hackathonId)}/entrega`}
+                        className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-hover"
+                      >
+                        Entregar código
+                      </Link>
+                    )}
+                    {!participation.equipe && participation.fase === "Publicado" && (
+                      <button
+                        onClick={() =>
+                          window.confirm("Cancelar sua inscrição neste Hackathon?") &&
+                          send(`${API}/Hackathons/${encodeURIComponent(participation.hackathonId)}/inscricao`, "DELETE")
+                        }
+                        className={dangerClass}
+                      >
+                        Cancelar inscrição
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {participation.equipe && <TeamCard participation={participation} send={send} />}
               </li>
