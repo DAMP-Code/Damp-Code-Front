@@ -5,6 +5,7 @@ import Sidebar from '@/app-components/explore/Sidebar'
 import Footer from '@/app-components/Footer'
 import Header from '@/app-components/Header'
 import ReceivedInvitations from '@/app-components/participant-dashboard/ReceivedInvitations'
+import MyParticipations from '@/app-components/participant-dashboard/MyParticipations'
 import { AuthContext } from '@/app-components/utilities/AuthContext'
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -76,6 +77,7 @@ useEffect(() => {
               </button>
             )}
             <ReceivedInvitations onAccepted={setCompanyAccess} />
+            <MyParticipations />
             <Search onSearch={setQuery} />
             <WeeklyHighlights hackathons={visibleHackathons} />
             <Levels />
