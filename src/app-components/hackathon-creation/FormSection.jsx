@@ -4,6 +4,7 @@ import handleLogoChange from "../utilities/handleLogoChange";
 
 const technologies = ["React", "Node", "Python", "MongoDB", "SQL", "PowerBI"];
 const rankings = ["Top 1", "Top 10", "Top 15", "Top 20", "Top 50", "Top 100"];
+const referenceLanguages = ["JavaScript", "Python", "C#", "Java", "SQL", "Outra"];
 const methods = [
   {
     id: 1,
@@ -487,6 +488,51 @@ function handleLogoChange(e) {
               </p>
             </div>
           ))}
+        </div>
+
+        {/* Solução de referência: continua editável depois de publicado, nunca aparece para quem participa */}
+        <div className="flex flex-col gap-y-3 rounded-2xl border border-white/10 bg-surface/40 p-4">
+          <label className="text-content font-semibold">Solução de referência (só a empresa vê)</label>
+          <p className="text-content-secondary text-sm">
+            Opcional. Fica ao lado do código entregue na tela de entregas, para comparar.
+          </p>
+
+          <select
+            name="LinguagemReferencia"
+            onChange={handleChange}
+            value={hackathon.LinguagemReferencia}
+            className="
+              bg-surface-light
+              border border-brand
+              rounded-xl
+              p-4
+              text-content
+            "
+          >
+            <option value="">Linguagem</option>
+            {referenceLanguages.map((language) => (
+              <option key={language} value={language}>{language}</option>
+            ))}
+          </select>
+
+          <textarea
+            name="SolucaoReferencia"
+            onChange={handleChange}
+            value={hackathon.SolucaoReferencia}
+            spellCheck={false}
+            placeholder="Cole aqui a solução esperada"
+            className="
+              bg-surface
+              border border-brand
+              rounded-xl
+              p-4
+              font-mono
+              text-sm
+              text-content
+              min-h-[200px]
+              resize-y
+            "
+          />
         </div>
 
         <div className="pt-6 flex flex-col gap-y-3">
