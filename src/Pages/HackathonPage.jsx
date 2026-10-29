@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
+import JoinHackathon from "@/app-components/hackathon-page/JoinHackathon";
 import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
@@ -30,6 +31,8 @@ const HackathonPage = () => {
 
   const [hackathon, setHackathon] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  // recarrega a contagem de participantes depois de uma inscrição
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     async function loadHackathon() {
@@ -50,7 +53,7 @@ const HackathonPage = () => {
     }
 
     loadHackathon();
-  }, [id, user?.token]);
+  }, [id, user?.token, reload]);
 
   function formatDate(date) {
     return date ? new Date(date).toLocaleDateString("pt-BR") : "—";
@@ -108,23 +111,7 @@ const HackathonPage = () => {
           />
         </div>
 
-        <button
-          style={{
-            backgroundColor: hackathon.corPrincipal,
-          }}
-          className="
-          px-8
-          py-3
-          rounded-xl
-          font-semibold
-          text-lg
-          shadow-lg
-          hover:-translate-y-1 hover:brightness-110
-          transition-all
-        "
-        >
-          Participar
-        </button>
+        <JoinHackathon hackathon={hackathon} onChanged={() => setReload((value) => value + 1)} />
       </div>
 
       {/* INFO */}
