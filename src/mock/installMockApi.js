@@ -23,6 +23,11 @@ function loadDatabase() {
     for (const key of ["companies", "memberships", "invitations", "nextInvitationId"]) {
       if (database[key] === undefined) database[key] = structuredClone(seedDatabase[key]);
     }
+    // Hackathons salvos antes do ciclo de vida (sem storedStatus) são trocados pelos do seed
+    if (database.hackathons?.some((item) => item.storedStatus === undefined)) {
+      database.hackathons = structuredClone(seedDatabase.hackathons);
+      database.nextHackathonId = seedDatabase.nextHackathonId;
+    }
     for (const user of seedDatabase.users) {
       if (!database.users.some((item) => item.email === user.email)) {
         database.users.push({ ...user, id: database.nextUserId++ });
@@ -249,36 +254,276 @@ function handleCompanies(path, method, body, database, user) {
   return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
 }
 
-function isActive(status) {
-  return status === true || status === "true" || status === "ativo" || status === "Ativo";
+const MAX_LOGO_LENGTH = 2 * 1024 * 1024;
+const WINNERS_COUNTS = [1, 10, 15, 20, 50, 100];
+const NO_COMPANY = "Apenas empresas e seus funcionários podem gerenciar Hackathons.";
+const HACKATHON_NOT_FOUND = "Hackathon não encontrado.";
+const DATES_ORDER = "As datas precisam seguir: início, fim das submissões, fim da avaliação.";
+const FINISHED = "Este Hackathon já foi encerrado ou cancelado.";
+const PHASE_TEXT = {
+  Draft: "Rascunho",
+  Published: "Publicado",
+  Active: "Ativo",
+  InReview: "Em avaliação",
+  Closed: "Encerrado",
+  Cancelled: "Cancelado",
+};
+
+// mesma regra do HackathonPhases.GetPhase da API: o status gravado manda, depois as datas
+function phaseOf(hackathon, now = new Date()) {
+  if (hackathon.storedStatus === "Draft") return "Draft";
+  if (hackathon.storedStatus === "Cancelled") return "Cancelled";
+  if (hackathon.storedStatus === "Closed") return "Closed";
+  if (!hackathon.dataInicio || now < new Date(hackathon.dataInicio)) return "Published";
+  if (!hackathon.dataFinal || now < new Date(hackathon.dataFinal)) return "Active";
+  if (!hackathon.dataFimAvaliacao || now < new Date(hackathon.dataFimAvaliacao)) return "InReview";
+  return "Closed";
 }
 
-function toHackathon(body, id) {
+function toHackathonResponse(database, hackathon) {
+  const phase = phaseOf(hackathon);
+  const company = database.companies.find((item) => item.companyId === hackathon.companyId);
   return {
-    hackathonId: id,
-    titulo: body.Titulo || body.titulo || "Sem título",
-    descricao: body.Descricao || body.descricao || "",
-    empresa: body.Empresa || body.empresa || "",
-    area: body.Area || body.area || "",
-    tecnologias: body.Tecnologias || body.tecnologias || [],
-    metodo: body.Metodo || body.metodo || "",
-    premiacao: Number(body.Premiacao ?? body.premiacao ?? 0),
-    corPrincipal: body.corPrincipal || "#6C48C5",
-    corSecundaria: body.corSecundaria || "#C68FE6",
-    corFundo: body.corFundo || "#170A36",
-    logo: body.Logo || body.logo || "",
-    dataFinal: body.DataFinal || body.dataFinal || new Date().toISOString(),
-    status: isActive(body.status),
-    participantes: body.participantes || "0 pessoas já entraram",
+    ...hackathon,
+    empresa: company?.name || "",
+    premiacao: hackathon.premiacao ?? 0,
+    status: phase === "Published" || phase === "Active",
+    fase: PHASE_TEXT[phase],
+    participantes: hackathon.participantes || "0 pessoas já entraram",
   };
+}
+
+function toIsoOrNull(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function parseFormato(value) {
+  return value === "Individual" || value === "Equipe" ? value : null;
+}
+
+function parseTipoPremiacao(value) {
+  return value === "Dinheiro" || value === "Entrevista" ? value : null;
+}
+
+function parseRanking(value) {
+  const match = String(value || "").match(/^Top (\d+)$/);
+  return match && WINNERS_COUNTS.includes(Number(match[1])) ? value : null;
+}
+
+function slugify(title) {
+  const slug = String(title)
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 200);
+  return slug || "hackathon";
+}
+
+function uniqueSlug(database, title) {
+  const slug = slugify(title);
+  if (!database.hackathons.some((item) => item.slug === slug)) return slug;
+  let suffix = 2;
+  while (database.hackathons.some((item) => item.slug === `${slug}-${suffix}`)) suffix++;
+  return `${slug}-${suffix}`;
+}
+
+function validateVisual(body) {
+  const colors = [body.corPrincipal, body.corSecundaria, body.corFundo];
+  if (colors.some((color) => color && !/^#[0-9A-Fa-f]{6}$/.test(color))) {
+    return "As cores devem estar no formato #RRGGBB.";
+  }
+  if (!body.Logo) return null;
+  if (body.Logo.length > MAX_LOGO_LENGTH) return "O logo deve ter no máximo 2 MB.";
+  return /^data:image\/(png|jpeg|webp|gif);base64,/.test(body.Logo)
+    ? null
+    : "O logo deve ser uma imagem PNG, JPEG, WEBP ou GIF.";
+}
+
+function validateDraft(body) {
+  const missing = [];
+  if (!body.Titulo?.trim()) missing.push("título");
+  if (!body.Descricao?.trim()) missing.push("descrição");
+  if (!body.Area?.trim()) missing.push("área");
+  if (!parseFormato(body.Formato)) missing.push("formato");
+  if (missing.length) return `Preencha: ${missing.join(", ")}.`;
+  const visualError = validateVisual(body);
+  if (visualError) return visualError;
+  const [inicio, fim, avaliacao] = [body.DataInicio, body.DataFinal, body.DataFimAvaliacao].map(toIsoOrNull);
+  if (inicio && fim && avaliacao && !(inicio < fim && fim < avaliacao)) return DATES_ORDER;
+  return null;
+}
+
+function missingCrucialFields(hackathon) {
+  const missing = [];
+  if (!hackathon.tecnologias?.length) missing.push("tecnologias");
+  if (!hackathon.dataInicio) missing.push("data de início");
+  if (!hackathon.dataFinal) missing.push("fim das submissões");
+  if (!hackathon.dataFimAvaliacao) missing.push("fim da avaliação");
+  if (!hackathon.tipoPremiacao) missing.push("tipo de premiação");
+  if (hackathon.tipoPremiacao === "Dinheiro" && !(hackathon.premiacao > 0)) missing.push("premiação");
+  if (!hackathon.ranking) missing.push("quantos ganham");
+  if (!hackathon.metodo) missing.push("método de avaliação");
+  return missing;
+}
+
+function applyContent(hackathon, body) {
+  const premiacao = body.Premiacao === null || body.Premiacao === undefined || body.Premiacao === "" ? null : Number(body.Premiacao);
+  Object.assign(hackathon, {
+    titulo: body.Titulo.trim(),
+    descricao: body.Descricao.trim(),
+    area: body.Area.trim(),
+    tecnologias: [...new Set(body.Tecnologias || [])],
+    metodo: body.Metodo || "",
+    premiacao,
+    formato: parseFormato(body.Formato),
+    tipoPremiacao: parseTipoPremiacao(body.TipoPremiacao),
+    ranking: parseRanking(body.Ranking),
+    dataInicio: toIsoOrNull(body.DataInicio),
+    dataFinal: toIsoOrNull(body.DataFinal),
+    dataFimAvaliacao: toIsoOrNull(body.DataFimAvaliacao),
+  });
+}
+
+function applyVisual(hackathon, body) {
+  Object.assign(hackathon, {
+    corPrincipal: body.corPrincipal || null,
+    corSecundaria: body.corSecundaria || null,
+    corFundo: body.corFundo || null,
+    logo: body.Logo || "",
+  });
+}
+
+// mesmas regras do HackathonService da API
+function handleHackathons(path, method, body, database, user) {
+  const now = new Date();
+  const respond = (hackathon, status = 200) => json(toHackathonResponse(database, hackathon), status);
+
+  if (method === "GET" && path === "/api/Hackathons") {
+    const visible = database.hackathons
+      .filter((item) => item.storedStatus === "Scheduled" || item.storedStatus === "Closed")
+      .sort(
+        (a, b) =>
+          (phaseOf(a, now) === "Closed") - (phaseOf(b, now) === "Closed") ||
+          new Date(a.dataInicio) - new Date(b.dataInicio),
+      );
+    return json(visible.map((item) => toHackathonResponse(database, item)));
+  }
+
+  const access = user ? managedCompany(database, user) : null;
+
+  if (method === "GET" && path === "/api/Hackathons/empresa") {
+    if (!user) return json({ message: "Não autenticado" }, 401);
+    if (!access) return problem(NO_COMPANY, 403);
+    const own = database.hackathons
+      .filter((item) => item.companyId === access.companyId)
+      .sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao));
+    return json(own.map((item) => toHackathonResponse(database, item)));
+  }
+
+  if (method === "POST" && path === "/api/Hackathons/register/Hackathon") {
+    if (!user) return json({ message: "Não autenticado" }, 401);
+    if (!access) return problem(NO_COMPANY, 403);
+    const error = validateDraft(body || {});
+    if (error) return problem(error, 400);
+    const hackathon = {
+      hackathonId: database.nextHackathonId++,
+      companyId: access.companyId,
+      storedStatus: "Draft",
+      slug: uniqueSlug(database, body.Titulo.trim()),
+      dataCriacao: now.toISOString(),
+    };
+    applyContent(hackathon, body);
+    applyVisual(hackathon, body);
+    database.hackathons.unshift(hackathon);
+    saveDatabase(database);
+    return respond(hackathon, 201);
+  }
+
+  const match = path.match(/^\/api\/Hackathons\/([^/]+)(?:\/(publicar|cancelar|encerrar))?$/);
+  if (!match) return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  const [, id, action] = match;
+
+  if (method === "GET" && !action) {
+    const hackathon = database.hackathons.find((item) => String(item.hackathonId) === id || item.slug === id);
+    if (!hackathon) return problem(HACKATHON_NOT_FOUND, 404);
+    const phase = phaseOf(hackathon, now);
+    if ((phase === "Draft" || phase === "Cancelled") && access?.companyId !== hackathon.companyId) {
+      return problem(HACKATHON_NOT_FOUND, 404);
+    }
+    return respond(hackathon);
+  }
+
+  if (!user) return json({ message: "Não autenticado" }, 401);
+  if (!access) return problem(NO_COMPANY, 403);
+  const hackathon = database.hackathons.find(
+    (item) => String(item.hackathonId) === id && item.companyId === access.companyId,
+  );
+  if (!hackathon) return problem(HACKATHON_NOT_FOUND, 404);
+  const phase = phaseOf(hackathon, now);
+
+  if (method === "PUT" && !action) {
+    if (phase === "Closed" || phase === "Cancelled") return problem(FINISHED, 409);
+    const error = phase === "Draft" ? validateDraft(body || {}) : validateVisual(body || {});
+    if (error) return problem(error, 400);
+    // depois de publicado, só cores e logo mudam
+    if (phase === "Draft") applyContent(hackathon, body);
+    applyVisual(hackathon, body);
+    saveDatabase(database);
+    return respond(hackathon);
+  }
+
+  if (method === "DELETE" && !action) {
+    if (hackathon.storedStatus !== "Draft") return problem("Só é possível apagar rascunhos. Use cancelar.", 409);
+    database.hackathons = database.hackathons.filter((item) => item !== hackathon);
+    saveDatabase(database);
+    return new Response(null, { status: 204 });
+  }
+
+  if (method === "POST" && action === "publicar") {
+    if (hackathon.storedStatus !== "Draft") return problem("Este Hackathon já foi publicado.", 409);
+    if (!access.canPublish) return problem("Sua empresa precisa ser verificada para publicar.", 403);
+    const missing = missingCrucialFields(hackathon);
+    if (missing.length) return problem(`Preencha antes de publicar: ${missing.join(", ")}.`, 400);
+    if (new Date(hackathon.dataInicio) <= now) return problem("A data de início precisa ser no futuro.", 400);
+    if (!(hackathon.dataInicio < hackathon.dataFinal && hackathon.dataFinal < hackathon.dataFimAvaliacao)) {
+      return problem(DATES_ORDER, 400);
+    }
+    hackathon.storedStatus = "Scheduled";
+    hackathon.dataPublicacao = now.toISOString();
+    saveDatabase(database);
+    return respond(hackathon);
+  }
+
+  if (method === "POST" && action === "cancelar") {
+    if (phase === "Closed" || phase === "Cancelled") return problem(FINISHED, 409);
+    hackathon.storedStatus = "Cancelled";
+    saveDatabase(database);
+    return respond(hackathon);
+  }
+
+  if (method === "POST" && action === "encerrar") {
+    if (phase !== "InReview") return problem("Só é possível encerrar durante a avaliação.", 409);
+    hackathon.storedStatus = "Closed";
+    saveDatabase(database);
+    return respond(hackathon);
+  }
+
+  return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
 }
 
 function handle(path, method, body, token) {
   const database = loadDatabase();
 
+  const currentUser = database.users.find((item) => `mock-${item.id}` === token);
   if (path.startsWith("/api/Companies")) {
-    const currentUser = database.users.find((item) => `mock-${item.id}` === token);
     return handleCompanies(path, method, body, database, currentUser);
+  }
+  if (path.startsWith("/api/Hackathons")) {
+    return handleHackathons(path, method, body, database, currentUser);
   }
 
   if (method === "POST" && path === "/api/Auth/login") {
@@ -335,26 +580,6 @@ function handle(path, method, body, token) {
     });
     saveDatabase(database);
     return json(publicUser(user), 201);
-  }
-
-  if (method === "GET" && path === "/api/Hackathons") {
-    return json(database.hackathons);
-  }
-
-  const hackathonMatch = path.match(/^\/api\/Hackathons\/(\d+)$/);
-  if (method === "GET" && hackathonMatch) {
-    const hackathon = database.hackathons.find(
-      (item) => String(item.hackathonId) === hackathonMatch[1],
-    );
-    if (!hackathon) return json({ message: "Hackathon não encontrado" }, 404);
-    return json(hackathon);
-  }
-
-  if (method === "POST" && path === "/api/Hackathons/register/Hackathon") {
-    const hackathon = toHackathon(body || {}, database.nextHackathonId++);
-    database.hackathons.unshift(hackathon);
-    saveDatabase(database);
-    return json(hackathon, 201);
   }
 
   return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
