@@ -27,7 +27,13 @@ const FormSection = ({
   handleChange,
   setHackathon,
   handleSubmit,
+  handlePublish,
   message,
+  isEditing,
+  isDraft,
+  isPublished,
+  canPublish,
+  loading,
 }) => {
   function handleTechnologies(e) {
   const { value, checked } = e.target;
@@ -48,6 +54,8 @@ const FormSection = ({
 }
 
 function handleRankings(item) {
+  // depois de publicado, quantos ganham fica travado
+  if (isPublished) return;
   setHackathon({
     ...hackathon,
     Ranking: item,
@@ -55,6 +63,7 @@ function handleRankings(item) {
 }
 
 function handleMethod(item) {
+  if (isPublished) return;
   setHackathon({
     ...hackathon,
     Metodo: item.name,
@@ -108,9 +117,15 @@ function handleLogoChange(e) {
 
   return (
     <section className="flex w-full flex-col gap-y-8 bg-surface px-5 py-8 sm:px-8 md:w-1/2 lg:px-10">
-      <Title text1={"Criar"} text2={"Hackathon"} />
+      <Title text1={isEditing ? "Editar" : "Criar"} text2={"Hackathon"} />
 
       <form className="flex flex-col gap-y-6 rounded-3xl border border-white/10 bg-surface-light/35 p-5 shadow-[0_20px_55px_rgba(0,0,0,0.2)] sm:p-7" onSubmit={handleSubmit}>
+        {isPublished && (
+          <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-warning">
+            Depois de publicado, só cores e logo podem ser alterados.
+          </p>
+        )}
+
         {/* Nome */}
         <div className="flex flex-col gap-y-2">
           <label className="text-content font-semibold">Nome do Hackathon</label>
@@ -119,7 +134,8 @@ function handleLogoChange(e) {
             type="text"
             onChange={handleChange}
             name="Titulo"
-            value={hackathon.Title}
+            value={hackathon.Titulo}
+            disabled={isPublished}
             required
             minLength={5}
             maxLength={100}
@@ -133,31 +149,6 @@ function handleLogoChange(e) {
               outline-none
               focus:border-highlight
               transition
-            "
-          />
-        </div>
-
-        {/* Empresa */}
-        <div className="flex flex-col gap-y-2">
-          <label className="text-content font-semibold">Empresa Parceira</label>
-
-          <input
-            type="text"
-            name="Empresa"
-            onChange={handleChange}
-            value={hackathon.Empresa}
-            required
-            minLength={2}
-            maxLength={100}
-            placeholder="Digite a empresa"
-            className="
-              bg-surface-light
-              border border-brand
-              rounded-xl
-              p-4
-              text-content
-              outline-none
-              focus:border-highlight
             "
           />
         </div>
@@ -211,7 +202,7 @@ function handleLogoChange(e) {
           <input
             type="file"
             onChange={handleLogoChange}
-            accept="image/*"
+            accept="image/png,image/jpeg,image/webp,image/gif"
             className="
               text-content
               file:bg-brand
@@ -224,14 +215,15 @@ function handleLogoChange(e) {
           />
         </div>
 
-        {/* Status */}
+        {/* Formato */}
         <div className="flex flex-col gap-y-2">
-          <label className="text-content font-semibold">Status</label>
+          <label className="text-content font-semibold">Formato</label>
 
           <select
-            name="status"
+            name="Formato"
             onChange={handleChange}
-            value={hackathon.status}
+            value={hackathon.Formato}
+            disabled={isPublished}
             className="
               bg-surface-light
               border border-brand
@@ -240,31 +232,69 @@ function handleLogoChange(e) {
               text-content
             "
           >
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
+            <option value="Individual">Individual</option>
+            <option value="Equipe">Equipe (2 a 5 pessoas)</option>
           </select>
         </div>
 
-        {/* DataFim */}
-        <div className="flex flex-col gap-y-2">
-          <label className="text-content font-semibold">Data Final:</label>
+        {/* Datas: início, fim das submissões e fim da avaliação */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="flex flex-col gap-y-2">
+            <label className="text-content font-semibold">Data de início</label>
 
-          <input
-            name="DataFinal"
-            type="date"
-            onChange={handleChange}
-            value={hackathon.DataFinal}
-             min={hackathon.DataCriacao}
-             max="2028-12-31" 
-            className="
-              bg-surface-light
-              border border-brand
-              rounded-xl
-              p-4
-              text-content
-            "
-          />
-        
+            <input
+              name="DataInicio"
+              type="datetime-local"
+              onChange={handleChange}
+              value={hackathon.DataInicio}
+              disabled={isPublished}
+              className="
+                bg-surface-light
+                border border-brand
+                rounded-xl
+                p-4
+                text-content
+              "
+            />
+          </div>
+
+          <div className="flex flex-col gap-y-2">
+            <label className="text-content font-semibold">Fim das submissões</label>
+
+            <input
+              name="DataFinal"
+              type="datetime-local"
+              onChange={handleChange}
+              value={hackathon.DataFinal}
+              disabled={isPublished}
+              className="
+                bg-surface-light
+                border border-brand
+                rounded-xl
+                p-4
+                text-content
+              "
+            />
+          </div>
+
+          <div className="flex flex-col gap-y-2">
+            <label className="text-content font-semibold">Fim da avaliação</label>
+
+            <input
+              name="DataFimAvaliacao"
+              type="datetime-local"
+              onChange={handleChange}
+              value={hackathon.DataFimAvaliacao}
+              disabled={isPublished}
+              className="
+                bg-surface-light
+                border border-brand
+                rounded-xl
+                p-4
+                text-content
+              "
+            />
+          </div>
         </div>
 
         {/* Área */}
@@ -275,6 +305,7 @@ function handleLogoChange(e) {
             name="Area"
             onChange={handleChange}
             value={hackathon.Area}
+            disabled={isPublished}
             className="
               bg-surface-light
               border border-brand
@@ -299,6 +330,7 @@ function handleLogoChange(e) {
             onChange={handleChange}
             required
             value={hackathon.Descricao}
+            disabled={isPublished}
             minLength={30}
             maxLength={500}
             placeholder="Descreva o hackathon"
@@ -314,6 +346,31 @@ function handleLogoChange(e) {
           />
         </div>
 
+        {/* Tipo de premiação */}
+        <div className="flex flex-col gap-y-2">
+          <label className="text-content font-semibold">Tipo de premiação</label>
+
+          <select
+            name="TipoPremiacao"
+            onChange={handleChange}
+            value={hackathon.TipoPremiacao}
+            disabled={isPublished}
+            className="
+              bg-surface-light
+              border border-brand
+              rounded-xl
+              p-4
+              text-content
+            "
+          >
+            <option value="">Selecione</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Entrevista">Encaminhamento para entrevista</option>
+          </select>
+        </div>
+
+        {/* o valor só faz sentido quando a premiação é em dinheiro */}
+        {hackathon.TipoPremiacao === "Dinheiro" && (
         <div className="flex flex-col gap-y-2">
           <label className="text-content font-semibold">Premiação Total</label>
 
@@ -322,6 +379,7 @@ function handleLogoChange(e) {
             name="Premiacao"
             value={hackathon.Premiacao}
             onChange={handleChange}
+            disabled={isPublished}
             max={100000}
             min={0}
             placeholder="10000"
@@ -334,6 +392,7 @@ function handleLogoChange(e) {
     "
           />
         </div>
+        )}
 
         <div className="flex flex-col gap-y-4">
           <label className="text-content font-semibold">Tecnologias</label>
@@ -346,6 +405,7 @@ function handleLogoChange(e) {
                   value={technology}
                   //ver se está marcado e add
                   checked={hackathon.Tecnologias?.includes(technology) || false}
+                  disabled={isPublished}
                   //altera o estado
                   onChange={handleTechnologies}
                 />
@@ -362,6 +422,7 @@ function handleLogoChange(e) {
               <button
                 key={item}
                 type="button"
+                disabled={isPublished}
                 className={`
                   border rounded-xl p-4 transition
                   
@@ -428,10 +489,11 @@ function handleLogoChange(e) {
           ))}
         </div>
 
-        <div className="pt-6">
+        <div className="pt-6 flex flex-col gap-y-3">
           <input
             type="submit"
-            value="Criar Hackathon"
+            value={isPublished ? "Salvar alterações" : "Salvar rascunho"}
+            disabled={loading}
             className="
       w-full
       bg-highlight
@@ -448,6 +510,25 @@ function handleLogoChange(e) {
       shadow-[0_12px_30px_rgba(255,234,0,0.15)]
     "
           />
+
+          {/* Publicar só existe para rascunho; empresa não verificada vê o botão desabilitado */}
+          {isDraft && (
+            <>
+              <button
+                type="button"
+                onClick={handlePublish}
+                disabled={loading || !canPublish}
+                className="w-full rounded-xl border border-highlight py-4 text-lg font-bold text-highlight transition-all duration-300 hover:bg-highlight hover:text-surface disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-highlight"
+              >
+                Publicar
+              </button>
+              {!canPublish && (
+                <p className="text-center text-sm text-warning">
+                  Sua empresa precisa ser verificada para publicar.
+                </p>
+              )}
+            </>
+          )}
         </div>
       </form>
       {message && <p className="rounded-xl border border-white/10 bg-surface-light px-5 py-3 text-center text-content">{message}</p>}
