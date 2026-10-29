@@ -29,6 +29,10 @@ export const seedDatabase = {
   nextUserId: 5,
   nextInvitationId: 1,
   nextHackathonId: 6,
+  nextTeamId: 2,
+  nextParticipationId: 3,
+  nextTeamInvitationId: 1,
+  nextTeamJoinRequestId: 1,
   users: [
     {
       id: 1,
@@ -80,6 +84,37 @@ export const seedDatabase = {
   ],
   memberships: [],
   invitations: [],
+  // Inscrições e equipes espelham as tabelas participations / hackathon_teams / team_invitations / team_join_requests.
+  // Ana está no Hackathon individual 4; Bruno tem a equipe aberta "Os Rápidos" no Hackathon 3.
+  teams: [
+    {
+      teamId: "t-1",
+      hackathonId: 3,
+      nome: "Os Rápidos",
+      aberta: true,
+      criadoPor: 4,
+    },
+  ],
+  participations: [
+    {
+      id: "p-1",
+      hackathonId: 4,
+      accountId: 1,
+      teamId: null,
+      joinedAt: "2026-10-26T12:00:00.000Z",
+      leftAt: null,
+    },
+    {
+      id: "p-2",
+      hackathonId: 3,
+      accountId: 4,
+      teamId: "t-1",
+      joinedAt: "2026-10-27T12:00:00.000Z",
+      leftAt: null,
+    },
+  ],
+  teamInvitations: [],
+  teamJoinRequests: [],
   hackathons: [
     {
       hackathonId: 1,
@@ -97,7 +132,6 @@ export const seedDatabase = {
       corSecundaria: "#C68FE6",
       corFundo: "#170A36",
       logo: "/src/assets/cards-start.svg",
-      participantes: "128 pessoas já entraram",
       companyId: "c-ifood",
       storedStatus: "Scheduled",
       slug: "rota-inteligente-de-entregas",
@@ -124,7 +158,6 @@ export const seedDatabase = {
       corSecundaria: "#FFEA00",
       corFundo: "#22114D",
       logo: "/src/assets/cards-prizes.svg",
-      participantes: "86 pessoas já entraram",
       companyId: "c-ifood",
       storedStatus: "Scheduled",
       slug: "cardapio-que-se-adapta",
@@ -151,7 +184,6 @@ export const seedDatabase = {
       corSecundaria: "#FFEA00",
       corFundo: "#170A36",
       logo: "/src/assets/cards-ranking.svg",
-      participantes: "210 pessoas já entraram",
       companyId: "c-nubank",
       storedStatus: "Scheduled",
       slug: "limite-em-tempo-real",
@@ -178,7 +210,6 @@ export const seedDatabase = {
       corSecundaria: "#C68FE6",
       corFundo: "#0B051B",
       logo: "/src/assets/cards-reputation.svg",
-      participantes: "64 pessoas já entraram",
       companyId: "c-nubank",
       storedStatus: "Scheduled",
       slug: "app-que-cabe-no-bolso",
