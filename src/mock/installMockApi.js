@@ -20,12 +20,34 @@ function loadDatabase() {
   try {
     const database = JSON.parse(saved);
     // bancos salvos antes das empresas/funcionários ganham as listas novas do seed
+    const hadSubmissions = database.submissions !== undefined;
     for (const key of [
       "companies", "memberships", "invitations", "nextInvitationId",
       "teams", "participations", "teamInvitations", "teamJoinRequests",
       "nextTeamId", "nextParticipationId", "nextTeamInvitationId", "nextTeamJoinRequestId",
+      "submissions", "submissionVersions", "nextSubmissionId", "nextSubmissionVersionId",
     ]) {
       if (database[key] === undefined) database[key] = structuredClone(seedDatabase[key]);
+    }
+    // bancos de antes das entregas ganham a equipe "Turma do Bit" e a referência do Hackathon 1 do seed
+    if (!hadSubmissions) {
+      for (const team of seedDatabase.teams) {
+        if (!database.teams.some((item) => item.teamId === team.teamId)) database.teams.push(structuredClone(team));
+      }
+      for (const participation of seedDatabase.participations) {
+        if (!database.participations.some((item) => item.id === participation.id)) {
+          database.participations.push(structuredClone(participation));
+        }
+      }
+      for (const hackathon of seedDatabase.hackathons) {
+        const saved = database.hackathons.find((item) => item.hackathonId === hackathon.hackathonId);
+        if (saved && hackathon.referenceCode && saved.referenceCode === undefined) {
+          saved.referenceLanguage = hackathon.referenceLanguage;
+          saved.referenceCode = hackathon.referenceCode;
+        }
+      }
+      database.nextTeamId = Math.max(database.nextTeamId, seedDatabase.nextTeamId);
+      database.nextParticipationId = Math.max(database.nextParticipationId, seedDatabase.nextParticipationId);
     }
     // Hackathons salvos antes do ciclo de vida (sem storedStatus) são trocados pelos do seed
     if (database.hackathons?.some((item) => item.storedStatus === undefined)) {
@@ -308,8 +330,10 @@ function phaseOf(hackathon, now = new Date()) {
 function toHackathonResponse(database, hackathon) {
   const phase = phaseOf(hackathon);
   const company = database.companies.find((item) => item.companyId === hackathon.companyId);
+  // a solução de referência nunca sai na resposta pública
+  const { referenceLanguage: _referenceLanguage, referenceCode: _referenceCode, ...publicFields } = hackathon;
   return {
-    ...hackathon,
+    ...publicFields,
     empresa: company?.name || "",
     premiacao: hackathon.premiacao ?? 0,
     status: phase === "Published" || phase === "Active",
@@ -363,6 +387,11 @@ function validateVisual(body) {
   const colors = [body.corPrincipal, body.corSecundaria, body.corFundo];
   if (colors.some((color) => color && !/^#[0-9A-Fa-f]{6}$/.test(color))) {
     return "As cores devem estar no formato #RRGGBB.";
+  }
+  // solução de referência segue as regras do código entregue
+  if (body.SolucaoReferencia?.trim()) {
+    const referenceError = validateCode(body.LinguagemReferencia, body.SolucaoReferencia);
+    if (referenceError) return referenceError;
   }
   if (!body.Logo) return null;
   if (body.Logo.length > MAX_LOGO_LENGTH) return "O logo deve ter no máximo 2 MB.";
@@ -440,6 +469,169 @@ function applyVisual(hackathon, body) {
     corSecundaria: body.corSecundaria || null,
     corFundo: body.corFundo || null,
     logo: body.Logo || "",
+    // a referência só a empresa vê, então muda mesmo depois de publicado
+  });
+  // campo ausente mantém a referência; texto vazio apaga (mesma regra da API)
+  if (body.SolucaoReferencia === undefined || body.SolucaoReferencia === null) return;
+  Object.assign(hackathon, {
+    referenceCode: body.SolucaoReferencia.trim() ? body.SolucaoReferencia : null,
+    referenceLanguage: body.SolucaoReferencia.trim() ? body.LinguagemReferencia || null : null,
+  });
+}
+
+const LANGUAGES = ["JavaScript", "Python", "C#", "Java", "SQL", "Outra"];
+const MAX_CODE_LENGTH = 100 * 1024;
+
+// mesmas regras do SubmissionService.ValidateCode da API
+function validateCode(language, code) {
+  if (!LANGUAGES.includes(language)) return "Escolha uma linguagem.";
+  if (!code?.trim()) return "Envie algum código.";
+  if (code.length > MAX_CODE_LENGTH) return "O código deve ter no máximo 100 KB.";
+  return null;
+}
+
+function toVersion(database, version, current) {
+  return {
+    versao: version.version,
+    linguagem: version.language,
+    nomeArquivo: version.fileName,
+    enviadoPor: displayName(database, version.submittedBy),
+    enviadoEm: version.submittedAt,
+    vale: version.version === current,
+  };
+}
+
+function toCode(version) {
+  return version
+    ? { versao: version.version, linguagem: version.language, nomeArquivo: version.fileName, codigo: version.code }
+    : null;
+}
+
+function versionsOf(database, submission) {
+  return database.submissionVersions
+    .filter((item) => item.submissionId === submission.submissionId)
+    .sort((a, b) => b.version - a.version);
+}
+
+// mesmas regras do SubmissionService da API
+function handleSubmissions(path, method, body, database, user) {
+  if (!user) return json({ message: "Não autenticado" }, 401);
+  const match = path.match(/^\/api\/Hackathons\/([^/]+)\/(entrega|entregas|referencia)(?:\/([^/]+))?(?:\/versoes\/(\d+))?$/);
+  if (!match) return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  const [, hackathonId, section, extra, versionText] = match;
+  const hackathon = database.hackathons.find((item) => String(item.hackathonId) === hackathonId);
+  const phase = hackathon ? phaseOf(hackathon) : "Draft";
+
+  if (section === "entrega") {
+    if (!hackathon || phase === "Draft" || phase === "Cancelled") return problem(HACKATHON_NOT_FOUND, 404);
+    const participation = activeParticipations(database, hackathon.hackathonId).find((item) => item.accountId === user.id);
+    if (!participation) return problem("Você não está inscrito neste Hackathon.", 403);
+    const findOwn = () =>
+      database.submissions.find((item) =>
+        participation.teamId ? item.teamId === participation.teamId : item.participationId === participation.id,
+      );
+    let submission = findOwn();
+
+    if (method === "GET" && versionText) {
+      const version = submission && versionsOf(database, submission).find((item) => item.version === Number(versionText));
+      return version ? json(toCode(version)) : problem("Versão não encontrada.", 404);
+    }
+
+    if (method === "GET" && !extra && !versionText) {
+      const versions = submission ? versionsOf(database, submission) : [];
+      const team = participation.teamId && database.teams.find((item) => item.teamId === participation.teamId);
+      return json({
+        aberta: phase === "Active",
+        dataInicio: hackathon.dataInicio,
+        dataFinal: hackathon.dataFinal,
+        equipe: team ? team.nome : null,
+        versoes: versions.map((item) => toVersion(database, item, submission.currentVersion)),
+        atual: toCode(versions.find((item) => item.version === submission?.currentVersion)),
+      });
+    }
+
+    if (method === "POST" && !extra) {
+      if (phase !== "Active") return problem("As submissões deste Hackathon estão fechadas.", 409);
+      const error = validateCode(body?.linguagem, body?.codigo);
+      if (error) return problem(error, 400);
+      if (!submission) {
+        submission = {
+          submissionId: `s-${database.nextSubmissionId++}`,
+          hackathonId: hackathon.hackathonId,
+          teamId: participation.teamId,
+          participationId: participation.teamId ? null : participation.id,
+          currentVersion: 0,
+        };
+        database.submissions.push(submission);
+      }
+      const version = {
+        id: `sv-${database.nextSubmissionVersionId++}`,
+        submissionId: submission.submissionId,
+        version: submission.currentVersion + 1,
+        language: body.linguagem,
+        fileName: body.nomeArquivo?.trim() ? body.nomeArquivo.trim().slice(0, 255) : null,
+        code: body.codigo,
+        submittedBy: user.id,
+        submittedAt: new Date().toISOString(),
+      };
+      database.submissionVersions.push(version);
+      submission.currentVersion = version.version;
+      saveDatabase(database);
+      return json(toCode(version), 201);
+    }
+  }
+
+  // visão da empresa: conta principal ou funcionário da empresa dona
+  if (method !== "GET") return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  const access = managedCompany(database, user);
+  if (!access) return problem("Apenas empresas e seus funcionários podem gerenciar Hackathons.", 403);
+  if (!hackathon || hackathon.companyId !== access.companyId) return problem(HACKATHON_NOT_FOUND, 404);
+
+  if (section === "referencia") {
+    return json({ linguagem: hackathon.referenceLanguage || null, codigo: hackathon.referenceCode || null });
+  }
+
+  const submissions = database.submissions.filter((item) => String(item.hackathonId) === hackathonId);
+  if (!extra) {
+    const active = activeParticipations(database, hackathon.hackathonId);
+    const rows =
+      hackathon.formato === "Equipe"
+        ? database.teams
+            .filter((team) => String(team.hackathonId) === hackathonId && active.some((item) => item.teamId === team.teamId))
+            .map((team) => ({ nome: team.nome, submission: submissions.find((item) => item.teamId === team.teamId) }))
+        : active.map((item) => ({
+            nome: displayName(database, item.accountId),
+            submission: submissions.find((submission) => submission.participationId === item.id),
+          }));
+    return json(
+      rows
+        .map(({ nome, submission }) => {
+          const last = submission && versionsOf(database, submission)[0];
+          return {
+            submissionId: submission?.submissionId ?? null,
+            nome,
+            versaoAtual: submission?.currentVersion ?? null,
+            enviadoEm: last?.submittedAt ?? null,
+          };
+        })
+        .sort((a, b) => a.nome.localeCompare(b.nome)),
+    );
+  }
+
+  const submission = submissions.find((item) => item.submissionId === extra);
+  if (!submission) return problem(versionText ? "Versão não encontrada." : "Entrega não encontrada.", 404);
+  const versions = versionsOf(database, submission);
+  if (versionText) {
+    const version = versions.find((item) => item.version === Number(versionText));
+    return version ? json(toCode(version)) : problem("Versão não encontrada.", 404);
+  }
+  const team = submission.teamId && database.teams.find((item) => item.teamId === submission.teamId);
+  const participation = submission.participationId && database.participations.find((item) => item.id === submission.participationId);
+  return json({
+    submissionId: submission.submissionId,
+    nome: team ? team.nome : displayName(database, participation?.accountId),
+    versoes: versions.map((item) => toVersion(database, item, submission.currentVersion)),
+    atual: toCode(versions.find((item) => item.version === submission.currentVersion)),
   });
 }
 
@@ -965,6 +1157,9 @@ function handle(path, method, body, token) {
   const currentUser = database.users.find((item) => `mock-${item.id}` === token);
   if (path.startsWith("/api/Companies")) {
     return handleCompanies(path, method, body, database, currentUser);
+  }
+  if (/^\/api\/Hackathons\/[^/]+\/(entrega|entregas|referencia)(\/|$)/.test(path)) {
+    return handleSubmissions(path, method, body, database, currentUser);
   }
   if (
     path.startsWith("/api/Teams") ||

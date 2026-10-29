@@ -23,16 +23,24 @@ export const MOCK_ACCOUNTS = [
     role: "participante",
     label: "participante Bruno",
   },
+  {
+    email: "carla@dampcode.dev",
+    password: "123456",
+    role: "participante",
+    label: "participante Carla",
+  },
 ];
 
 export const seedDatabase = {
-  nextUserId: 5,
+  nextUserId: 6,
   nextInvitationId: 1,
   nextHackathonId: 6,
-  nextTeamId: 2,
-  nextParticipationId: 3,
+  nextTeamId: 3,
+  nextParticipationId: 5,
   nextTeamInvitationId: 1,
   nextTeamJoinRequestId: 1,
+  nextSubmissionId: 2,
+  nextSubmissionVersionId: 3,
   users: [
     {
       id: 1,
@@ -66,6 +74,14 @@ export const seedDatabase = {
       role: "participante",
       tecnologias: ["Java", "Spring"],
     },
+    {
+      id: 5,
+      name: "Carla Dias",
+      email: "carla@dampcode.dev",
+      password: "123456",
+      role: "participante",
+      tecnologias: ["Python", "SQL"],
+    },
   ],
   // Empresas e vínculos espelham as tabelas companies / company_memberships / company_invitations da API.
   companies: [
@@ -94,6 +110,14 @@ export const seedDatabase = {
       aberta: true,
       criadoPor: 4,
     },
+    // Ana e Carla entregando código no Hackathon 1 (iFood, fase Ativo)
+    {
+      teamId: "t-2",
+      hackathonId: 1,
+      nome: "Turma do Bit",
+      aberta: false,
+      criadoPor: 1,
+    },
   ],
   participations: [
     {
@@ -112,9 +136,57 @@ export const seedDatabase = {
       joinedAt: "2026-10-27T12:00:00.000Z",
       leftAt: null,
     },
+    {
+      id: "p-3",
+      hackathonId: 1,
+      accountId: 1,
+      teamId: "t-2",
+      joinedAt: "2026-09-25T12:00:00.000Z",
+      leftAt: null,
+    },
+    {
+      id: "p-4",
+      hackathonId: 1,
+      accountId: 5,
+      teamId: "t-2",
+      joinedAt: "2026-09-26T12:00:00.000Z",
+      leftAt: null,
+    },
   ],
   teamInvitations: [],
   teamJoinRequests: [],
+  // Entregas espelham as tabelas submissions / submission_versions; o código fica junto (na API ele vai para o MongoDB).
+  submissions: [
+    {
+      submissionId: "s-1",
+      hackathonId: 1,
+      teamId: "t-2",
+      participationId: null,
+      currentVersion: 2,
+    },
+  ],
+  submissionVersions: [
+    {
+      id: "sv-1",
+      submissionId: "s-1",
+      version: 1,
+      language: "Python",
+      fileName: null,
+      code: "def melhor_rota(pedidos):\n    return sorted(pedidos, key=lambda p: p['distancia'])\n",
+      submittedBy: 1,
+      submittedAt: "2026-10-05T14:00:00.000Z",
+    },
+    {
+      id: "sv-2",
+      submissionId: "s-1",
+      version: 2,
+      language: "Python",
+      fileName: "rota.py",
+      code: "def melhor_rota(pedidos, transito):\n    peso = lambda p: p['distancia'] * transito.get(p['bairro'], 1)\n    return sorted(pedidos, key=peso)\n",
+      submittedBy: 5,
+      submittedAt: "2026-10-12T20:30:00.000Z",
+    },
+  ],
   hackathons: [
     {
       hackathonId: 1,
@@ -141,6 +213,8 @@ export const seedDatabase = {
       dataCriacao: "2026-09-15T12:00:00.000Z",
       dataInicio: "2026-10-01T12:00:00.000Z",
       dataFimAvaliacao: "2026-12-05T12:00:00.000Z",
+      referenceLanguage: "Python",
+      referenceCode: "def melhor_rota(pedidos, transito):\n    # pesa a distância pelo trânsito de cada bairro\n    return otimizar(pedidos, transito)\n",
     },
     {
       hackathonId: 2,

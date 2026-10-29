@@ -195,6 +195,15 @@ const ManageChallenges = () => {
                       </button>
                     )}
 
+                    {["Ativo", "Em avaliação", "Encerrado"].includes(hackathon.fase) && (
+                      <button
+                        className={`${actionClass} bg-highlight/20 text-highlight hover:bg-highlight hover:text-surface`}
+                        onClick={() => navigate(`/dashboard/Empresa/entregas/${encodeURIComponent(hackathon.hackathonId)}`)}
+                      >
+                        Entregas
+                      </button>
+                    )}
+
                     {["Publicado", "Ativo", "Em avaliação"].includes(hackathon.fase) && (
                       <button
                         className={`${actionClass} bg-danger/20 text-danger hover:bg-danger hover:text-white`}
