@@ -350,6 +350,19 @@ function validateDraft(body) {
   if (!body.Area?.trim()) missing.push("área");
   if (!parseFormato(body.Formato)) missing.push("formato");
   if (missing.length) return `Preencha: ${missing.join(", ")}.`;
+  const limits = [
+    ["título", body.Titulo, 200],
+    ["descrição", body.Descricao, 4000],
+    ["área", body.Area, 100],
+    ["método de avaliação", body.Metodo, 100],
+    ["tecnologias", (body.Tecnologias || []).reduce((longest, name) => (name.length > longest.length ? name : longest), ""), 100],
+  ];
+  const tooLong = limits.find(([, value, limit]) => value?.trim().length > limit);
+  if (tooLong) return `O campo ${tooLong[0]} deve ter no máximo ${tooLong[2]} caracteres.`;
+  if (body.Premiacao !== null && body.Premiacao !== undefined && body.Premiacao !== "") {
+    const premiacao = Number(body.Premiacao);
+    if (!(premiacao >= 0 && premiacao <= 9999999999.99)) return "A premiação deve ficar entre 0 e 9.999.999.999,99.";
+  }
   const visualError = validateVisual(body);
   if (visualError) return visualError;
   const [inicio, fim, avaliacao] = [body.DataInicio, body.DataFinal, body.DataFimAvaliacao].map(toIsoOrNull);
@@ -371,7 +384,12 @@ function missingCrucialFields(hackathon) {
 }
 
 function applyContent(hackathon, body) {
-  const premiacao = body.Premiacao === null || body.Premiacao === undefined || body.Premiacao === "" ? null : Number(body.Premiacao);
+  const tipoPremiacao = parseTipoPremiacao(body.TipoPremiacao);
+  // valor em dinheiro não vale para premiação por entrevista
+  const premiacao =
+    tipoPremiacao === "Entrevista" || body.Premiacao === null || body.Premiacao === undefined || body.Premiacao === ""
+      ? null
+      : Number(body.Premiacao);
   Object.assign(hackathon, {
     titulo: body.Titulo.trim(),
     descricao: body.Descricao.trim(),
@@ -380,7 +398,7 @@ function applyContent(hackathon, body) {
     metodo: body.Metodo || "",
     premiacao,
     formato: parseFormato(body.Formato),
-    tipoPremiacao: parseTipoPremiacao(body.TipoPremiacao),
+    tipoPremiacao,
     ranking: parseRanking(body.Ranking),
     dataInicio: toIsoOrNull(body.DataInicio),
     dataFinal: toIsoOrNull(body.DataFinal),
@@ -467,7 +485,9 @@ function handleHackathons(path, method, body, database, user) {
 
   if (method === "PUT" && !action) {
     if (phase === "Closed" || phase === "Cancelled") return problem(FINISHED, 409);
-    const error = phase === "Draft" ? validateDraft(body || {}) : validateVisual(body || {});
+    // os logos do seed são caminhos de SVG: reenviar o mesmo logo não deve travar a edição
+    const checked = body?.Logo && body.Logo === hackathon.logo ? { ...body, Logo: "" } : body || {};
+    const error = phase === "Draft" ? validateDraft(checked) : validateVisual(checked);
     if (error) return problem(error, 400);
     // depois de publicado, só cores e logo mudam
     if (phase === "Draft") applyContent(hackathon, body);

@@ -15,7 +15,7 @@ function formatDeadline(value) {
   if (!value) return "Sem prazo";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Sem prazo";
-  return date.toLocaleDateString("pt-BR", { timeZone: "UTC" });
+  return date.toLocaleDateString("pt-BR");
 }
 
 function isActive(status) {
