@@ -38,6 +38,10 @@ const [hackathon, setHackathon] = useState({
   DataInicio: "",
   DataFinal: "", // fim das submissões
   DataFimAvaliacao: "",
+
+  // solução de referência: só a empresa vê, para comparar com as entregas
+  LinguagemReferencia: "",
+  SolucaoReferencia: "",
 })
 
   // fase vem da API; sem id ainda é um rascunho novo
@@ -97,6 +101,19 @@ const [hackathon, setHackathon] = useState({
           DataFinal: toDateTimeLocal(data.dataFinal),
           DataFimAvaliacao: toDateTimeLocal(data.dataFimAvaliacao),
         }))
+
+        // a solução de referência não vem na resposta pública; só quem gerencia a empresa lê
+        const referenceResponse = await fetch(`https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}/referencia`, {
+          headers: { Authorization: `Bearer ${user?.token}` },
+        })
+        if (referenceResponse.ok) {
+          const reference = await referenceResponse.json()
+          setHackathon((prev) => ({
+            ...prev,
+            LinguagemReferencia: reference.linguagem || "",
+            SolucaoReferencia: reference.codigo || "",
+          }))
+        }
       } catch (error) {
         console.error(error)
       }

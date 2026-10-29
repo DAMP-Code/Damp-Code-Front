@@ -8,6 +8,7 @@ import AccountTypeSelection from "./Pages/AccountTypeSelection";
 import CreateCompany from "./Pages/CreateCompany";
 import CompanyDetails from "./Pages/CompanyDetails";
 import CompanyDashboard from "./Pages/company/CompanyDashboard";
+import SubmissionsReview from "./Pages/company/SubmissionsReview";
 import CreateHackathon from "./Pages/company/CreateHackathon";
 import ParticipantDashboard from "./Pages/participant/ParticipantDashboard";
 import HackathonPage from "./Pages/HackathonPage";
@@ -26,6 +27,7 @@ const App = () => {
       <Route path="/escolha" element={<AccountTypeSelection />}></Route>
       <Route path="/cadastroEmpresa/detalhes" element={<CompanyDetails />} />
       <Route path="/dashboard/Empresa" element={<CompanyDashboard />}></Route>
+      <Route path="/dashboard/Empresa/entregas/:id" element={<SubmissionsReview />}></Route>
       <Route
         path="/dashboard/participante"
         element={<ParticipantDashboard />}
