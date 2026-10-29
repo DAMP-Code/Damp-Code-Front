@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/app-components/utilities/AuthContext";
 import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
@@ -25,13 +26,23 @@ const HackathonPage = () => {
 
   const { id } = useParams();
 
+  const { user } = useContext(AuthContext);
+
   const [hackathon, setHackathon] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     async function loadHackathon() {
+      // com token, a empresa dona também consegue ver o próprio rascunho
       const response = await fetch(
-        `https://localhost:7092/api/Hackathons/${id}`,
+        `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}`,
+        user?.token ? { headers: { Authorization: `Bearer ${user.token}` } } : undefined,
       );
+
+      if (!response.ok) {
+        setNotFound(true);
+        return;
+      }
 
       const data = await response.json();
 
@@ -39,14 +50,18 @@ const HackathonPage = () => {
     }
 
     loadHackathon();
-  }, [id]);
+  }, [id, user?.token]);
+
+  function formatDate(date) {
+    return date ? new Date(date).toLocaleDateString("pt-BR") : "—";
+  }
 
   if (!hackathon) {
     return (
       <div className="min-h-screen bg-surface">
         <Header />
         <p className="mx-auto flex min-h-[50vh] w-11/12 max-w-7xl items-center text-lg text-content-secondary">
-          Carregando o hackathon.
+          {notFound ? "Hackathon não encontrado." : "Carregando o hackathon."}
         </p>
         <Footer />
       </div>
@@ -126,9 +141,20 @@ const HackathonPage = () => {
           <b> R$ {hackathon.premiacao}</b>
         </p>
 
-        <p>
-          Termina em {new Date(hackathon.dataFinal).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
-        </p>
+        {hackathon.fase === "Publicado" ? (
+          <p>
+            <b>Inscrições abertas</b> · começa em{" "}
+            {new Date(hackathon.dataInicio).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+          </p>
+        ) : (
+          hackathon.fase && <p>{hackathon.fase}</p>
+        )}
+
+        <p>Início: {formatDate(hackathon.dataInicio)}</p>
+
+        <p>Fim das submissões: {formatDate(hackathon.dataFinal)}</p>
+
+        <p>Fim da avaliação: {formatDate(hackathon.dataFimAvaliacao)}</p>
       </div>
 
       {/* CONTEÚDO */}

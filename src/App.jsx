@@ -29,7 +29,8 @@ const App = () => {
         path="/dashboard/participante"
         element={<ParticipantDashboard />}
       ></Route>
-      <Route path="/cadastroHackaton" element={<CreateHackathon />}></Route>
+      <Route path="/cadastroHackaton" element={<CreateHackathon key="novo" />}></Route>
+      <Route path="/cadastroHackaton/:id" element={<CreateHackathon key="editar" />}></Route>
       <Route path="/hackathon/:id" element={<HackathonPage />} />
       <Route path="/dashboard/ranking" element={<Ranking />} />
     </Routes>
