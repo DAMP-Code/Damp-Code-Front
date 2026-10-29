@@ -253,6 +253,17 @@ function handleCompanies(path, method, body, database, user) {
     if (registeredInCompany) {
       return problem("Você está inscrito em um Hackathon desta empresa. Saia da inscrição antes de aceitar.", 409);
     }
+    // funcionário não participa dos Hackathons da empresa: convites e pedidos de equipe neles são cancelados
+    const companyTeamIds = database.teams
+      .filter((team) => database.hackathons.some((h) => String(h.hackathonId) === String(team.hackathonId) && h.companyId === invitation.companyId))
+      .map((team) => team.teamId);
+    for (const item of [...database.teamInvitations, ...database.teamJoinRequests]) {
+      const mine = item.accountId === user.id || item.email?.toLowerCase() === user.email.toLowerCase();
+      if (mine && item.status === "Pending" && companyTeamIds.includes(item.teamId)) {
+        item.status = "Cancelled";
+        item.respondedAt = new Date().toISOString();
+      }
+    }
     database.memberships.push({
       companyId: invitation.companyId,
       accountId: user.id,

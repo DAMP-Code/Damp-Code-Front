@@ -200,9 +200,14 @@ const MyParticipations = () => {
               <li key={participation.hackathonId} className="border-t border-border pt-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span>
-                    <Link to={`/hackathon/${encodeURIComponent(participation.hackathonId)}`} className="font-medium hover:underline">
-                      {participation.titulo}
-                    </Link>
+                    {/* Hackathon cancelado sai do público: sem link para não cair em "não encontrado" */}
+                    {participation.fase === "Cancelado" ? (
+                      <span className="font-medium">{participation.titulo}</span>
+                    ) : (
+                      <Link to={`/hackathon/${encodeURIComponent(participation.hackathonId)}`} className="font-medium hover:underline">
+                        {participation.titulo}
+                      </Link>
+                    )}
                     <span className="text-content-secondary">
                       {" "}· {participation.empresa} · {participation.fase}
                       {participation.dataInicio && ` · começa em ${new Date(participation.dataInicio).toLocaleDateString("pt-BR")}`}
