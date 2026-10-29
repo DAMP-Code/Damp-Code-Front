@@ -68,7 +68,7 @@ const [hackathon, setHackathon] = useState({
 
     async function loadHackathon() {
       try {
-        const response = await fetch(`https://localhost:7092/api/Hackathons/${id}`, {
+        const response = await fetch(`https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}`, {
           headers: { Authorization: `Bearer ${user?.token}` },
         })
         if (!response.ok) {
@@ -141,7 +141,7 @@ const [hackathon, setHackathon] = useState({
 
     const response = await fetch(
       id
-        ? `https://localhost:7092/api/Hackathons/${id}`
+        ? `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}`
         : "https://localhost:7092/api/Hackathons/register/Hackathon",
       {
         method: id ? "PUT" : "POST",
@@ -173,7 +173,7 @@ const [hackathon, setHackathon] = useState({
         setMessage("Alterações salvas.");
       } else {
         setMessage("Rascunho salvo.");
-        navigate(`/cadastroHackaton/${data.hackathonId}`);
+        navigate(`/cadastroHackaton/${encodeURIComponent(data.hackathonId)}`);
       }
     } catch (error) {
       console.error(error);
@@ -191,7 +191,7 @@ const [hackathon, setHackathon] = useState({
       const saved = await saveHackathon();
 
       const response = await fetch(
-        `https://localhost:7092/api/Hackathons/${saved.hackathonId}/publicar`,
+        `https://localhost:7092/api/Hackathons/${encodeURIComponent(saved.hackathonId)}/publicar`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${user?.token}` },
@@ -199,7 +199,7 @@ const [hackathon, setHackathon] = useState({
       );
       const data = await response.json().catch(() => null);
       if (!response.ok) {
-        if (!id) navigate(`/cadastroHackaton/${saved.hackathonId}`);
+        if (!id) navigate(`/cadastroHackaton/${encodeURIComponent(saved.hackathonId)}`);
         throw new Error(data?.detail || "Erro ao publicar Hackathon");
       }
 

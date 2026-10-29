@@ -27,9 +27,6 @@ const CompanyDashboard = () => {
     loadCompany()
   }, [user?.token])
 
-  // funcionário ainda não gerencia Hackathons por aqui: as telas atuais identificam a empresa pelo user.name
-  const isEmployee = companyAccess?.isPrimaryAccount === false
-
   return (
         <div className='bg-surface w-full min-h-screen'>
         <Header />
@@ -39,14 +36,10 @@ const CompanyDashboard = () => {
                 Sua empresa ainda não foi verificada. Você pode criar rascunhos, mas só poderá publicar depois da verificação.
               </div>
             )}
-            {!isEmployee && (
-              <>
-                {/* 🔥 Criar Hackathon */}
-                <CreateChallenge />
-                {/* 📂 Gerenciar Hackathons */}
-                <ManageChallenges />
-              </>
-            )}
+            {/* 🔥 Criar Hackathon */}
+            <CreateChallenge />
+            {/* 📂 Gerenciar Hackathons */}
+            <ManageChallenges />
             {/* 👥 Funcionários */}
             <ManageEmployees companyAccess={companyAccess} />
 
