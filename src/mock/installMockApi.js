@@ -470,8 +470,12 @@ function applyVisual(hackathon, body) {
     corFundo: body.corFundo || null,
     logo: body.Logo || "",
     // a referência só a empresa vê, então muda mesmo depois de publicado
-    referenceCode: body.SolucaoReferencia?.trim() ? body.SolucaoReferencia : null,
-    referenceLanguage: body.SolucaoReferencia?.trim() ? body.LinguagemReferencia || null : null,
+  });
+  // campo ausente mantém a referência; texto vazio apaga (mesma regra da API)
+  if (body.SolucaoReferencia === undefined || body.SolucaoReferencia === null) return;
+  Object.assign(hackathon, {
+    referenceCode: body.SolucaoReferencia.trim() ? body.SolucaoReferencia : null,
+    referenceLanguage: body.SolucaoReferencia.trim() ? body.LinguagemReferencia || null : null,
   });
 }
 

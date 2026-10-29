@@ -46,6 +46,8 @@ const [hackathon, setHackathon] = useState({
 
   // fase vem da API; sem id ainda é um rascunho novo
   const [fase, setFase] = useState(id ? null : "Rascunho");
+  // só envia a referência se ela foi carregada; se a leitura falhar, salvar não apaga a referência guardada
+  const [referenceLoaded, setReferenceLoaded] = useState(!id);
   const [companyAccess, setCompanyAccess] = useState(null);
   const [message, setMessage] = useState("");
 
@@ -107,6 +109,7 @@ const [hackathon, setHackathon] = useState({
           headers: { Authorization: `Bearer ${user?.token}` },
         })
         if (referenceResponse.ok) {
+          setReferenceLoaded(true)
           const reference = await referenceResponse.json()
           setHackathon((prev) => ({
             ...prev,
@@ -154,6 +157,8 @@ const [hackathon, setHackathon] = useState({
       DataInicio: toIsoDate(hackathon.DataInicio),
       DataFinal: toIsoDate(hackathon.DataFinal),
       DataFimAvaliacao: toIsoDate(hackathon.DataFimAvaliacao),
+      LinguagemReferencia: referenceLoaded ? hackathon.LinguagemReferencia : undefined,
+      SolucaoReferencia: referenceLoaded ? hackathon.SolucaoReferencia : undefined,
     }
 
     const response = await fetch(
