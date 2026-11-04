@@ -157,7 +157,8 @@ const [hackathon, setHackathon] = useState({
       logoFile: undefined, // o arquivo já virou data URL em Logo
       Empresa: undefined,
       // sempre envia a lista (chaves em minúsculo, como o JSON da API): sem ela a API recria só o prêmio do 1º lugar
-      Premios: hackathon.Premios.map((prize) => ({
+      // só as linhas com tipo escolhido: a linha vazia do formulário novo não é um prêmio ainda
+      Premios: hackathon.Premios.filter((prize) => prize.Tipo).map((prize) => ({
         posicao: prize.Posicao,
         tipo: prize.Tipo,
         valor: prize.Tipo === "Dinheiro" && prize.Valor !== "" ? Number(prize.Valor) : null,

@@ -109,7 +109,10 @@ const EvaluationRanking = () => {
           : `As posições ${empty.join(", ")} ficaram sem vencedor. Publicar assim mesmo?`;
       if (!window.confirm(text)) return;
     }
-    if (!window.confirm("Publicar o resultado encerra o Hackathon e não dá para mudar nota, comentário ou vencedores depois. Continuar?")) return;
+    const confirmText = hackathon?.fase === "Em avaliação"
+      ? "Publicar o resultado encerra o Hackathon e não dá para mudar nota, comentário ou vencedores depois. Continuar?"
+      : "Depois de publicado, o resultado não pode mais ser alterado (nota, comentário ou vencedores). Continuar?";
+    if (!window.confirm(confirmText)) return;
 
     setBusy(true);
     setError("");

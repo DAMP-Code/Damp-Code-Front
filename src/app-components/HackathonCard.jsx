@@ -86,7 +86,7 @@ const HackathonCard = ({ hackathon }) => {
                 : formatPrize(hackathon.premiacao)}
             </p>
             {prizes.length > 1 && (
-              <p className="text-xs text-content-secondary">+{prizes.length - 1} prêmios</p>
+              <p className="text-xs text-content-secondary">+{prizes.length - 1} {prizes.length === 2 ? "prêmio" : "prêmios"}</p>
             )}
           </div>
           <button

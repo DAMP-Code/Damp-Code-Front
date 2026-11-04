@@ -718,10 +718,10 @@ function stripComments(source, language) {
 }
 
 function tokenize(source, language) {
-  const tokens = stripComments(source, language).match(/[A-Za-z_][A-Za-z0-9_]*|\d+(?:\.\d+)?|\S/g) || [];
+  const tokens = stripComments(source, language).match(/[\p{L}_][\p{L}\p{N}_]*|\d+(?:\.\d+)?|\S/gu) || [];
   return tokens.map((token) => {
     if (/^\d/.test(token)) return "NUM";
-    if (/^[A-Za-z_]/.test(token)) return RESERVED_WORDS.has(token.toLowerCase()) ? token.toUpperCase() : "ID";
+    if (/^[\p{L}_]/u.test(token)) return RESERVED_WORDS.has(token.toLowerCase()) ? token.toUpperCase() : "ID";
     return token;
   });
 }
@@ -945,9 +945,11 @@ function toResult(database, hackathon, participation) {
       item.hackathonId === hackathon.hackathonId &&
       (participation.teamId ? item.teamId === participation.teamId : item.participationId === participation.id),
   );
-  const total = database.submissions.filter(
+  const ranked = database.submissions.filter(
     (item) => item.hackathonId === hackathon.hackathonId && item.finalPosition != null,
-  ).length;
+  );
+  // o total nunca fica abaixo da maior posição (prêmios sem vencedor deixam buracos)
+  const total = Math.max(ranked.length, ...ranked.map((item) => item.finalPosition));
   const prize = submission?.prizePosition
     ? (hackathon.premios || []).find((item) => item.posicao === submission.prizePosition)
     : null;

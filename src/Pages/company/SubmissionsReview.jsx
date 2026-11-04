@@ -84,6 +84,9 @@ const SubmissionsReview = () => {
   useEffect(() => {
     if (!selectedId) return;
     let cancelled = false;
+    // limpa a nota da entrega anterior até o detalhe novo chegar
+    setScore("");
+    setComment("");
 
     async function loadDetail() {
       try {
@@ -125,6 +128,12 @@ const SubmissionsReview = () => {
 
   async function saveScore() {
     const savingId = selectedId;
+    const rounded = Math.round(Number(score));
+    if (score === "" || !Number.isFinite(rounded) || rounded < 0 || rounded > 100) {
+      setSaveError("A nota deve ficar entre 0 e 100.");
+      setSaved(false);
+      return;
+    }
     setSaving(true);
     setSaveError("");
     setSaved(false);
@@ -132,7 +141,7 @@ const SubmissionsReview = () => {
       const response = await fetch(`${hackathonUrl}/entregas/${encodeURIComponent(selectedId)}/avaliacao`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ nota: score === "" ? null : Number(score), comentario: comment }),
+        body: JSON.stringify({ nota: rounded, comentario: comment }),
       });
       if (!response.ok) {
         const data = await response.json().catch(() => null);
@@ -262,6 +271,9 @@ const SubmissionsReview = () => {
                           Nota (0–100)
                           <input
                             type="number"
+                            min={0}
+                            max={100}
+                            step={1}
                             value={score}
                             onChange={(e) => setScore(e.target.value)}
                             className="rounded-xl border border-brand bg-surface p-2 text-content"
