@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import BackButton from "@/app-components/BackButton";
@@ -29,6 +29,12 @@ const SubmissionsReview = () => {
   const [detail, setDetail] = useState(null);
   const [shown, setShown] = useState(null); // versão mostrada (a que vale ou uma antiga)
   const [error, setError] = useState("");
+  const [notes, setNotes] = useState({}); // nota por entrega, para a lista da esquerda
+  const [score, setScore] = useState("");
+  const [comment, setComment] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saved, setSaved] = useState(false);
 
   const token = user?.token;
   const hackathonUrl = `${API}/${encodeURIComponent(id)}`;
@@ -52,6 +58,13 @@ const SubmissionsReview = () => {
         setEntries(list);
         setSelectedId(list.find((item) => item.submissionId)?.submissionId ?? null);
         if (referenceResponse.ok) setReference(await referenceResponse.json());
+
+        // a lista de notas só vem quando a fase de avaliação permite
+        const evaluationResponse = await fetch(`${hackathonUrl}/avaliacao`, { headers });
+        if (evaluationResponse.ok) {
+          const evaluation = await evaluationResponse.json();
+          setNotes(Object.fromEntries(evaluation.entregas.map((item) => [item.submissionId, item.nota])));
+        }
       } catch (loadError) {
         console.error(loadError);
         setError("Erro ao conectar com o servidor");
@@ -73,6 +86,11 @@ const SubmissionsReview = () => {
         const data = await response.json();
         setDetail(data);
         setShown(data.atual);
+        setScore(String(data.nota ?? data.semelhanca ?? ""));
+        setComment(data.comentario ?? "");
+        setSaveError("");
+        setSaved(false);
+        setNotes((current) => ({ ...current, [data.submissionId ?? selectedId]: data.nota ?? null }));
       } catch (detailError) {
         console.error(detailError);
       }
@@ -93,16 +111,52 @@ const SubmissionsReview = () => {
     }
   }
 
+  async function saveScore() {
+    setSaving(true);
+    setSaveError("");
+    setSaved(false);
+    try {
+      const response = await fetch(`${hackathonUrl}/entregas/${encodeURIComponent(selectedId)}/avaliacao`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ nota: score === "" ? null : Number(score), comentario: comment }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setSaveError(data?.detail || "Não foi possível salvar a nota.");
+        return;
+      }
+      const data = await response.json();
+      setNotes((current) => ({ ...current, [selectedId]: data.nota }));
+      setDetail((current) => ({ ...current, nota: data.nota, comentario: data.comentario }));
+      setSaved(true);
+    } catch (saveFailure) {
+      console.error(saveFailure);
+      setSaveError("Erro ao conectar com o servidor");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const delivered = entries.filter((item) => item.submissionId);
   const missing = entries.filter((item) => !item.submissionId);
   const shownInfo = detail?.versoes.find((item) => item.versao === shown?.versao);
+  const currentInfo = detail?.versoes.find((item) => item.vale);
+  const differentLanguage =
+    Boolean(reference?.linguagem && currentInfo?.linguagem) && currentInfo.linguagem !== reference.linguagem;
+  const hasNote = detail?.nota !== null && detail?.nota !== undefined;
 
   return (
     <div className="min-h-screen bg-surface">
       <Header />
       <section className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-8 text-content sm:px-6 lg:p-8">
         <BackButton />
-        <Title text1={"Entregas"} text2={hackathon ? ` - ${hackathon.titulo}` : ""} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Title text1={"Entregas"} text2={hackathon ? ` - ${hackathon.titulo}` : ""} />
+          <Link to={`/dashboard/Empresa/avaliacao/${encodeURIComponent(id)}`} className="font-medium text-highlight hover:underline">
+            Ver ranking
+          </Link>
+        </div>
 
         {error ? (
           <p className="rounded-xl border border-danger/40 bg-danger/10 px-5 py-3 text-danger">{error}</p>
@@ -124,6 +178,9 @@ const SubmissionsReview = () => {
                       <span className="font-medium">{entry.nome}</span>
                       <span className="block text-sm text-content-secondary">
                         v{entry.versaoAtual} · {formatDateTime(entry.enviadoEm)}
+                      </span>
+                      <span className="block text-sm text-content-secondary">
+                        {notes[entry.submissionId] != null ? `Nota ${notes[entry.submissionId]}` : "Sem nota"}
                       </span>
                     </button>
                   </li>
@@ -174,6 +231,53 @@ const SubmissionsReview = () => {
                   </p>
                 )}
                 {shown ? <pre className={codeClass}>{shown.codigo}</pre> : <p className="text-content-secondary">—</p>}
+
+                {detail && (detail.podeAvaliar || hasNote) && (
+                  <div className="mt-2 flex flex-col gap-3 border-t border-white/10 pt-4">
+                    <p className="text-sm text-content-secondary">
+                      {detail.semelhanca != null ? `Semelhança com a referência: ${detail.semelhanca}%` : "Sem referência"}
+                    </p>
+                    {differentLanguage && (
+                      <p className="text-sm text-highlight">Linguagem diferente da referência</p>
+                    )}
+                    {detail.podeAvaliar ? (
+                      <>
+                        <label className="flex flex-col gap-1 text-sm">
+                          Nota (0–100)
+                          <input
+                            type="number"
+                            value={score}
+                            onChange={(e) => setScore(e.target.value)}
+                            className="rounded-xl border border-brand bg-surface p-2 text-content"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-1 text-sm">
+                          Comentário
+                          <textarea
+                            rows={3}
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="rounded-xl border border-brand bg-surface p-2 text-content"
+                          />
+                        </label>
+                        {saveError && <p className="text-sm text-danger">{saveError}</p>}
+                        {saved && <p className="text-sm text-content-secondary">Nota salva.</p>}
+                        <button
+                          onClick={saveScore}
+                          disabled={saving}
+                          className="self-start rounded-xl bg-highlight px-5 py-2 font-semibold text-surface transition hover:opacity-90 disabled:opacity-60"
+                        >
+                          {saving ? "Salvando..." : "Salvar nota"}
+                        </button>
+                      </>
+                    ) : (
+                      <p className="text-sm">
+                        Nota: <strong>{detail.nota}</strong>
+                        {detail.comentario && <span className="block text-content-secondary">{detail.comentario}</span>}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
