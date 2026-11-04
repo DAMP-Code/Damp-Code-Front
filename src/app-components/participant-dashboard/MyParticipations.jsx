@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../utilities/AuthContext";
+import { prizeLabel } from "../utilities/prizes";
 
 const API = "https://localhost:7092/api";
 
@@ -108,6 +109,33 @@ const TeamCard = ({ participation, send }) => {
           </button>
         </div>
       )}
+    </div>
+  );
+};
+
+// Resultado publicado: posição, nota, prêmio e comentário da empresa.
+const ResultCard = ({ participation }) => {
+  const { resultado, equipe } = participation;
+  const prize = resultado.premio;
+  const subject = equipe ? "Sua equipe" : "Você";
+
+  return (
+    <div className="mt-3 flex flex-col gap-2 rounded-xl border border-highlight/40 bg-surface/40 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-medium">
+          {resultado.posicao == null
+            ? "Sem entrega"
+            : `${subject} ficou em ${resultado.posicao}º de ${resultado.totalClassificados} · Nota ${resultado.nota}`}
+        </span>
+        <span className="rounded-full bg-success/20 px-3 py-1 text-xs font-medium text-success">Resultado publicado</span>
+      </div>
+      {prize && (
+        <p className="text-sm font-medium">
+          🏆 {prize.posicao}º lugar — {prizeLabel(prize)}
+          {prize.tipo !== "Dinheiro" && prize.descricao && ` · ${prize.descricao}`}
+        </p>
+      )}
+      {resultado.comentario && <p className="text-sm text-content-secondary">“{resultado.comentario}”</p>}
     </div>
   );
 };
@@ -235,6 +263,7 @@ const MyParticipations = () => {
                     )}
                   </div>
                 </div>
+                {participation.resultado && <ResultCard participation={participation} />}
                 {participation.equipe && <TeamCard participation={participation} send={send} />}
               </li>
             ))}
