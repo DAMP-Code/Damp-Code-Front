@@ -1,5 +1,5 @@
-import { Link, useParams } from "react-router-dom";
-import React, { useContext, useEffect, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
@@ -20,6 +20,7 @@ const codeClass = "max-h-[560px] min-h-[320px] overflow-auto whitespace-pre roun
 // Comparação manual da empresa: solução de referência ao lado do código entregue.
 const SubmissionsReview = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useContext(AuthContext);
 
   const [hackathon, setHackathon] = useState(null);
@@ -36,6 +37,8 @@ const SubmissionsReview = () => {
   const [saveError, setSaveError] = useState("");
   const [saved, setSaved] = useState(false);
 
+  const selectedIdRef = useRef(null);
+  selectedIdRef.current = selectedId;
   const token = user?.token;
   const hackathonUrl = `${API}/${encodeURIComponent(id)}`;
 
@@ -56,7 +59,10 @@ const SubmissionsReview = () => {
         }
         const list = await entriesResponse.json();
         setEntries(list);
-        setSelectedId(list.find((item) => item.submissionId)?.submissionId ?? null);
+        // ?entrega=<submissionId> abre direto na entrega pedida
+        const wanted = searchParams.get("entrega");
+        const chosen = list.find((item) => item.submissionId && item.submissionId === wanted) ?? list.find((item) => item.submissionId);
+        setSelectedId(chosen?.submissionId ?? null);
         if (referenceResponse.ok) setReference(await referenceResponse.json());
 
         // a lista de notas só vem quando a fase de avaliação permite
@@ -72,10 +78,12 @@ const SubmissionsReview = () => {
     }
 
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hackathonUrl, token]);
 
   useEffect(() => {
     if (!selectedId) return;
+    let cancelled = false;
 
     async function loadDetail() {
       try {
@@ -84,6 +92,7 @@ const SubmissionsReview = () => {
         });
         if (!response.ok) return;
         const data = await response.json();
+        if (cancelled) return; // a entrega selecionada mudou
         setDetail(data);
         setShown(data.atual);
         setScore(String(data.nota ?? data.semelhanca ?? ""));
@@ -97,6 +106,9 @@ const SubmissionsReview = () => {
     }
 
     loadDetail();
+    return () => {
+      cancelled = true;
+    };
   }, [hackathonUrl, selectedId, token]);
 
   async function showVersion(number) {
@@ -112,6 +124,7 @@ const SubmissionsReview = () => {
   }
 
   async function saveScore() {
+    const savingId = selectedId;
     setSaving(true);
     setSaveError("");
     setSaved(false);
@@ -127,9 +140,12 @@ const SubmissionsReview = () => {
         return;
       }
       const data = await response.json();
-      setNotes((current) => ({ ...current, [selectedId]: data.nota }));
-      setDetail((current) => ({ ...current, nota: data.nota, comentario: data.comentario }));
-      setSaved(true);
+      setNotes((current) => ({ ...current, [savingId]: data.nota }));
+      // só mexe no detalhe se ainda é a mesma entrega
+      if (selectedIdRef.current === savingId) {
+        setDetail((current) => ({ ...current, nota: data.nota, comentario: data.comentario }));
+        setSaved(true);
+      }
     } catch (saveFailure) {
       console.error(saveFailure);
       setSaveError("Erro ao conectar com o servidor");
