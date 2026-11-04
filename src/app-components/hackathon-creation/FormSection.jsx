@@ -3,7 +3,7 @@ import Title from "../Title";
 import handleLogoChange from "../utilities/handleLogoChange";
 
 const technologies = ["React", "Node", "Python", "MongoDB", "SQL", "PowerBI"];
-const rankings = ["Top 1", "Top 10", "Top 15", "Top 20", "Top 50", "Top 100"];
+const maxPrizes = 10;
 const referenceLanguages = ["JavaScript", "Python", "C#", "Java", "SQL", "Outra"];
 const methods = [
   {
@@ -54,12 +54,33 @@ const FormSection = ({
   }
 }
 
-function handleRankings(item) {
-  // depois de publicado, quantos ganham fica travado
+// prêmios por posição: só mudam no rascunho
+function updatePrize(index, changes) {
   if (isPublished) return;
   setHackathon({
     ...hackathon,
-    Ranking: item,
+    Premios: hackathon.Premios.map((prize, i) =>
+      i === index ? { ...prize, ...changes } : prize
+    ),
+  });
+}
+
+function addPrize() {
+  if (isPublished || hackathon.Premios.length >= maxPrizes) return;
+  setHackathon({
+    ...hackathon,
+    Premios: [
+      ...hackathon.Premios,
+      { Posicao: hackathon.Premios.length + 1, Tipo: "", Valor: "", Descricao: "" },
+    ],
+  });
+}
+
+function removeLastPrize() {
+  if (isPublished || hackathon.Premios.length <= 1) return;
+  setHackathon({
+    ...hackathon,
+    Premios: hackathon.Premios.slice(0, -1),
   });
 }
 
@@ -347,53 +368,76 @@ function handleLogoChange(e) {
           />
         </div>
 
-        {/* Tipo de premiação */}
-        <div className="flex flex-col gap-y-2">
-          <label className="text-content font-semibold">Tipo de premiação</label>
+        {/* Prêmios por posição */}
+        <div className="flex flex-col gap-y-4">
+          <label className="text-content font-semibold">Prêmios por posição</label>
 
-          <select
-            name="TipoPremiacao"
-            onChange={handleChange}
-            value={hackathon.TipoPremiacao}
-            disabled={isPublished}
-            className="
-              bg-surface-light
-              border border-brand
-              rounded-xl
-              p-4
-              text-content
-            "
-          >
-            <option value="">Selecione</option>
-            <option value="Dinheiro">Dinheiro</option>
-            <option value="Entrevista">Encaminhamento para entrevista</option>
-          </select>
+          {hackathon.Premios.map((prize, index) => (
+            <div
+              key={prize.Posicao}
+              className="flex flex-col gap-y-3 rounded-xl border border-brand p-4"
+            >
+              <p className="text-content font-semibold">{prize.Posicao}º lugar</p>
+
+              <select
+                value={prize.Tipo}
+                onChange={(e) => updatePrize(index, { Tipo: e.target.value, Valor: "" })}
+                disabled={isPublished}
+                className="bg-surface-light border border-brand rounded-xl p-4 text-content"
+              >
+                <option value="">Selecione</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Entrevista">Encaminhamento para entrevista</option>
+              </select>
+
+              {/* o valor só faz sentido quando o prêmio é em dinheiro */}
+              {prize.Tipo === "Dinheiro" && (
+                <input
+                  type="number"
+                  value={prize.Valor}
+                  onChange={(e) => updatePrize(index, { Valor: e.target.value })}
+                  disabled={isPublished}
+                  min={0}
+                  step="0.01"
+                  placeholder="Valor em R$"
+                  className="bg-surface-light border border-brand rounded-xl p-4 text-content"
+                />
+              )}
+
+              <input
+                type="text"
+                value={prize.Descricao}
+                onChange={(e) => updatePrize(index, { Descricao: e.target.value })}
+                disabled={isPublished}
+                maxLength={120}
+                placeholder="Descrição (opcional)"
+                className="bg-surface-light border border-brand rounded-xl p-4 text-content"
+              />
+
+              {index === hackathon.Premios.length - 1 && hackathon.Premios.length > 1 && (
+                <button
+                  type="button"
+                  onClick={removeLastPrize}
+                  disabled={isPublished}
+                  className="self-start text-sm text-content-secondary hover:text-highlight"
+                >
+                  Remover
+                </button>
+              )}
+            </div>
+          ))}
+
+          {hackathon.Premios.length < maxPrizes && (
+            <button
+              type="button"
+              onClick={addPrize}
+              disabled={isPublished}
+              className="self-start rounded-xl border border-brand px-4 py-2 text-content transition hover:border-highlight hover:bg-surface-light"
+            >
+              Adicionar posição
+            </button>
+          )}
         </div>
-
-        {/* o valor só faz sentido quando a premiação é em dinheiro */}
-        {hackathon.TipoPremiacao === "Dinheiro" && (
-        <div className="flex flex-col gap-y-2">
-          <label className="text-content font-semibold">Premiação Total</label>
-
-          <input
-            type="number"
-            name="Premiacao"
-            value={hackathon.Premiacao}
-            onChange={handleChange}
-            disabled={isPublished}
-            max={100000}
-            min={0}
-            placeholder="10000"
-            className="
-      bg-surface-light
-      border border-brand
-      rounded-xl
-      p-4
-      text-content
-    "
-          />
-        </div>
-        )}
 
         <div className="flex flex-col gap-y-4">
           <label className="text-content font-semibold">Tecnologias</label>
@@ -412,31 +456,6 @@ function handleLogoChange(e) {
                 />
                 {technology}
               </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-y-4">
-          <label className="text-content font-semibold">Quantos Ganham?</label>
-          <div className="grid grid-cols-3 gap-4">
-            {rankings.map((item) => (
-              <button
-                key={item}
-                type="button"
-                disabled={isPublished}
-                className={`
-                  border rounded-xl p-4 transition
-                  
-                  ${
-                    hackathon.Ranking === item
-                      ? "bg-highlight border-highlight text-surface"
-                      : "border-brand text-content hover:border-highlight hover:bg-surface-light"
-                  }
-        `}
-                onClick={() => handleRankings(item)}
-              >
-                {item}
-              </button>
             ))}
           </div>
         </div>

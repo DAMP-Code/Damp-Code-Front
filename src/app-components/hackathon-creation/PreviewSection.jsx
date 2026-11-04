@@ -39,17 +39,16 @@ const PreviewSection = ({ hackathon }) => {
           {hackathon.participantes || 'X pessoas já entraram'}
         </p>
 
-        {/* VAGAS */}
+        {/* PRÊMIOS */}
         <p>
-          vagas em prêmios:
-          <span className='font-bold text-white'>
-            {hackathon.ranking}
-          </span>{' '}
-        </p>
-
-        {/* premiacao */}
-        <p>
-          Premiação: R$<b>{hackathon.Premiacao}</b>
+          Prêmios:{' '}
+          {hackathon.Premios?.filter((prize) => prize.Tipo).map((prize) => (
+            <span key={prize.Posicao} className='mr-3'>
+              <b>{prize.Posicao}º</b>{' '}
+              {prize.Tipo === 'Dinheiro' ? `R$ ${prize.Valor}` : 'Entrevista'}
+              {prize.Descricao && ` · ${prize.Descricao}`}
+            </span>
+          ))}
         </p>
 
         {/* DATA */}
