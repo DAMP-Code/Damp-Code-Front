@@ -29,18 +29,38 @@ export const MOCK_ACCOUNTS = [
     role: "participante",
     label: "participante Carla",
   },
+  {
+    email: "diego@dampcode.dev",
+    password: "123456",
+    role: "participante",
+    label: "participante Diego",
+  },
 ];
 
+// Sem lista de prêmios, o 1º lugar sai dos campos antigos (mesma regra da API).
+export function legacyPrizes(hackathon) {
+  const type = hackathon.tipoPremiacao;
+  if (!type || (type !== "Entrevista" && !(hackathon.premiacao > 0))) return [];
+  return [
+    {
+      posicao: 1,
+      tipo: type,
+      valor: type === "Dinheiro" ? hackathon.premiacao : null,
+      descricao: null,
+    },
+  ];
+}
+
 export const seedDatabase = {
-  nextUserId: 6,
+  nextUserId: 7,
   nextInvitationId: 1,
-  nextHackathonId: 6,
+  nextHackathonId: 7,
   nextTeamId: 3,
-  nextParticipationId: 5,
+  nextParticipationId: 12,
   nextTeamInvitationId: 1,
   nextTeamJoinRequestId: 1,
-  nextSubmissionId: 2,
-  nextSubmissionVersionId: 3,
+  nextSubmissionId: 9,
+  nextSubmissionVersionId: 10,
   users: [
     {
       id: 1,
@@ -81,6 +101,14 @@ export const seedDatabase = {
       password: "123456",
       role: "participante",
       tecnologias: ["Python", "SQL"],
+    },
+    {
+      id: 6,
+      name: "Diego Pires",
+      email: "diego@dampcode.dev",
+      password: "123456",
+      role: "participante",
+      tecnologias: ["Go", "Docker"],
     },
   ],
   // Empresas e vínculos espelham as tabelas companies / company_memberships / company_invitations da API.
@@ -152,6 +180,33 @@ export const seedDatabase = {
       joinedAt: "2026-09-26T12:00:00.000Z",
       leftAt: null,
     },
+    // Hackathon 2 (encerrado, resultado publicado): Ana, Bruno e Carla entregaram
+    ...[
+      ["p-5", 1],
+      ["p-6", 4],
+      ["p-7", 5],
+    ].map(([id, accountId]) => ({
+      id,
+      hackathonId: 2,
+      accountId,
+      teamId: null,
+      joinedAt: "2026-09-02T12:00:00.000Z",
+      leftAt: null,
+    })),
+    // Hackathon 6 (em avaliação): quatro entregas individuais
+    ...[
+      ["p-8", 1],
+      ["p-9", 4],
+      ["p-10", 5],
+      ["p-11", 6],
+    ].map(([id, accountId]) => ({
+      id,
+      hackathonId: 6,
+      accountId,
+      teamId: null,
+      joinedAt: "2026-10-02T12:00:00.000Z",
+      leftAt: null,
+    })),
   ],
   teamInvitations: [],
   teamJoinRequests: [],
@@ -163,6 +218,76 @@ export const seedDatabase = {
       teamId: "t-2",
       participationId: null,
       currentVersion: 2,
+    },
+    // Hackathon 2: resultado publicado, Ana em 2º com prêmio
+    {
+      submissionId: "s-2",
+      hackathonId: 2,
+      teamId: null,
+      participationId: "p-6",
+      currentVersion: 1,
+      score: 92,
+      feedback: "Cardápio completo sempre acessível e sugestões bem explicadas.",
+      prizePosition: 1,
+      finalPosition: 1,
+      status: "Evaluated",
+    },
+    {
+      submissionId: "s-3",
+      hackathonId: 2,
+      teamId: null,
+      participationId: "p-5",
+      currentVersion: 1,
+      score: 85,
+      feedback: "Boa interface; faltou tratar o usuário sem histórico.",
+      prizePosition: 2,
+      finalPosition: 2,
+      status: "Evaluated",
+    },
+    {
+      submissionId: "s-4",
+      hackathonId: 2,
+      teamId: null,
+      participationId: "p-7",
+      currentVersion: 1,
+      score: 60,
+      feedback: null,
+      prizePosition: null,
+      finalPosition: 3,
+      status: "Evaluated",
+    },
+    // Hackathon 6: em avaliação, duas já têm nota
+    {
+      submissionId: "s-5",
+      hackathonId: 6,
+      teamId: null,
+      participationId: "p-8",
+      currentVersion: 1,
+      score: 88,
+      feedback: "Código limpo e fácil de ler.",
+    },
+    {
+      submissionId: "s-6",
+      hackathonId: 6,
+      teamId: null,
+      participationId: "p-9",
+      currentVersion: 1,
+      score: 70,
+      feedback: null,
+    },
+    {
+      submissionId: "s-7",
+      hackathonId: 6,
+      teamId: null,
+      participationId: "p-10",
+      currentVersion: 1,
+    },
+    {
+      submissionId: "s-8",
+      hackathonId: 6,
+      teamId: null,
+      participationId: "p-11",
+      currentVersion: 1,
     },
   ],
   submissionVersions: [
@@ -186,6 +311,35 @@ export const seedDatabase = {
       submittedBy: 5,
       submittedAt: "2026-10-12T20:30:00.000Z",
     },
+    ...[
+      ["sv-3", "s-2", 4, "2026-10-08T15:00:00.000Z"],
+      ["sv-4", "s-3", 1, "2026-10-09T18:00:00.000Z"],
+      ["sv-5", "s-4", 5, "2026-10-09T19:00:00.000Z"],
+    ].map(([id, submissionId, submittedBy, submittedAt]) => ({
+      id,
+      submissionId,
+      version: 1,
+      language: "JavaScript",
+      fileName: "cardapio.js",
+      code: "function sugerir(cardapio, historico) {\n  const favoritos = historico.map((prato) => prato.categoria);\n  return cardapio.filter((prato) => favoritos.includes(prato.categoria));\n}\n",
+      submittedBy,
+      submittedAt,
+    })),
+    ...[
+      ["sv-6", "s-5", 1, "def melhor_rota(pedidos, transito):\n    peso = lambda p: p['distancia'] * transito.get(p['bairro'], 1)\n    return sorted(pedidos, key=peso)\n"],
+      ["sv-7", "s-6", 4, "def melhor_rota(pedidos, transito):\n    return sorted(pedidos, key=lambda p: p['distancia'])\n"],
+      ["sv-8", "s-7", 5, "def melhor_rota(pedidos, transito):\n    for pedido in pedidos:\n        print(pedido)\n    return pedidos\n"],
+      ["sv-9", "s-8", 6, "def melhor_rota(pedidos, transito):\n    # pesa a distância pelo trânsito de cada bairro\n    return otimizar(pedidos, transito)\n"],
+    ].map(([id, submissionId, submittedBy, code], index) => ({
+      id,
+      submissionId,
+      version: 1,
+      language: "Python",
+      fileName: "rota.py",
+      code,
+      submittedBy,
+      submittedAt: `2026-10-2${index + 1}T14:00:00.000Z`,
+    })),
   ],
   hackathons: [
     {
@@ -197,7 +351,12 @@ export const seedDatabase = {
       area: "Back-end",
       tecnologias: ["Node.js", "PostgreSQL"],
       metodo: "Avaliação IA",
-      premiacao: 25000,
+      premiacao: 1000,
+      premios: [
+        { posicao: 1, tipo: "Dinheiro", valor: 1000, descricao: null },
+        { posicao: 2, tipo: "Dinheiro", valor: 500, descricao: null },
+        { posicao: 3, tipo: "Entrevista", valor: null, descricao: "Entrevista para vaga júnior" },
+      ],
       status: true,
       dataFinal: "2026-11-20T12:00:00.000Z",
       corPrincipal: "#6C48C5",
@@ -209,7 +368,7 @@ export const seedDatabase = {
       slug: "rota-inteligente-de-entregas",
       formato: "Equipe",
       tipoPremiacao: "Dinheiro",
-      ranking: "Top 10",
+      ranking: "Top 3",
       dataCriacao: "2026-09-15T12:00:00.000Z",
       dataInicio: "2026-10-01T12:00:00.000Z",
       dataFimAvaliacao: "2026-12-05T12:00:00.000Z",
@@ -226,6 +385,11 @@ export const seedDatabase = {
       tecnologias: ["React", "TypeScript"],
       metodo: "Avaliação Manual",
       premiacao: 12000,
+      premios: [
+        { posicao: 1, tipo: "Dinheiro", valor: 12000, descricao: null },
+        { posicao: 2, tipo: "Entrevista", valor: null, descricao: "Entrevista com o time de produto" },
+      ],
+      resultsPublishedAt: "2026-10-27T12:00:00.000Z",
       status: false,
       dataFinal: "2026-10-10T12:00:00.000Z",
       corPrincipal: "#6C48C5",
@@ -233,11 +397,11 @@ export const seedDatabase = {
       corFundo: "#22114D",
       logo: "/src/assets/cards-prizes.svg",
       companyId: "c-ifood",
-      storedStatus: "Scheduled",
+      storedStatus: "Closed",
       slug: "cardapio-que-se-adapta",
       formato: "Individual",
-      tipoPremiacao: "Entrevista",
-      ranking: "Top 15",
+      tipoPremiacao: "Dinheiro",
+      ranking: "Top 2",
       dataCriacao: "2026-08-20T12:00:00.000Z",
       dataInicio: "2026-09-01T12:00:00.000Z",
       dataFimAvaliacao: "2026-10-25T12:00:00.000Z",
@@ -319,5 +483,42 @@ export const seedDatabase = {
       dataInicio: "2027-02-01T12:00:00.000Z",
       dataFimAvaliacao: "2027-03-10T12:00:00.000Z",
     },
+    // em avaliação: as submissões já terminaram e a empresa está dando notas
+    {
+      hackathonId: 6,
+      titulo: "Fila de pedidos sem engarrafamento",
+      descricao:
+        "Organize a fila de pedidos de uma cozinha para que nenhum prato esfrie esperando o entregador.",
+      area: "Back-end",
+      tecnologias: ["Python", "SQL"],
+      metodo: "Avaliação Manual",
+      premiacao: 5000,
+      premios: [
+        { posicao: 1, tipo: "Dinheiro", valor: 5000, descricao: null },
+        { posicao: 2, tipo: "Dinheiro", valor: 2000, descricao: null },
+      ],
+      status: false,
+      dataFinal: "2026-10-30T12:00:00.000Z",
+      corPrincipal: "#6C48C5",
+      corSecundaria: "#C68FE6",
+      corFundo: "#170A36",
+      logo: "",
+      companyId: "c-ifood",
+      storedStatus: "Scheduled",
+      slug: "fila-de-pedidos-sem-engarrafamento",
+      formato: "Individual",
+      tipoPremiacao: "Dinheiro",
+      ranking: "Top 2",
+      dataCriacao: "2026-09-20T12:00:00.000Z",
+      dataInicio: "2026-10-01T12:00:00.000Z",
+      dataFimAvaliacao: "2027-01-30T12:00:00.000Z",
+      referenceLanguage: "Python",
+      referenceCode: "def melhor_rota(pedidos, transito):\n    # pesa a distância pelo trânsito de cada bairro\n    return otimizar(pedidos, transito)\n",
+    },
   ],
 };
+
+// Hackathons sem lista de prêmios (rascunho e demais do seed) ganham o 1º prêmio derivado dos campos antigos.
+for (const hackathon of seedDatabase.hackathons) {
+  if (!hackathon.premios) hackathon.premios = legacyPrizes(hackathon);
+}
