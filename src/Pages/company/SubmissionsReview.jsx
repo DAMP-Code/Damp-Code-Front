@@ -1,5 +1,5 @@
-import { useParams } from "react-router-dom";
-import React, { useContext, useEffect, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
@@ -20,6 +20,7 @@ const codeClass = "max-h-[560px] min-h-[320px] overflow-auto whitespace-pre roun
 // Comparação manual da empresa: solução de referência ao lado do código entregue.
 const SubmissionsReview = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useContext(AuthContext);
 
   const [hackathon, setHackathon] = useState(null);
@@ -29,7 +30,15 @@ const SubmissionsReview = () => {
   const [detail, setDetail] = useState(null);
   const [shown, setShown] = useState(null); // versão mostrada (a que vale ou uma antiga)
   const [error, setError] = useState("");
+  const [notes, setNotes] = useState({}); // nota por entrega, para a lista da esquerda
+  const [score, setScore] = useState("");
+  const [comment, setComment] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saved, setSaved] = useState(false);
 
+  const selectedIdRef = useRef(null);
+  selectedIdRef.current = selectedId;
   const token = user?.token;
   const hackathonUrl = `${API}/${encodeURIComponent(id)}`;
 
@@ -50,8 +59,18 @@ const SubmissionsReview = () => {
         }
         const list = await entriesResponse.json();
         setEntries(list);
-        setSelectedId(list.find((item) => item.submissionId)?.submissionId ?? null);
+        // ?entrega=<submissionId> abre direto na entrega pedida
+        const wanted = searchParams.get("entrega");
+        const chosen = list.find((item) => item.submissionId && item.submissionId === wanted) ?? list.find((item) => item.submissionId);
+        setSelectedId(chosen?.submissionId ?? null);
         if (referenceResponse.ok) setReference(await referenceResponse.json());
+
+        // a lista de notas só vem quando a fase de avaliação permite
+        const evaluationResponse = await fetch(`${hackathonUrl}/avaliacao`, { headers });
+        if (evaluationResponse.ok) {
+          const evaluation = await evaluationResponse.json();
+          setNotes(Object.fromEntries(evaluation.entregas.map((item) => [item.submissionId, item.nota])));
+        }
       } catch (loadError) {
         console.error(loadError);
         setError("Erro ao conectar com o servidor");
@@ -59,10 +78,15 @@ const SubmissionsReview = () => {
     }
 
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hackathonUrl, token]);
 
   useEffect(() => {
     if (!selectedId) return;
+    let cancelled = false;
+    // limpa a nota da entrega anterior até o detalhe novo chegar
+    setScore("");
+    setComment("");
 
     async function loadDetail() {
       try {
@@ -71,14 +95,23 @@ const SubmissionsReview = () => {
         });
         if (!response.ok) return;
         const data = await response.json();
+        if (cancelled) return; // a entrega selecionada mudou
         setDetail(data);
         setShown(data.atual);
+        setScore(String(data.nota ?? data.semelhanca ?? ""));
+        setComment(data.comentario ?? "");
+        setSaveError("");
+        setSaved(false);
+        setNotes((current) => ({ ...current, [data.submissionId ?? selectedId]: data.nota ?? null }));
       } catch (detailError) {
         console.error(detailError);
       }
     }
 
     loadDetail();
+    return () => {
+      cancelled = true;
+    };
   }, [hackathonUrl, selectedId, token]);
 
   async function showVersion(number) {
@@ -93,16 +126,62 @@ const SubmissionsReview = () => {
     }
   }
 
+  async function saveScore() {
+    const savingId = selectedId;
+    const rounded = Math.round(Number(score));
+    if (score === "" || !Number.isFinite(rounded) || rounded < 0 || rounded > 100) {
+      setSaveError("A nota deve ficar entre 0 e 100.");
+      setSaved(false);
+      return;
+    }
+    setSaving(true);
+    setSaveError("");
+    setSaved(false);
+    try {
+      const response = await fetch(`${hackathonUrl}/entregas/${encodeURIComponent(selectedId)}/avaliacao`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ nota: rounded, comentario: comment }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setSaveError(data?.detail || "Não foi possível salvar a nota.");
+        return;
+      }
+      const data = await response.json();
+      setNotes((current) => ({ ...current, [savingId]: data.nota }));
+      // só mexe no detalhe se ainda é a mesma entrega
+      if (selectedIdRef.current === savingId) {
+        setDetail((current) => ({ ...current, nota: data.nota, comentario: data.comentario }));
+        setSaved(true);
+      }
+    } catch (saveFailure) {
+      console.error(saveFailure);
+      setSaveError("Erro ao conectar com o servidor");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const delivered = entries.filter((item) => item.submissionId);
   const missing = entries.filter((item) => !item.submissionId);
   const shownInfo = detail?.versoes.find((item) => item.versao === shown?.versao);
+  const currentInfo = detail?.versoes.find((item) => item.vale);
+  const differentLanguage =
+    Boolean(reference?.linguagem && currentInfo?.linguagem) && currentInfo.linguagem !== reference.linguagem;
+  const hasNote = detail?.nota !== null && detail?.nota !== undefined;
 
   return (
     <div className="min-h-screen bg-surface">
       <Header />
       <section className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-8 text-content sm:px-6 lg:p-8">
         <BackButton />
-        <Title text1={"Entregas"} text2={hackathon ? ` - ${hackathon.titulo}` : ""} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Title text1={"Entregas"} text2={hackathon ? ` - ${hackathon.titulo}` : ""} />
+          <Link to={`/dashboard/Empresa/avaliacao/${encodeURIComponent(id)}`} className="font-medium text-highlight hover:underline">
+            Ver ranking
+          </Link>
+        </div>
 
         {error ? (
           <p className="rounded-xl border border-danger/40 bg-danger/10 px-5 py-3 text-danger">{error}</p>
@@ -124,6 +203,9 @@ const SubmissionsReview = () => {
                       <span className="font-medium">{entry.nome}</span>
                       <span className="block text-sm text-content-secondary">
                         v{entry.versaoAtual} · {formatDateTime(entry.enviadoEm)}
+                      </span>
+                      <span className="block text-sm text-content-secondary">
+                        {notes[entry.submissionId] != null ? `Nota ${notes[entry.submissionId]}` : "Sem nota"}
                       </span>
                     </button>
                   </li>
@@ -174,6 +256,56 @@ const SubmissionsReview = () => {
                   </p>
                 )}
                 {shown ? <pre className={codeClass}>{shown.codigo}</pre> : <p className="text-content-secondary">—</p>}
+
+                {detail && (detail.podeAvaliar || hasNote) && (
+                  <div className="mt-2 flex flex-col gap-3 border-t border-white/10 pt-4">
+                    <p className="text-sm text-content-secondary">
+                      {detail.semelhanca != null ? `Semelhança com a referência: ${detail.semelhanca}%` : "Sem referência"}
+                    </p>
+                    {differentLanguage && (
+                      <p className="text-sm text-highlight">Linguagem diferente da referência</p>
+                    )}
+                    {detail.podeAvaliar ? (
+                      <>
+                        <label className="flex flex-col gap-1 text-sm">
+                          Nota (0–100)
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={score}
+                            onChange={(e) => setScore(e.target.value)}
+                            className="rounded-xl border border-brand bg-surface p-2 text-content"
+                          />
+                        </label>
+                        <label className="flex flex-col gap-1 text-sm">
+                          Comentário
+                          <textarea
+                            rows={3}
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="rounded-xl border border-brand bg-surface p-2 text-content"
+                          />
+                        </label>
+                        {saveError && <p className="text-sm text-danger">{saveError}</p>}
+                        {saved && <p className="text-sm text-content-secondary">Nota salva.</p>}
+                        <button
+                          onClick={saveScore}
+                          disabled={saving}
+                          className="self-start rounded-xl bg-highlight px-5 py-2 font-semibold text-surface transition hover:opacity-90 disabled:opacity-60"
+                        >
+                          {saving ? "Salvando..." : "Salvar nota"}
+                        </button>
+                      </>
+                    ) : (
+                      <p className="text-sm">
+                        Nota: <strong>{detail.nota}</strong>
+                        {detail.comentario && <span className="block text-content-secondary">{detail.comentario}</span>}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

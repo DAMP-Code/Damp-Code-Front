@@ -1,4 +1,4 @@
-import { seedDatabase } from "./seed";
+import { legacyPrizes, seedDatabase } from "./seed";
 
 const API = "https://localhost:7092";
 const STORAGE_KEY = "damp-mock-db";
@@ -53,6 +53,10 @@ function loadDatabase() {
     if (database.hackathons?.some((item) => item.storedStatus === undefined)) {
       database.hackathons = structuredClone(seedDatabase.hackathons);
       database.nextHackathonId = seedDatabase.nextHackathonId;
+    }
+    // Hackathons salvos antes da premiação por posição ganham o 1º prêmio derivado dos campos antigos
+    for (const hackathon of database.hackathons) {
+      if (!hackathon.premios) hackathon.premios = legacyPrizes(hackathon);
     }
     for (const user of seedDatabase.users) {
       if (!database.users.some((item) => item.email === user.email)) {
@@ -331,9 +335,16 @@ function toHackathonResponse(database, hackathon) {
   const phase = phaseOf(hackathon);
   const company = database.companies.find((item) => item.companyId === hackathon.companyId);
   // a solução de referência nunca sai na resposta pública
-  const { referenceLanguage: _referenceLanguage, referenceCode: _referenceCode, ...publicFields } = hackathon;
+  const {
+    referenceLanguage: _referenceLanguage,
+    referenceCode: _referenceCode,
+    resultsPublishedAt,
+    ...publicFields
+  } = hackathon;
   return {
     ...publicFields,
+    premios: [...(hackathon.premios || [])].sort((a, b) => a.posicao - b.posicao),
+    resultadoPublicado: Boolean(resultsPublishedAt),
     empresa: company?.name || "",
     premiacao: hackathon.premiacao ?? 0,
     status: phase === "Published" || phase === "Active",
@@ -400,6 +411,32 @@ function validateVisual(body) {
     : "O logo deve ser uma imagem PNG, JPEG, WEBP ou GIF.";
 }
 
+const MAX_PRIZES = 10;
+const MAX_PRIZE_DESCRIPTION = 120;
+const MAX_PRIZE_AMOUNT = 9999999999.99;
+
+// mesmas mensagens do HackathonService.ValidatePrizes da API
+function validatePrizes(prizes) {
+  if (!Array.isArray(prizes) || prizes.length === 0) return null;
+  if (prizes.length > MAX_PRIZES) return `Defina no máximo ${MAX_PRIZES} prêmios.`;
+  const positions = prizes.map((prize) => prize?.posicao).sort((a, b) => a - b);
+  if (prizes.some((prize) => !prize) || positions.some((position, index) => position !== index + 1)) {
+    return "As posições dos prêmios devem ser 1, 2, 3... sem pular.";
+  }
+  for (const prize of [...prizes].sort((a, b) => a.posicao - b.posicao)) {
+    const type = parseTipoPremiacao(prize.tipo);
+    if (!type) return `Escolha o tipo do prêmio do ${prize.posicao}º lugar.`;
+    if (type === "Dinheiro" && !(Number(prize.valor) > 0)) return `Informe o valor do prêmio do ${prize.posicao}º lugar.`;
+    if (type === "Dinheiro" && Number(prize.valor) > MAX_PRIZE_AMOUNT) {
+      return `O valor do prêmio do ${prize.posicao}º lugar deve ficar entre 0,01 e 9.999.999.999,99.`;
+    }
+    if (prize.descricao?.trim().length > MAX_PRIZE_DESCRIPTION) {
+      return `A descrição do prêmio do ${prize.posicao}º lugar deve ter no máximo ${MAX_PRIZE_DESCRIPTION} caracteres.`;
+    }
+  }
+  return null;
+}
+
 function validateDraft(body) {
   const missing = [];
   if (!body.Titulo?.trim()) missing.push("título");
@@ -420,6 +457,8 @@ function validateDraft(body) {
     const premiacao = Number(body.Premiacao);
     if (!(premiacao >= 0 && premiacao <= 9999999999.99)) return "A premiação deve ficar entre 0 e 9.999.999.999,99.";
   }
+  const prizesError = validatePrizes(body.Premios ?? body.premios);
+  if (prizesError) return prizesError;
   const visualError = validateVisual(body);
   if (visualError) return visualError;
   const [inicio, fim, avaliacao] = [body.DataInicio, body.DataFinal, body.DataFimAvaliacao].map(toIsoOrNull);
@@ -433,9 +472,7 @@ function missingCrucialFields(hackathon) {
   if (!hackathon.dataInicio) missing.push("data de início");
   if (!hackathon.dataFinal) missing.push("fim das submissões");
   if (!hackathon.dataFimAvaliacao) missing.push("fim da avaliação");
-  if (!hackathon.tipoPremiacao) missing.push("tipo de premiação");
-  if (hackathon.tipoPremiacao === "Dinheiro" && !(hackathon.premiacao > 0)) missing.push("premiação");
-  if (!hackathon.ranking) missing.push("quantos ganham");
+  if (!hackathon.premios?.length) missing.push("premiação");
   if (!hackathon.metodo) missing.push("método de avaliação");
   return missing;
 }
@@ -461,6 +498,30 @@ function applyContent(hackathon, body) {
     dataFinal: toIsoOrNull(body.DataFinal),
     dataFimAvaliacao: toIsoOrNull(body.DataFimAvaliacao),
   });
+  applyPrizes(hackathon, body.Premios ?? body.premios);
+}
+
+// Com lista, ela manda e os campos antigos são derivados do 1º lugar; sem lista, o 1º lugar sai dos campos antigos.
+function applyPrizes(hackathon, prizes) {
+  if (!Array.isArray(prizes)) {
+    hackathon.premios = legacyPrizes(hackathon);
+    return;
+  }
+  hackathon.premios = [...prizes]
+    .sort((a, b) => a.posicao - b.posicao)
+    .map((prize) => {
+      const tipo = parseTipoPremiacao(prize.tipo);
+      return {
+        posicao: prize.posicao,
+        tipo,
+        valor: tipo === "Dinheiro" ? Number(prize.valor) : null,
+        descricao: prize.descricao?.trim() ? prize.descricao.trim() : null,
+      };
+    });
+  const first = hackathon.premios[0];
+  hackathon.ranking = hackathon.premios.length ? `Top ${hackathon.premios.length}` : null;
+  hackathon.tipoPremiacao = first?.tipo ?? null;
+  hackathon.premiacao = first?.valor ?? null;
 }
 
 function applyVisual(hackathon, body) {
@@ -632,7 +693,193 @@ function handleSubmissions(path, method, body, database, user) {
     nome: team ? team.nome : displayName(database, participation?.accountId),
     versoes: versions.map((item) => toVersion(database, item, submission.currentVersion)),
     atual: toCode(versions.find((item) => item.version === submission.currentVersion)),
+    semelhanca: suggestSimilarity(database, hackathon, submission),
+    nota: submission.score ?? null,
+    comentario: submission.feedback ?? null,
+    podeAvaliar: canEvaluate(hackathon),
   });
+}
+
+// Versão simplificada do SimilarityScore da API: mesma tokenização e mesmo Dice, só com as palavras reservadas mais comuns.
+const RESERVED_WORDS = new Set([
+  "if", "else", "elif", "for", "foreach", "while", "do", "switch", "case", "default", "break", "continue", "return",
+  "function", "def", "class", "new", "this", "var", "let", "const", "try", "catch", "except", "finally", "throw",
+  "raise", "true", "false", "null", "none", "undefined", "import", "from", "export", "async", "await", "in", "is",
+  "not", "and", "or", "lambda", "void", "int", "string", "bool", "public", "private", "static", "select", "where",
+  "join", "group", "order", "by", "insert", "update", "delete", "create", "table",
+]);
+
+function stripComments(source, language) {
+  let result = source.replace(/\/\*[\s\S]*?\*\//g, " ");
+  if (language === "Python") result = result.replace(/#.*$/gm, "");
+  else if (language === "SQL") result = result.replace(/--.*$/gm, "");
+  else result = result.replace(/\/\/.*$/gm, "");
+  return result;
+}
+
+function tokenize(source, language) {
+  const tokens = stripComments(source, language).match(/[\p{L}_][\p{L}\p{N}_]*|\d+(?:\.\d+)?|\S/gu) || [];
+  return tokens.map((token) => {
+    if (/^\d/.test(token)) return "NUM";
+    if (/^[\p{L}_]/u.test(token)) return RESERVED_WORDS.has(token.toLowerCase()) ? token.toUpperCase() : "ID";
+    return token;
+  });
+}
+
+function countGrams(tokens, size) {
+  const grams = new Map();
+  for (let index = 0; index + size <= tokens.length; index++) {
+    const gram = tokens.slice(index, index + size).join(" ");
+    grams.set(gram, (grams.get(gram) || 0) + 1);
+  }
+  return grams;
+}
+
+function similarityScore(reference, code, language) {
+  const a = tokenize(reference, language);
+  const b = tokenize(code, language);
+  if (!a.length || !b.length) return 0;
+  const size = a.length < 3 || b.length < 3 ? 1 : 3;
+  const gramsA = countGrams(a, size);
+  const gramsB = countGrams(b, size);
+  let common = 0;
+  for (const [gram, countA] of gramsA) common += Math.min(countA, gramsB.get(gram) || 0);
+  const total = [...gramsA.values(), ...gramsB.values()].reduce((sum, value) => sum + value, 0);
+  return Math.round((200 * common) / total);
+}
+
+// semelhança da versão que vale com a referência; nula sem referência ou sem código
+function suggestSimilarity(database, hackathon, submission) {
+  if (!hackathon.referenceCode?.trim()) return null;
+  const current = versionsOf(database, submission).find((item) => item.version === submission.currentVersion);
+  if (!current) return null;
+  return similarityScore(hackathon.referenceCode, current.code, current.language || hackathon.referenceLanguage || "Outra");
+}
+
+// nota e vencedores só mudam depois do fim das submissões, enquanto o resultado não foi publicado
+function canEvaluate(hackathon) {
+  const phase = phaseOf(hackathon);
+  return !hackathon.resultsPublishedAt && (phase === "InReview" || phase === "Closed");
+}
+
+function lastSubmittedAt(database, submission) {
+  return versionsOf(database, submission)[0]?.submittedAt ?? "";
+}
+
+// maior nota primeiro, sem nota no fim; empate para quem enviou a versão que vale antes
+function rankSubmissions(database, submissions) {
+  return [...submissions].sort(
+    (a, b) =>
+      (a.score == null) - (b.score == null) ||
+      (b.score ?? 0) - (a.score ?? 0) ||
+      lastSubmittedAt(database, a).localeCompare(lastSubmittedAt(database, b)),
+  );
+}
+
+function toEvaluationEntry(database, hackathon, submission) {
+  const team = submission.teamId && database.teams.find((item) => item.teamId === submission.teamId);
+  const participation = submission.participationId && database.participations.find((item) => item.id === submission.participationId);
+  const versions = versionsOf(database, submission);
+  const current = versions.find((item) => item.version === submission.currentVersion);
+  return {
+    submissionId: submission.submissionId,
+    nome: team ? team.nome : displayName(database, participation?.accountId),
+    linguagem: current?.language ?? null,
+    semelhanca: suggestSimilarity(database, hackathon, submission),
+    nota: submission.score ?? null,
+    comentario: submission.feedback ?? null,
+    posicaoPremio: submission.prizePosition ?? null,
+    enviadoEm: versions[0]?.submittedAt ?? null,
+  };
+}
+
+function toEvaluationRanking(database, hackathon) {
+  const submissions = database.submissions.filter((item) => item.hackathonId === hackathon.hackathonId && item.currentVersion > 0);
+  return {
+    podeAvaliar: canEvaluate(hackathon),
+    resultadoPublicado: Boolean(hackathon.resultsPublishedAt),
+    premios: [...(hackathon.premios || [])].sort((a, b) => a.posicao - b.posicao),
+    entregas: rankSubmissions(database, submissions).map((item) => toEvaluationEntry(database, hackathon, item)),
+  };
+}
+
+// mesmas regras do EvaluationService da API
+function handleEvaluation(path, method, body, database, user) {
+  const match = path.match(/^\/api\/Hackathons\/([^/]+)\/(?:(avaliacao|vencedores|resultado)|entregas\/([^/]+)\/avaliacao)$/);
+  if (!match) return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  const [, hackathonId, section, submissionId] = match;
+  const routes = { avaliacao: "GET", vencedores: "PUT", resultado: "POST" };
+  if (method !== (submissionId ? "PUT" : routes[section])) {
+    return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  }
+  if (!user) return json({ message: "Não autenticado" }, 401);
+  const access = managedCompany(database, user);
+  if (!access) return problem(NO_COMPANY, 403);
+  const hackathon = database.hackathons.find(
+    (item) => String(item.hackathonId) === hackathonId && item.companyId === access.companyId,
+  );
+  if (!hackathon) return problem(HACKATHON_NOT_FOUND, 404);
+
+  if (section === "avaliacao") return json(toEvaluationRanking(database, hackathon));
+
+  if (hackathon.storedStatus === "Cancelled") return problem(FINISHED, 409);
+  if (hackathon.resultsPublishedAt) return problem("O resultado já foi publicado.", 409);
+  if (!canEvaluate(hackathon)) return problem("A avaliação abre quando as submissões terminam.", 409);
+  const submissions = database.submissions.filter((item) => item.hackathonId === hackathon.hackathonId && item.currentVersion > 0);
+
+  if (submissionId) {
+    const nota = body?.nota;
+    if (!Number.isInteger(nota) || nota < 0 || nota > 100) return problem("A nota deve ficar entre 0 e 100.", 400);
+    const feedback = typeof body?.comentario === "string" && body.comentario.trim() ? body.comentario.trim() : null;
+    if (feedback?.length > 1000) return problem("O comentário deve ter no máximo 1000 caracteres.", 400);
+    const submission = submissions.find((item) => item.submissionId === submissionId);
+    if (!submission) return problem("Entrega não encontrada.", 404);
+    Object.assign(submission, {
+      score: nota,
+      feedback,
+      evaluatedAt: new Date().toISOString(),
+      evaluatedByAccountId: user.id,
+    });
+    saveDatabase(database);
+    return json(toEvaluationEntry(database, hackathon, submission));
+  }
+
+  if (section === "vencedores") {
+    const winners = Array.isArray(body?.vencedores) ? body.vencedores : [];
+    const positions = new Set((hackathon.premios || []).map((prize) => prize.posicao));
+    if (
+      winners.some((item) => !positions.has(item?.posicao)) ||
+      new Set(winners.map((item) => item.posicao)).size !== winners.length ||
+      new Set(winners.map((item) => item.submissionId)).size !== winners.length
+    ) {
+      return problem("Escolha um vencedor diferente para cada prêmio.", 400);
+    }
+    if (winners.some((item) => !submissions.some((submission) => submission.submissionId === item.submissionId))) {
+      return problem("Entrega não encontrada.", 404);
+    }
+    for (const submission of submissions) submission.prizePosition = null;
+    for (const winner of winners) {
+      submissions.find((item) => item.submissionId === winner.submissionId).prizePosition = winner.posicao;
+    }
+    saveDatabase(database);
+    return json(toEvaluationRanking(database, hackathon));
+  }
+
+  // publicar o resultado
+  if (submissions.some((item) => item.score == null)) {
+    return problem("Dê nota a todas as entregas antes de publicar.", 409);
+  }
+  // premiados ficam na posição do prêmio; os demais seguem o ranking a partir da primeira posição depois dos prêmios
+  let next = (hackathon.premios || []).length + 1;
+  for (const submission of rankSubmissions(database, submissions)) {
+    submission.finalPosition = submission.prizePosition ?? next++;
+    submission.status = "Evaluated";
+  }
+  const now = new Date().toISOString();
+  if (phaseOf(hackathon) === "InReview") hackathon.storedStatus = "Closed";
+  hackathon.resultsPublishedAt = now;
+  saveDatabase(database);
+  return json(toHackathonResponse(database, hackathon));
 }
 
 const MAX_TEAM_SIZE = 5;
@@ -688,6 +935,30 @@ function toParticipation(database, hackathon, participation) {
     formato: hackathon.formato,
     dataInicio: hackathon.dataInicio,
     equipe: team ? toTeam(database, team) : null,
+  };
+}
+
+// resultado publicado: a entrega é da equipe (equipe) ou da inscrição (individual); sem entrega, só o total
+function toResult(database, hackathon, participation) {
+  const submission = database.submissions.find(
+    (item) =>
+      item.hackathonId === hackathon.hackathonId &&
+      (participation.teamId ? item.teamId === participation.teamId : item.participationId === participation.id),
+  );
+  const ranked = database.submissions.filter(
+    (item) => item.hackathonId === hackathon.hackathonId && item.finalPosition != null,
+  );
+  // o total nunca fica abaixo da maior posição (prêmios sem vencedor deixam buracos)
+  const total = Math.max(ranked.length, ...ranked.map((item) => item.finalPosition));
+  const prize = submission?.prizePosition
+    ? (hackathon.premios || []).find((item) => item.posicao === submission.prizePosition)
+    : null;
+  return {
+    posicao: submission?.finalPosition ?? null,
+    totalClassificados: total,
+    nota: submission?.score ?? null,
+    comentario: submission?.feedback ?? null,
+    premio: prize ?? null,
   };
 }
 
@@ -800,7 +1071,10 @@ function handleParticipations(path, method, body, database, user) {
       .map((item) => ({ item, hackathon: database.hackathons.find((h) => String(h.hackathonId) === String(item.hackathonId)) }))
       .filter(({ hackathon }) => hackathon)
       .sort((a, b) => new Date(a.hackathon.dataInicio) - new Date(b.hackathon.dataInicio))
-      .map(({ item, hackathon }) => toParticipation(database, hackathon, item));
+      .map(({ item, hackathon }) => ({
+        ...toParticipation(database, hackathon, item),
+        resultado: hackathon.resultsPublishedAt ? toResult(database, hackathon, item) : null,
+      }));
     const teamInfo = (teamId) => {
       const team = database.teams.find((item) => item.teamId === teamId);
       const hackathon = database.hackathons.find((item) => String(item.hackathonId) === String(team?.hackathonId));
@@ -1157,6 +1431,9 @@ function handle(path, method, body, token) {
   const currentUser = database.users.find((item) => `mock-${item.id}` === token);
   if (path.startsWith("/api/Companies")) {
     return handleCompanies(path, method, body, database, currentUser);
+  }
+  if (/^\/api\/Hackathons\/[^/]+\/(avaliacao|vencedores|resultado|entregas\/[^/]+\/avaliacao)$/.test(path)) {
+    return handleEvaluation(path, method, body, database, currentUser);
   }
   if (/^\/api\/Hackathons\/[^/]+\/(entrega|entregas|referencia)(\/|$)/.test(path)) {
     return handleSubmissions(path, method, body, database, currentUser);

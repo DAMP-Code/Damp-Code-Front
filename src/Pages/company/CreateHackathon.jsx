@@ -24,9 +24,7 @@ const [hackathon, setHackathon] = useState({
   Formato: "Individual",
   Tecnologias: [],
   Metodo: "",
-  Ranking: "",
-  TipoPremiacao: "",
-  Premiacao: "",
+  Premios: [{ Posicao: 1, Tipo: "", Valor: "", Descricao: "" }],
 
   corPrincipal: "#6C48C5",
   corSecundaria: "#C68FE6",
@@ -92,9 +90,14 @@ const [hackathon, setHackathon] = useState({
           Formato: data.formato,
           Tecnologias: data.tecnologias || [],
           Metodo: data.metodo || "",
-          Ranking: data.ranking || "",
-          TipoPremiacao: data.tipoPremiacao || "",
-          Premiacao: data.premiacao || "",
+          Premios: data.premios?.length
+            ? data.premios.map((prize) => ({
+                Posicao: prize.posicao,
+                Tipo: prize.tipo || "",
+                Valor: prize.valor ?? "",
+                Descricao: prize.descricao || "",
+              }))
+            : [{ Posicao: 1, Tipo: "", Valor: "", Descricao: "" }],
           corPrincipal: data.corPrincipal || "#6C48C5",
           corSecundaria: data.corSecundaria || "#C68FE6",
           corFundo: data.corFundo || "#170A36",
@@ -153,7 +156,14 @@ const [hackathon, setHackathon] = useState({
       ...hackathon,
       logoFile: undefined, // o arquivo já virou data URL em Logo
       Empresa: undefined,
-      Premiacao: hackathon.Premiacao === "" ? null : Number(hackathon.Premiacao),
+      // sempre envia a lista (chaves em minúsculo, como o JSON da API): sem ela a API recria só o prêmio do 1º lugar
+      // só as linhas com tipo escolhido: a linha vazia do formulário novo não é um prêmio ainda
+      Premios: hackathon.Premios.filter((prize) => prize.Tipo).map((prize) => ({
+        posicao: prize.Posicao,
+        tipo: prize.Tipo,
+        valor: prize.Tipo === "Dinheiro" && prize.Valor !== "" ? Number(prize.Valor) : null,
+        descricao: prize.Descricao,
+      })),
       DataInicio: toIsoDate(hackathon.DataInicio),
       DataFinal: toIsoDate(hackathon.DataFinal),
       DataFimAvaliacao: toIsoDate(hackathon.DataFimAvaliacao),

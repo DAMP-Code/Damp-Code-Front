@@ -29,6 +29,8 @@ const HackathonCard = ({ hackathon }) => {
     ? hackathon.tecnologias.slice(0, 2)
     : [];
   const active = isActive(hackathon.status);
+  const prizes = Array.isArray(hackathon.premios) ? hackathon.premios : [];
+  const firstPrize = prizes.find((prize) => prize.posicao === 1) || prizes[0];
 
   return (
     <article className="flex w-[min(100%,21rem)] min-h-80 flex-col overflow-hidden rounded-2xl border border-white/10 bg-surface-light text-left shadow-[0_18px_45px_rgba(0,0,0,0.28)] transition-colors duration-200 hover:border-brand-light">
@@ -77,8 +79,15 @@ const HackathonCard = ({ hackathon }) => {
           <div>
             <p className="text-xs text-content-secondary">Prêmio</p>
             <p className="text-lg font-semibold text-content">
-              {formatPrize(hackathon.premiacao)}
+              {firstPrize
+                ? firstPrize.tipo === "Dinheiro"
+                  ? formatPrize(firstPrize.valor)
+                  : "Entrevista"
+                : formatPrize(hackathon.premiacao)}
             </p>
+            {prizes.length > 1 && (
+              <p className="text-xs text-content-secondary">+{prizes.length - 1} {prizes.length === 2 ? "prêmio" : "prêmios"}</p>
+            )}
           </div>
           <button
             className="rounded-xl bg-highlight px-3 py-2 text-sm font-bold text-surface transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110"

@@ -6,6 +6,7 @@ import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
 import HackathonTitle from "@/app-components/hackathon-creation/HackathonTitle";
+import { prizeLabel } from "@/app-components/utilities/prizes";
 import HackathonSubtitle from "@/app-components/hackathon-creation/HackathonSubtitle";
 
 const HackathonPage = () => {
@@ -123,10 +124,24 @@ const HackathonPage = () => {
 
         <p>{hackathon.participantes || "X pessoas já entraram"}</p>
 
-        <p>
-          Premiação:
-          <b> R$ {hackathon.premiacao}</b>
-        </p>
+        {hackathon.premios?.length > 0 ? (
+          <div className="w-full rounded-2xl border border-white/10 bg-surface/40 px-4 py-3">
+            <p className="!border-0 !bg-transparent !p-0 font-semibold text-content">Prêmios</p>
+            <ul className="mt-1 flex flex-col gap-1">
+              {hackathon.premios.map((prize) => (
+                <li key={prize.posicao}>
+                  <b>{prize.posicao}º lugar</b> — {prizeLabel(prize)}
+                  {prize.descricao && ` · ${prize.descricao}`}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p>
+            Premiação:
+            <b> R$ {hackathon.premiacao}</b>
+          </p>
+        )}
 
         {hackathon.fase === "Publicado" ? (
           <p>
