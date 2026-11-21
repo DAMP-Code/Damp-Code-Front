@@ -1,9 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import "../style.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faChevronDown, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
+import Avatar from "@/app-components/Avatar";
 
 const accountButtonClass =
   "rounded-xl bg-highlight px-4 py-2 text-sm font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] hover:-translate-y-0.5 hover:brightness-110";
@@ -27,7 +28,6 @@ const linksByRole = {
   participante: [
     { to: "/", label: "Explorar", end: true },
     { to: "/dashboard/participante", label: "Meu painel" },
-    { to: "/perfil", label: "Perfil" },
     { to: "/sobre", label: "Sobre" },
   ],
   admin: [
@@ -37,21 +37,55 @@ const linksByRole = {
   ],
 };
 
+// itens do menu da conta (o do avatar)
+const accountLinksByRole = {
+  participante: [
+    { to: "/perfil", label: "Meu perfil" },
+    { to: "/conta", label: "Configurações da conta" },
+  ],
+  empresa: [{ to: "/conta", label: "Configurações da conta" }],
+  admin: [{ to: "/conta", label: "Configurações da conta" }],
+};
+
+const roleLabel = { participante: "Participante", empresa: "Empresa", admin: "Admin" };
+
 const Header = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const accountRef = useRef(null);
 
   const links = user ? linksByRole[user.role] || [] : visitorLinks;
+  const accountLinks = user ? accountLinksByRole[user.role] || [] : [];
+
+  // fecha o menu da conta com clique fora ou Esc
+  useEffect(() => {
+    if (!isAccountOpen) return;
+    function handleClick(e) {
+      if (accountRef.current && !accountRef.current.contains(e.target)) setIsAccountOpen(false);
+    }
+    function handleKey(e) {
+      if (e.key === "Escape") setIsAccountOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [isAccountOpen]);
 
   function handleLogout() {
     logout();
     setIsMenuOpen(false);
+    setIsAccountOpen(false);
     navigate("/");
   }
 
   function closeMenu() {
     setIsMenuOpen(false);
+    setIsAccountOpen(false);
   }
 
   function renderLink(link, className) {
@@ -77,6 +111,7 @@ const Header = () => {
 
   const desktopLinkClass = "rounded-lg px-3 py-2 hover:bg-white/5 hover:text-highlight";
   const mobileLinkClass = "w-full rounded-lg p-4 text-center text-content hover:text-highlight";
+  const accountItemClass = "block w-full rounded-lg px-3 py-2.5 text-left text-sm text-content hover:bg-white/5 hover:text-highlight";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-surface-light/95 shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-xl">
@@ -96,10 +131,51 @@ const Header = () => {
               Criar conta
             </Link>
           )}
+
+          {/* MENU DA CONTA */}
           {user && (
-            <button onClick={handleLogout} className="rounded-lg px-3 py-2 hover:text-red-400">
-              Sair
-            </button>
+            <div ref={accountRef} className="relative ml-2">
+              <button
+                type="button"
+                onClick={() => setIsAccountOpen(!isAccountOpen)}
+                aria-haspopup="menu"
+                aria-expanded={isAccountOpen}
+                aria-label={`Conta de ${user.name}`}
+                className="flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-white/5"
+              >
+                <Avatar name={user.name} color={user.avatarColor} />
+                <FontAwesomeIcon
+                  icon={faChevronDown}
+                  className={`text-xs text-content-secondary transition-transform ${isAccountOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isAccountOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-white/10 bg-surface-light p-2 shadow-[0_24px_60px_rgba(0,0,0,0.45)]"
+                >
+                  <div className="flex items-center gap-3 border-b border-white/10 px-3 pb-3 pt-2">
+                    <Avatar name={user.name} color={user.avatarColor} size="md" />
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-content">{user.name}</p>
+                      <p className="truncate text-sm text-content-secondary">{user.email}</p>
+                      <p className="text-xs font-medium text-brand-light">{roleLabel[user.role]}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col py-2">
+                    {accountLinks.map((link) => (
+                      <Link key={link.to} role="menuitem" to={link.to} onClick={closeMenu} className={accountItemClass}>
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                  <button role="menuitem" onClick={handleLogout} className={`${accountItemClass} border-t border-white/10 hover:text-red-400`}>
+                    Sair
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </nav>
 
@@ -115,11 +191,22 @@ const Header = () => {
       </div>
 
       <div
-        className={`absolute left-0 top-full z-10 w-full border-t border-white/10 bg-surface-light/98 px-4 py-3 shadow-2xl backdrop-blur-xl md:hidden ${
+        className={`absolute left-0 top-full z-10 w-full border-t border-white/10 bg-surface-light px-4 py-3 shadow-2xl md:hidden ${
           isMenuOpen ? "flex flex-col gap-1" : "hidden"
         }`}
       >
+        {/* conta no topo do menu do celular */}
+        {user && (
+          <div className="mb-1 flex items-center gap-3 rounded-xl bg-white/5 p-3">
+            <Avatar name={user.name} color={user.avatarColor} size="md" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-content">{user.name}</p>
+              <p className="truncate text-sm text-content-secondary">{user.email}</p>
+            </div>
+          </div>
+        )}
         {links.map((link) => renderLink(link, mobileLinkClass))}
+        {accountLinks.map((link) => renderLink(link, mobileLinkClass))}
         {!user && (
           <Link to="/escolha" onClick={closeMenu} className={`mx-4 mb-2 text-center ${accountButtonClass}`}>
             Criar conta

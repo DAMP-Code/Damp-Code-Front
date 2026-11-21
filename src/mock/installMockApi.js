@@ -86,6 +86,7 @@ function publicUser(user) {
     name: user.name,
     email: user.email,
     role: user.role,
+    avatarColor: user.avatarColor || null,
     // token falso: o mock só precisa saber quem está chamando
     token: `mock-${user.id}`,
   };
@@ -1644,6 +1645,45 @@ function handle(path, method, body, token) {
   }
   if (path.startsWith("/api/Hackathons")) {
     return handleHackathons(path, method, body, database, currentUser);
+  }
+
+  // configurações da conta (mesmas regras do AuthService da API)
+  if (path === "/api/Auth/me" || path === "/api/Auth/me/senha") {
+    if (!currentUser) return json({ message: "Não autenticado" }, 401);
+    const accountResponse = () => {
+      const { token: _token, ...rest } = publicUser(currentUser);
+      return { ...rest, level: currentUser.role === "participante" ? 1 : null, xp: currentUser.role === "participante" ? 0 : null };
+    };
+
+    if (method === "GET" && path === "/api/Auth/me") return json(accountResponse());
+
+    if (method === "PUT" && path === "/api/Auth/me") {
+      if (body?.name !== null && body?.name !== undefined) {
+        if (currentUser.role === "empresa") return problem("O nome da empresa não pode ser mudado por aqui.", 400);
+        if (currentUser.role === "admin") return problem("Esta conta não tem nome para editar.", 400);
+        const name = String(body.name).trim();
+        if (name.length < 2 || name.length > 150) return problem("O nome precisa ter entre 2 e 150 caracteres.", 400);
+        currentUser.name = name;
+      }
+      if (body?.avatarColor !== null && body?.avatarColor !== undefined) {
+        const color = String(body.avatarColor).trim();
+        if (color && !/^#[0-9A-Fa-f]{6}$/.test(color)) return problem("Cor inválida. Use o formato #RRGGBB.", 400);
+        currentUser.avatarColor = color || null;
+      }
+      saveDatabase(database);
+      return json(accountResponse());
+    }
+
+    if (method === "PUT" && path === "/api/Auth/me/senha") {
+      if (String(body?.senhaAtual || "") !== currentUser.password) return problem("Senha atual incorreta.", 400);
+      const next = String(body?.novaSenha || "");
+      if (next.length < 10 || next.length > 128) return problem("A nova senha precisa ter entre 10 e 128 caracteres.", 400);
+      if (next === currentUser.password) return problem("A nova senha precisa ser diferente da atual.", 400);
+      currentUser.password = next;
+      saveDatabase(database);
+      // a API devolve um token novo; no mock o token não muda
+      return json(publicUser(currentUser));
+    }
   }
 
   if (method === "POST" && path === "/api/Auth/login") {

@@ -33,7 +33,8 @@ const RequireRole = ({ role, children }) => {
   }, [needsCompanyCheck, user?.token]);
 
   if (!user) return <Navigate to="/loginUser" replace />;
-  if (user.role === role) return children;
+  // role pode ser um tipo ("empresa") ou uma lista (["participante", "empresa", "admin"])
+  if ([].concat(role).includes(user.role)) return children;
 
   if (needsCompanyCheck) {
     // ainda conferindo se é funcionário

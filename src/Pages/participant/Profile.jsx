@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Header from "@/app-components/Header";
 import Footer from "@/app-components/Footer";
 import EmptyState from "@/app-components/EmptyState";
+import Avatar from "@/app-components/Avatar";
 import ScoreChart from "@/app-components/charts/ScoreChart";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { prizeLabel } from "@/app-components/utilities/prizes";
@@ -21,13 +22,6 @@ const phaseStyles = {
 const runningPhases = ["Publicado", "Ativo", "Em avaliação"];
 
 const panelClass = "rounded-2xl border border-white/10 bg-surface-light p-5 shadow-[0_20px_55px_rgba(0,0,0,0.24)] sm:p-6";
-
-// iniciais para o avatar: "Ana Ribeiro" -> "AR"
-function initials(name) {
-  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
-}
 
 function formatDate(value) {
   return value ? new Date(value).toLocaleDateString("pt-BR") : null;
@@ -100,12 +94,7 @@ const Profile = () => {
         {/* IDENTIDADE */}
         <section className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-surface-light p-6 shadow-[0_20px_55px_rgba(0,0,0,0.24)] sm:p-8 md:flex-row md:items-center md:justify-between">
           <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-            <span
-              aria-hidden="true"
-              className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-brand text-2xl font-bold text-white sm:size-20 sm:text-3xl"
-            >
-              {initials(user?.name)}
-            </span>
+            <Avatar name={user?.name} color={user?.avatarColor} size="lg" />
             <div className="flex min-w-0 flex-col gap-1">
               <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">{user?.name}</h1>
               <p className="truncate text-content-secondary">{user?.email}</p>
