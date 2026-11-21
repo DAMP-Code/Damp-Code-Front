@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Title from "../Title";
 import handleLogoChange from "../utilities/handleLogoChange";
 
@@ -31,6 +32,7 @@ const FormSection = ({
   handlePublish,
   message,
   isEditing,
+  modulesLink,
   isDraft,
   isPublished,
   canPublish,
@@ -139,7 +141,15 @@ function handleLogoChange(e) {
 
   return (
     <section className="flex w-full flex-col gap-y-8 bg-surface px-5 py-8 sm:px-8 md:w-1/2 lg:px-10">
-      <Title text1={isEditing ? "Editar" : "Criar"} text2={"Hackathon"} />
+      <div>
+        <Title text1={isEditing ? "Editar" : "Criar"} text2={"Hackathon"} />
+        {/* módulos e conteúdos ficam numa tela própria; só existem depois que o Hackathon foi salvo */}
+        {modulesLink && (
+          <Link to={modulesLink} className="font-semibold text-highlight hover:underline">
+            Módulos e conteúdos do Hackathon
+          </Link>
+        )}
+      </div>
 
       <form className="flex flex-col gap-y-6 rounded-3xl border border-white/10 bg-surface-light/35 p-5 shadow-[0_20px_55px_rgba(0,0,0,0.2)] sm:p-7" onSubmit={handleSubmit}>
         {isPublished && (

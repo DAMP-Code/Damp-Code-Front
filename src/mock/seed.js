@@ -67,6 +67,8 @@ export const seedDatabase = {
   nextTeamJoinRequestId: 1,
   nextSubmissionId: 9,
   nextSubmissionVersionId: 10,
+  nextModuleId: 3,
+  nextContentId: 5,
   users: [
     {
       id: 1,
@@ -359,6 +361,60 @@ export const seedDatabase = {
       submittedBy,
       submittedAt: `2026-10-2${index + 1}T14:00:00.000Z`,
     })),
+  ],
+  // Módulos e conteúdos espelham as tabelas hackathon_modules / hackathon_module_contents.
+  // O Hackathon 4 (Nubank) já vem com material de apoio.
+  modules: [
+    {
+      moduloId: "m-1",
+      hackathonId: 4,
+      posicao: 1,
+      titulo: "Comece por aqui",
+      descricao: "O que a Nubank espera da entrega e como o fluxo de pagamento funciona hoje.",
+      conteudos: [
+        {
+          conteudoId: "ct-1",
+          tipo: "Texto",
+          titulo: "Como ler o desafio",
+          texto: "O foco é o fluxo de pagamento em poucas telas. Pense em quem segura o celular com uma mão só: botões ao alcance do polegar, nada de formulário longo.\n\nA entrega é o código das telas principais e um README curto explicando as escolhas.",
+          url: null,
+          posicao: 1,
+        },
+        {
+          conteudoId: "ct-2",
+          tipo: "Video",
+          titulo: "Aula de abertura",
+          texto: "Gravação da conversa com o time de produto.",
+          url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          posicao: 2,
+        },
+      ],
+    },
+    {
+      moduloId: "m-2",
+      hackathonId: 4,
+      posicao: 2,
+      titulo: "Cursos recomendados",
+      descricao: null,
+      conteudos: [
+        {
+          conteudoId: "ct-3",
+          tipo: "Link",
+          titulo: "Guia de acessibilidade no Android",
+          texto: "Documentação oficial com exemplos de tamanho de toque e contraste.",
+          url: "https://developer.android.com/guide/topics/ui/accessibility",
+          posicao: 1,
+        },
+        {
+          conteudoId: "ct-4",
+          tipo: "Link",
+          titulo: "Curso de React Native",
+          texto: null,
+          url: "https://reactnative.dev/docs/getting-started",
+          posicao: 2,
+        },
+      ],
+    },
   ],
   hackathons: [
     {

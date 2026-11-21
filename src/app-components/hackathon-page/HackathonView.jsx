@@ -1,5 +1,6 @@
 import React from "react";
 import PhaseTimeline from "./PhaseTimeline";
+import ModuleList from "./ModuleList";
 import { formatMoney, prizeLabel, totalPrize } from "@/app-components/utilities/prizes";
 
 function getMethodDescription(method) {
@@ -29,7 +30,7 @@ const phaseBadge = {
 
 // Página de um Hackathon. A mesma tela serve para a página pública e para a prévia do formulário,
 // por isso usa container queries (@...) em vez dos breakpoints da janela.
-const HackathonView = ({ hackathon, action }) => {
+const HackathonView = ({ hackathon, action, modules }) => {
   const color = hackathon.corPrincipal || "#6C48C5";
   const accent = hackathon.corSecundaria || "#C68FE6";
   const prizes = [...(hackathon.premios || [])].sort((a, b) => a.posicao - b.posicao);
@@ -95,6 +96,14 @@ const HackathonView = ({ hackathon, action }) => {
               {hackathon.descricao || "A empresa ainda não escreveu a descrição."}
             </p>
           </section>
+
+          {modules?.length > 0 && (
+            <section className="rounded-2xl border border-white/10 bg-surface/50 p-6 backdrop-blur-sm">
+              <h2 className="text-xl font-semibold text-white">Conteúdos</h2>
+              <p className="mt-1 text-sm text-content-secondary">Material de apoio da empresa, em ordem.</p>
+              <ModuleList modules={modules} accent={accent} />
+            </section>
+          )}
 
           <section className="rounded-2xl border border-white/10 bg-surface/50 p-6 backdrop-blur-sm">
             <h2 className="text-xl font-semibold text-white">Como as entregas são avaliadas</h2>

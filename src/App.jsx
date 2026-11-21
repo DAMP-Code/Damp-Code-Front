@@ -17,6 +17,7 @@ import SubmissionPage from "./Pages/SubmissionPage";
 import Ranking from "./Pages/company/Ranking";
 import Profile from "./Pages/participant/Profile";
 import AdminVerification from "./Pages/admin/AdminVerification";
+import ManageModules from "./Pages/company/ManageModules";
 import RequireRole from "./app-components/utilities/RequireRole";
 
 const App = () => {
@@ -39,6 +40,7 @@ const App = () => {
       ></Route>
       <Route path="/cadastroHackaton" element={<RequireRole role="empresa"><CreateHackathon key="novo" /></RequireRole>}></Route>
       <Route path="/cadastroHackaton/:id" element={<RequireRole role="empresa"><CreateHackathon key="editar" /></RequireRole>}></Route>
+      <Route path="/cadastroHackaton/:id/modulos" element={<RequireRole role="empresa"><ManageModules /></RequireRole>} />
       <Route path="/hackathon/:id" element={<HackathonPage />} />
       <Route path="/hackathon/:id/entrega" element={<RequireRole role="participante"><SubmissionPage /></RequireRole>} />
       <Route path="/dashboard/ranking" element={<RequireRole role="empresa"><Ranking /></RequireRole>} />

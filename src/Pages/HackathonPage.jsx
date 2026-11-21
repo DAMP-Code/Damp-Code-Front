@@ -14,6 +14,7 @@ const HackathonPage = () => {
 
   const [hackathon, setHackathon] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [modules, setModules] = useState([]);
   // recarrega a contagem de participantes depois de uma inscrição
   const [reload, setReload] = useState(0);
 
@@ -37,6 +38,23 @@ const HackathonPage = () => {
 
     loadHackathon();
   }, [id, user?.token, reload]);
+
+  // material de apoio (módulos e conteúdos); sem módulos a seção não aparece
+  useEffect(() => {
+    async function loadModules() {
+      try {
+        const response = await fetch(
+          `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}/modulos`,
+          user?.token ? { headers: { Authorization: `Bearer ${user.token}` } } : undefined,
+        );
+        if (response.ok) setModules(await response.json());
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadModules();
+  }, [id, user?.token]);
 
   if (!hackathon) {
     return (
@@ -72,7 +90,7 @@ const HackathonPage = () => {
       >
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
           <BackButton />
-          <HackathonView hackathon={hackathon} action={action} />
+          <HackathonView hackathon={hackathon} action={action} modules={modules} />
         </div>
       </section>
       <Footer />

@@ -259,6 +259,7 @@ const [hackathon, setHackathon] = useState({
               handleChange={handleChange}
               setHackathon={setHackathon}
               isEditing={Boolean(id)}
+              modulesLink={id && !["Encerrado", "Cancelado"].includes(fase) ? `/cadastroHackaton/${encodeURIComponent(id)}/modulos` : null}
               isDraft={isDraft}
               isPublished={isPublished}
               canPublish={companyAccess?.canPublish === true}

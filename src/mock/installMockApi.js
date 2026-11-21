@@ -26,6 +26,7 @@ function loadDatabase() {
       "teams", "participations", "teamInvitations", "teamJoinRequests",
       "nextTeamId", "nextParticipationId", "nextTeamInvitationId", "nextTeamJoinRequestId",
       "submissions", "submissionVersions", "nextSubmissionId", "nextSubmissionVersionId",
+      "modules", "nextModuleId", "nextContentId",
     ]) {
       if (database[key] === undefined) database[key] = structuredClone(seedDatabase[key]);
     }
@@ -1458,12 +1459,174 @@ function handleHackathons(path, method, body, database, user) {
   return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
 }
 
+// Módulos e conteúdos do Hackathon (mesmas regras do HackathonModuleService da API).
+const MODULE_LIMIT = 20;
+const CONTENT_LIMIT = 30;
+const MODULES_LOCKED = "Hackathon encerrado ou cancelado não aceita mudanças nos módulos.";
+const CONTENT_TYPES = ["Texto", "Link", "Video"];
+
+function toModule(module) {
+  return {
+    moduloId: module.moduloId,
+    titulo: module.titulo,
+    descricao: module.descricao,
+    posicao: module.posicao,
+    conteudos: [...module.conteudos].sort((a, b) => a.posicao - b.posicao),
+  };
+}
+
+function validateModule(body) {
+  const titulo = String(body?.titulo || "").trim();
+  if (!titulo) return "Informe o título do módulo.";
+  if (titulo.length > 120) return "O título do módulo tem no máximo 120 caracteres.";
+  if (String(body?.descricao || "").length > 1000) return "A descrição do módulo tem no máximo 1.000 caracteres.";
+  return null;
+}
+
+function validateContent(body) {
+  const tipo = CONTENT_TYPES.find((item) => item.toLowerCase() === String(body?.tipo || "").toLowerCase());
+  if (!tipo) return { error: "Tipo de conteúdo deve ser Texto, Link ou Video." };
+  const titulo = String(body?.titulo || "").trim();
+  if (!titulo) return { error: "Informe o título do conteúdo." };
+  if (titulo.length > 160) return { error: "O título do conteúdo tem no máximo 160 caracteres." };
+  const texto = String(body?.texto || "").trim();
+  const url = String(body?.url || "").trim();
+  if (tipo === "Texto") {
+    if (!texto) return { error: "Escreva o texto do conteúdo." };
+    if (texto.length > 20000) return { error: "O texto tem no máximo 20.000 caracteres." };
+    return { value: { tipo, titulo, texto, url: null } };
+  }
+  if (!/^https?:\/\/\S+$/i.test(url) || url.length > 2048) return { error: "Informe uma URL que comece com http:// ou https://." };
+  if (texto.length > 1000) return { error: "A descrição do link tem no máximo 1.000 caracteres." };
+  return { value: { tipo, titulo, texto: texto || null, url } };
+}
+
+// posições 1, 2, 3... sem buracos, na ordem atual
+function renumber(items) {
+  [...items].sort((a, b) => a.posicao - b.posicao).forEach((item, index) => {
+    item.posicao = index + 1;
+  });
+}
+
+// a lista de ordem precisa ter exatamente os mesmos ids, sem repetir
+function applyOrder(items, ids, idKey) {
+  if (!Array.isArray(ids) || ids.length !== items.length || new Set(ids).size !== ids.length) return false;
+  if (!ids.every((id) => items.some((item) => item[idKey] === id))) return false;
+  ids.forEach((id, index) => {
+    items.find((item) => item[idKey] === id).posicao = index + 1;
+  });
+  return true;
+}
+
+function handleModules(path, method, body, database, user) {
+  const match = path.match(/^\/api\/Hackathons\/([^/]+)\/modulos(?:\/([^/]+))?(?:\/conteudos(?:\/([^/]+))?)?$/);
+  if (!match) return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  const [, hackathonId, moduleSegment, contentSegment] = match;
+  const isContentRoute = path.includes("/conteudos");
+
+  const hackathon = database.hackathons.find((item) => String(item.hackathonId) === hackathonId);
+  if (!hackathon) return problem(HACKATHON_NOT_FOUND, 404);
+  const access = user ? managedCompany(database, user) : null;
+  const manages = access?.companyId === hackathon.companyId;
+  const phase = phaseOf(hackathon);
+  if ((phase === "Draft" || phase === "Cancelled") && !manages) return problem(HACKATHON_NOT_FOUND, 404);
+
+  const modules = database.modules.filter((item) => String(item.hackathonId) === String(hackathon.hackathonId));
+  const ordered = () => [...modules].sort((a, b) => a.posicao - b.posicao).map(toModule);
+
+  if (method === "GET" && !moduleSegment) return json(ordered());
+
+  if (!user) return json({ message: "Não autenticado" }, 401);
+  if (!manages) return problem(NO_COMPANY, 403);
+  if (phase === "Closed" || phase === "Cancelled") return problem(MODULES_LOCKED, 409);
+
+  // módulos
+  if (!isContentRoute) {
+    if (method === "POST" && !moduleSegment) {
+      const error = validateModule(body);
+      if (error) return problem(error, 400);
+      if (modules.length >= MODULE_LIMIT) return problem(`O Hackathon já tem ${MODULE_LIMIT} módulos.`, 409);
+      const module = {
+        moduloId: `m-${database.nextModuleId++}`,
+        hackathonId: hackathon.hackathonId,
+        posicao: modules.length + 1,
+        titulo: String(body.titulo).trim(),
+        descricao: String(body?.descricao || "").trim() || null,
+        conteudos: [],
+      };
+      database.modules.push(module);
+      saveDatabase(database);
+      return json(toModule(module), 201);
+    }
+    if (method === "PUT" && moduleSegment === "ordem") {
+      if (!applyOrder(modules, body?.ids, "moduloId")) return problem("A nova ordem precisa ter todos os módulos, sem repetir.", 400);
+      saveDatabase(database);
+      return json(ordered());
+    }
+    const module = modules.find((item) => item.moduloId === moduleSegment);
+    if (!module) return problem("Módulo não encontrado.", 404);
+    if (method === "PUT") {
+      const error = validateModule(body);
+      if (error) return problem(error, 400);
+      module.titulo = String(body.titulo).trim();
+      module.descricao = String(body?.descricao || "").trim() || null;
+      saveDatabase(database);
+      return json(toModule(module));
+    }
+    if (method === "DELETE") {
+      database.modules = database.modules.filter((item) => item !== module);
+      renumber(modules.filter((item) => item !== module));
+      saveDatabase(database);
+      return new Response(null, { status: 204 });
+    }
+    return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  }
+
+  // conteúdos de um módulo
+  const module = modules.find((item) => item.moduloId === moduleSegment);
+  if (!module) return problem("Módulo não encontrado.", 404);
+
+  if (method === "POST" && !contentSegment) {
+    const { error, value } = validateContent(body);
+    if (error) return problem(error, 400);
+    if (module.conteudos.length >= CONTENT_LIMIT) return problem(`O módulo já tem ${CONTENT_LIMIT} conteúdos.`, 409);
+    const content = { conteudoId: `ct-${database.nextContentId++}`, ...value, posicao: module.conteudos.length + 1 };
+    module.conteudos.push(content);
+    saveDatabase(database);
+    return json(content, 201);
+  }
+  if (method === "PUT" && contentSegment === "ordem") {
+    if (!applyOrder(module.conteudos, body?.ids, "conteudoId")) return problem("A nova ordem precisa ter todos os conteúdos, sem repetir.", 400);
+    saveDatabase(database);
+    return json(toModule(module));
+  }
+  const content = module.conteudos.find((item) => item.conteudoId === contentSegment);
+  if (!content) return problem("Conteúdo não encontrado.", 404);
+  if (method === "PUT") {
+    const { error, value } = validateContent(body);
+    if (error) return problem(error, 400);
+    Object.assign(content, value);
+    saveDatabase(database);
+    return json(content);
+  }
+  if (method === "DELETE") {
+    module.conteudos = module.conteudos.filter((item) => item !== content);
+    renumber(module.conteudos);
+    saveDatabase(database);
+    return new Response(null, { status: 204 });
+  }
+  return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+}
+
 function handle(path, method, body, token) {
   const database = loadDatabase();
 
   const currentUser = database.users.find((item) => `mock-${item.id}` === token);
   if (path.startsWith("/api/Companies")) {
     return handleCompanies(path, method, body, database, currentUser);
+  }
+  if (/^\/api\/Hackathons\/[^/]+\/modulos(\/|$)/.test(path)) {
+    return handleModules(path, method, body, database, currentUser);
   }
   if (/^\/api\/Hackathons\/[^/]+\/(avaliacao|vencedores|resultado|entregas\/[^/]+\/avaliacao)$/.test(path)) {
     return handleEvaluation(path, method, body, database, currentUser);
