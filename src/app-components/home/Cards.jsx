@@ -59,7 +59,7 @@ const Cards = () => {
       ) : null}
 
       {!loading && hackathons.length > 0 ? (
-        <div className="flex w-full min-w-0 max-w-7xl flex-wrap items-stretch justify-start gap-6 px-5">
+        <div className="grid w-full min-w-0 max-w-7xl grid-cols-1 gap-6 px-5 sm:grid-cols-2 lg:grid-cols-4 [&>*]:w-full">
           {hackathons.map((hackathon) => (
             <HackathonCard
               key={hackathon.hackathonId || hackathon.HackathonId}
