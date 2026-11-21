@@ -220,7 +220,7 @@ textarea::placeholder {
   to { transform: translateX(-50%); }
 }
 .damp-marquee {
-  animation: damp-marquee 40s linear infinite;
+  animation: damp-marquee var(--marquee-duration, 40s) linear infinite;
 }
 .damp-marquee-track:hover .damp-marquee {
   animation-play-state: paused;

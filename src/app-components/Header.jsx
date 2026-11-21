@@ -40,13 +40,11 @@ const linksByRole = {
 };
 
 // itens do menu da conta (o do avatar)
+// "Meu perfil" já traz as configurações da conta (participante em /perfil; empresa e admin em /conta)
 const accountLinksByRole = {
-  participante: [
-    { to: "/perfil", label: "Meu perfil" },
-    { to: "/conta", label: "Configurações da conta" },
-  ],
-  empresa: [{ to: "/conta", label: "Configurações da conta" }],
-  admin: [{ to: "/conta", label: "Configurações da conta" }],
+  participante: [{ to: "/perfil", label: "Meu perfil" }],
+  empresa: [{ to: "/conta", label: "Meu perfil" }],
+  admin: [{ to: "/conta", label: "Meu perfil" }],
 };
 
 const roleLabel = { participante: "Participante", empresa: "Empresa", admin: "Admin" };

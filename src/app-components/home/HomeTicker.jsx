@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCode, faFire, faTrophy } from '@fortawesome/free-solid-svg-icons'
@@ -6,10 +6,18 @@ import { formatMoney, totalPrize } from '@/app-components/utilities/prizes'
 
 const API = 'https://localhost:7092/api/Hackathons'
 
+// velocidade constante da faixa, em pixels por segundo (mais itens não deixam a faixa mais rápida)
+const SPEED = 45
+
 // Faixa que rola sem parar logo abaixo do topo: desafios abertos, vencedores e tecnologias pedidas.
 // Para quando o mouse passa por cima; com "menos animação" no sistema ela fica parada e rola na mão.
 const HomeTicker = () => {
   const [items, setItems] = useState([])
+  // quantas vezes a lista se repete em cada metade: a metade precisa ser mais larga que a tela, senão sobra um buraco
+  const [repeats, setRepeats] = useState(1)
+  const [duration, setDuration] = useState(40)
+  const trackRef = useRef(null)
+  const groupRef = useRef(null)
 
   useEffect(() => {
     async function load() {
@@ -71,7 +79,32 @@ const HomeTicker = () => {
     load()
   }, [])
 
+  // mede a largura de uma volta da lista e repete até cobrir a tela com folga; recalcula ao redimensionar
+  useLayoutEffect(() => {
+    const track = trackRef.current
+    const group = groupRef.current
+    if (!track || !group || items.length === 0) return
+
+    function measure() {
+      const setWidth = group.scrollWidth / repeats
+      if (!setWidth) return
+      const needed = Math.max(1, Math.ceil(track.clientWidth / setWidth) + 1)
+      if (needed !== repeats) {
+        setRepeats(needed)
+        return
+      }
+      setDuration(group.scrollWidth / SPEED)
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(track)
+    return () => observer.disconnect()
+  }, [items, repeats])
+
   if (items.length === 0) return null
+
+  const copies = Array.from({ length: repeats }, (_, index) => index)
 
   const renderItem = (item, copy) => {
     const content = (
@@ -83,26 +116,29 @@ const HomeTicker = () => {
     )
     const className = 'flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-surface-light/70 px-4 py-2 text-sm'
     return item.to ? (
-      <Link key={`${copy}-${item.key}`} to={item.to} tabIndex={copy ? -1 : undefined} className={`${className} transition hover:border-highlight/50`}>
+      <Link key={`${copy}-${item.key}`} to={item.to} tabIndex={copy ? -1 : undefined} aria-hidden={copy ? true : undefined} className={`${className} transition hover:border-highlight/50`}>
         {content}
       </Link>
     ) : (
-      <span key={`${copy}-${item.key}`} className={className}>
+      <span key={`${copy}-${item.key}`} aria-hidden={copy ? true : undefined} className={className}>
         {content}
       </span>
     )
   }
 
   return (
-    <section aria-label='Acontecendo agora' className='damp-marquee-track relative w-full overflow-hidden border-b border-white/5 py-4 motion-reduce:overflow-x-auto'>
+    <section ref={trackRef} aria-label='Acontecendo agora' className='damp-marquee-track relative w-full overflow-hidden border-b border-white/5 py-4 motion-reduce:overflow-x-auto'>
       {/* bordas se apagando nas laterais */}
       <div aria-hidden='true' className='pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-surface to-transparent sm:w-32' />
       <div aria-hidden='true' className='pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-surface to-transparent sm:w-32' />
-      <div className='damp-marquee flex w-max'>
-        <div className='flex gap-3 pr-3'>{items.map((item) => renderItem(item, ''))}</div>
-        {/* cópia do mesmo tamanho para a faixa emendar sem tranco (escondida de leitores de tela) */}
+      <div className='damp-marquee flex w-max' style={{ '--marquee-duration': `${duration}s` }}>
+        {/* metade A: a lista repetida até passar da largura da tela (só a primeira volta é lida por leitores de tela) */}
+        <div ref={groupRef} className='flex gap-3 pr-3'>
+          {copies.map((copy) => items.map((item) => renderItem(item, copy === 0 ? '' : `r${copy}`)))}
+        </div>
+        {/* metade B: cópia idêntica da A; a animação anda exatamente uma metade e emenda sem tranco */}
         <div aria-hidden='true' className='flex gap-3 pr-3 motion-reduce:hidden'>
-          {items.map((item) => renderItem(item, 'copia'))}
+          {copies.map((copy) => items.map((item) => renderItem(item, `b${copy}`)))}
         </div>
       </div>
     </section>

@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Header from "@/app-components/Header";
 import Footer from "@/app-components/Footer";
 import EmptyState from "@/app-components/EmptyState";
-import Avatar from "@/app-components/Avatar";
+import EditableAvatar from "@/app-components/account/EditableAvatar";
+import AccountForms from "@/app-components/account/AccountForms";
 import ScoreChart from "@/app-components/charts/ScoreChart";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { prizeLabel } from "@/app-components/utilities/prizes";
@@ -32,6 +33,14 @@ const Profile = () => {
   const [participations, setParticipations] = useState(null);
   const [companyAccess, setCompanyAccess] = useState(null);
   const [error, setError] = useState("");
+  const location = useLocation();
+
+  // vindo de /conta (ou de um link com #configuracoes), rola até as configurações
+  useEffect(() => {
+    if (location.hash !== "#configuracoes") return;
+    const timer = setTimeout(() => document.getElementById("configuracoes")?.scrollIntoView({ behavior: "smooth" }), 300);
+    return () => clearTimeout(timer);
+  }, [location.hash]);
 
   useEffect(() => {
     const headers = { Authorization: `Bearer ${user?.token}` };
@@ -94,7 +103,7 @@ const Profile = () => {
         {/* IDENTIDADE */}
         <section className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-surface-light p-6 shadow-[0_20px_55px_rgba(0,0,0,0.24)] sm:p-8 md:flex-row md:items-center md:justify-between">
           <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-            <Avatar name={user?.name} color={user?.avatarColor} image={user?.avatarImage} size="lg" />
+            <EditableAvatar size="lg" />
             <div className="flex min-w-0 flex-col gap-1">
               <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">{user?.name}</h1>
               <p className="truncate text-content-secondary">{user?.email}</p>
@@ -227,6 +236,14 @@ const Profile = () => {
             </section>
           </>
         )}
+        {/* CONFIGURAÇÕES: tudo da conta fica no próprio perfil */}
+        <section id="configuracoes" className="flex scroll-mt-28 flex-col gap-4 pt-4">
+          <div>
+            <h2 className="text-2xl font-bold">Configurações da conta</h2>
+            <p className="text-content-secondary">Para trocar a foto ou a cor, clique na sua foto lá em cima.</p>
+          </div>
+          <AccountForms />
+        </section>
       </main>
       <Footer />
     </div>
