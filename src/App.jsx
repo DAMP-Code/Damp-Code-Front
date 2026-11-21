@@ -21,6 +21,9 @@ import ManageModules from "./Pages/company/ManageModules";
 import About from "./Pages/About";
 import AccountSettings from "./Pages/AccountSettings";
 import ResultsRanking from "./Pages/ResultsRanking";
+import NotFound from "./Pages/NotFound";
+import Terms from "./Pages/Terms";
+import Privacy from "./Pages/Privacy";
 import RequireRole from "./app-components/utilities/RequireRole";
 
 const App = () => {
@@ -30,8 +33,9 @@ const App = () => {
       <Route path="/explore" element={<Explore />}></Route>
       <Route path="/sobre" element={<About />} />
       <Route path="/ranking" element={<ResultsRanking />} />
+      <Route path="/termos" element={<Terms />} />
+      <Route path="/privacidade" element={<Privacy />} />
       <Route path="/conta" element={<RequireRole role={["participante", "empresa", "admin"]}><AccountSettings /></RequireRole>} />
-      <Route path="/" element={<h1>Rota Não Encontrada!</h1>}></Route>
       <Route path="/cadastroUser" element={<CreateUser />}></Route>
       <Route path="/cadastroEmpresa" element={<CreateCompany />}></Route>
       <Route path="/loginUser" element={<UserLogin />}></Route>
@@ -52,6 +56,8 @@ const App = () => {
       <Route path="/dashboard/ranking" element={<RequireRole role="empresa"><Ranking /></RequireRole>} />
       <Route path="/perfil" element={<RequireRole role="participante"><Profile /></RequireRole>} />
       <Route path="/admin" element={<RequireRole role="admin"><AdminVerification /></RequireRole>} />
+      {/* qualquer endereço que não existe */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

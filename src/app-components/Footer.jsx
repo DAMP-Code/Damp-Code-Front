@@ -19,14 +19,14 @@ const Footer = () => {
             </Link>
           </li>
           <li>
-            <a href="#" className="text-content-secondary hover:text-highlight transition">
+            <Link to="/privacidade" className="text-content-secondary hover:text-highlight transition">
               Privacidade
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#" className="text-content-secondary hover:text-highlight transition">
+            <Link to="/termos" className="text-content-secondary hover:text-highlight transition">
               Termos
-            </a>
+            </Link>
           </li>
           <li>
             <a href="#" className="text-content-secondary hover:text-highlight transition">
