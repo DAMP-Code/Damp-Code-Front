@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -15,8 +15,8 @@ const team = [
     role: "Lorem ipsum dolor",
     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     focus: ["Lorem", "Ipsum", "Dolor"],
-    // caminho da foto (ex.: "/src/assets/equipe/diego.jpg"); sem foto aparece a letra
-    photo: null,
+    // foto em src/assets/equipe; sem o arquivo aparece a letra
+    photo: "/src/assets/equipe/diego.jpg",
     github: "https://github.com/DiegoLopes-da-Silva",
     linkedin: "https://www.linkedin.com/in/diego-lopes-da-silva-833b67352/",
   },
@@ -26,7 +26,9 @@ const team = [
     role: "Lorem ipsum dolor",
     bio: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     focus: ["Lorem", "Ipsum", "Dolor"],
-    photo: null,
+    photo: "/src/assets/equipe/altair.jpg",
+    // selfie em pé: enquadra mais para cima para mostrar o rosto
+    photoPosition: "50% 22%",
     github: "https://github.com/juninh0-dev",
     linkedin: "https://www.linkedin.com/in/altairgodoi/",
   },
@@ -54,6 +56,32 @@ const team = [
 
 // atraso da entrada de cada letra (uma depois da outra)
 const letterDelay = ["delay-0", "delay-150", "delay-300", "delay-500"];
+
+// foto da pessoa (absoluta: não aumenta a altura do cartão); se o arquivo não existir ou falhar, mostra a letra
+const TeamPhoto = ({ person }) => {
+  const [failed, setFailed] = useState(false);
+
+  if (person.photo && !failed) {
+    return (
+      <img
+        src={person.photo}
+        alt={`Foto de ${person.name}`}
+        onError={() => setFailed(true)}
+        style={{ objectPosition: person.photoPosition || "50% 50%" }}
+        className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
+      />
+    );
+  }
+
+  return (
+    <span
+      aria-hidden="true"
+      className="absolute inset-0 flex select-none items-center justify-center text-[9rem] font-black leading-none text-highlight/90 drop-shadow-[0_10px_40px_rgba(255,234,0,0.25)] transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none lg:text-[11rem]"
+    >
+      {person.letter}
+    </span>
+  );
+};
 
 const About = () => {
   const { user } = useContext(AuthContext);
@@ -119,16 +147,7 @@ const About = () => {
               >
                 {/* FOTO: enquanto não tem foto, a letra da pessoa ocupa o espaço; no desktop o lado alterna (D esquerda, A direita...) */}
                 <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-[radial-gradient(circle_at_30%_20%,rgba(198,143,230,0.35),rgba(108,72,197,0.25)_45%,rgba(23,10,54,0.9))] md:aspect-auto md:w-72 lg:w-80">
-                  {person.photo ? (
-                    <img src={person.photo} alt={`Foto de ${person.name}`} className="size-full object-cover" />
-                  ) : (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-0 flex select-none items-center justify-center text-[9rem] font-black leading-none text-highlight/90 drop-shadow-[0_10px_40px_rgba(255,234,0,0.25)] transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none lg:text-[11rem]"
-                    >
-                      {person.letter}
-                    </span>
-                  )}
+                  <TeamPhoto person={person} />
                 </div>
 
                 {/* INFORMAÇÕES */}
