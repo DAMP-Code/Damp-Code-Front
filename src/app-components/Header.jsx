@@ -22,15 +22,18 @@ const linksByRole = {
     { to: "/", label: "Explorar", end: true },
     { to: "/dashboard/ranking", label: "Ranking" },
     { to: "/dashboard/Empresa", label: "Dashboard" },
+    { to: "/sobre", label: "Sobre" },
   ],
   participante: [
     { to: "/", label: "Explorar", end: true },
     { to: "/dashboard/participante", label: "Meu painel" },
     { to: "/perfil", label: "Perfil" },
+    { to: "/sobre", label: "Sobre" },
   ],
   admin: [
     { to: "/", label: "Explorar", end: true },
     { to: "/admin", label: "Verificações" },
+    { to: "/sobre", label: "Sobre" },
   ],
 };
 

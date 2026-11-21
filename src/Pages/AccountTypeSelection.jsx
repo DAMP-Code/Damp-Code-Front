@@ -1,5 +1,6 @@
 import BackButton from '@/app-components/BackButton'
 import Footer from '@/app-components/Footer'
+import Header from '@/app-components/Header'
 import React from 'react'
 import { Link } from 'react-router-dom'
 
@@ -25,16 +26,9 @@ const choices = [
 const AccountTypeSelection = () => {
   return (
     <div className='flex min-h-screen flex-col bg-[radial-gradient(circle_at_20%_15%,rgba(108,72,197,0.22),transparent_32%),var(--color-surface)]'>
+      <Header />
       <div className='mx-auto flex w-full max-w-5xl flex-1 flex-col px-5 py-8 sm:py-12'>
-        <div className='flex items-center justify-between gap-4'>
-          <BackButton />
-          <Link to='/'>
-            <img src='/src/assets/DAMPCode.svg' alt='Damp Code' className='h-8 w-auto' />
-          </Link>
-          <Link to='/loginUser' className='text-sm font-medium text-brand-light hover:text-highlight'>
-            Entrar
-          </Link>
-        </div>
+        <BackButton />
 
         <div className='mx-auto mt-12 flex w-full max-w-2xl flex-col gap-3 text-center sm:mt-16'>
           <h1 className='text-3xl font-semibold text-content sm:text-4xl'>Como você quer usar a Damp Code</h1>
