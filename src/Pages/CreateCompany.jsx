@@ -1,7 +1,9 @@
-import AuthShell, { AuthField, authButtonClass } from "@/app-components/auth/AuthShell";
+import AuthLink from "@/app-components/auth/AuthLink";
+import AuthShell, { AuthField, PasswordMeter, authButtonClass } from "@/app-components/auth/AuthShell";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { RegistrationContext  } from "@/app-components/utilities/RegistrationContext";
+import { navigateWithTransition } from "@/app-components/utilities/viewTransition";
 
 const CreateCompany = () => {
 
@@ -11,6 +13,7 @@ const CreateCompany = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   // aviso só depois que a confirmação tem o tamanho da senha, para não reclamar enquanto a pessoa digita
+  const passwordsMatch = confirmPassword !== "" && confirmPassword === password;
   const passwordsDiffer = confirmPassword.length >= password.length && confirmPassword !== "" && confirmPassword !== password;
 
   const {registrationData, setRegistrationData} = useContext(RegistrationContext);
@@ -33,7 +36,7 @@ const CreateCompany = () => {
 
     setRegistrationData(basicData );
     
-  navigate("/cadastroEmpresa/detalhes");
+  navigateWithTransition(navigate, "/cadastroEmpresa/detalhes");
 
   //   const [loading, setLoading] = useState(false);
   // const [message, setMessage] = useState("");
@@ -43,10 +46,12 @@ const CreateCompany = () => {
 
   return (
     <AuthShell
+      mode="empresa"
+      step={1}
       title="Conta de empresa"
       lede="O próximo passo pede CNPJ, área e uma descrição curta."
       asideTitle="Publique o desafio e encontre quem resolve."
-      asideText="Defina o problema, o prêmio e o prazo. A avaliação pode ser por IA ou manual."
+      asideText="Defina o problema, o prêmio e o prazo. A nota de cada entrega é sugerida pela sua solução de referência, e quem decide é você."
       points={["Hackathon com a cara da empresa", "Prêmio e prazo visíveis no card", "Acesso ao painel de desafios"]}
     >
       <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
@@ -83,7 +88,9 @@ const CreateCompany = () => {
           required
           minLength={10}
           onChange={(e) => setPassword(e.target.value)}
-        />
+        >
+          <PasswordMeter value={password} min={10} />
+        </AuthField>
         <AuthField
           label="Confirmar senha"
           type="password"
@@ -96,18 +103,20 @@ const CreateCompany = () => {
           aria-invalid={passwordsDiffer}
           aria-describedby={passwordsDiffer ? "confirm-password-hint" : undefined}
           onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        {passwordsDiffer && (
-          <p id="confirm-password-hint" className="-mt-3 text-sm text-danger">
-            As senhas não são iguais.
-          </p>
-        )}
+        >
+          {passwordsDiffer && (
+            <span id="confirm-password-hint" className="text-sm font-normal text-danger">
+              As senhas não são iguais.
+            </span>
+          )}
+          {passwordsMatch && <span className="text-xs font-normal text-success">As senhas são iguais.</span>}
+        </AuthField>
         <button type="submit" className={authButtonClass}>
           Continuar
         </button>
-        <Link to="/loginUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
+        <AuthLink to="/loginUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
           Já tenho conta. Fazer login.
-        </Link>
+        </AuthLink>
       </form>
       {message ? (
         <p className="mt-5 rounded-xl border border-white/10 bg-surface px-4 py-3 text-center text-sm text-content">

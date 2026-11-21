@@ -1,4 +1,5 @@
-import AuthShell, { AuthField, authButtonClass } from "@/app-components/auth/AuthShell";
+import AuthLink from "@/app-components/auth/AuthLink";
+import AuthShell, { AuthField, PasswordMeter, authButtonClass } from "@/app-components/auth/AuthShell";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -12,6 +13,8 @@ const CreateUser = () => {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [created, setCreated] = useState(false);
+  const passwordsMatch = confirmPassword !== "" && confirmPassword === password;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -24,6 +27,7 @@ const CreateUser = () => {
 
     setLoading(true);
     setMessage("");
+    setCreated(false);
 
     const user = {
       name,
@@ -52,7 +56,8 @@ const CreateUser = () => {
 
       console.log("Usuário criado:", data);
 
-      setMessage("Usuário criado com sucesso!");
+      setMessage("Conta criada! Agora é só entrar com o seu e-mail e senha.");
+      setCreated(true);
 
       setName("");
       setEmail("");
@@ -69,6 +74,7 @@ const CreateUser = () => {
 
   return (
     <AuthShell
+      mode="participante"
       title="Criar conta"
       lede="Para participar dos hackathons, com ranking e reconhecimento."
       asideTitle="Entre nos desafios e construa portfólio."
@@ -109,7 +115,9 @@ const CreateUser = () => {
           required
           minLength={10}
           onChange={(e) => setPassword(e.target.value)}
-        />
+        >
+          <PasswordMeter value={password} min={10} />
+        </AuthField>
         <AuthField
           label="Confirmar senha"
           type="password"
@@ -122,22 +130,34 @@ const CreateUser = () => {
           aria-invalid={passwordsDiffer}
           aria-describedby={passwordsDiffer ? "confirm-password-hint" : undefined}
           onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        {passwordsDiffer && (
-          <p id="confirm-password-hint" className="-mt-3 text-sm text-danger">
-            As senhas não são iguais.
-          </p>
-        )}
+        >
+          {passwordsDiffer && (
+            <span id="confirm-password-hint" className="text-sm font-normal text-danger">
+              As senhas não são iguais.
+            </span>
+          )}
+          {passwordsMatch && <span className="text-xs font-normal text-success">As senhas são iguais.</span>}
+        </AuthField>
         <button type="submit" disabled={loading} className={authButtonClass}>
           {loading ? "Criando..." : "Criar conta"}
         </button>
-        <Link to="/loginUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
+        <AuthLink to="/loginUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
           Já tenho conta. Fazer login.
-        </Link>
+        </AuthLink>
       </form>
       {message ? (
-        <p className="mt-5 rounded-xl border border-white/10 bg-surface px-4 py-3 text-center text-sm text-content">
+        <p
+          className={`mt-5 rounded-xl border px-4 py-3 text-center text-sm animate-in fade-in slide-in-from-bottom-1 duration-300 ${created ? "border-success/40 bg-success/10 text-success" : "border-white/10 bg-surface text-content"}`}
+        >
           {message}
+          {created ? (
+            <>
+              {" "}
+              <AuthLink to="/loginUser" className="font-semibold underline">
+                Entrar
+              </AuthLink>
+            </>
+          ) : null}
         </p>
       ) : null}
     </AuthShell>

@@ -281,3 +281,44 @@ textarea::placeholder {
   animation: damp-float var(--float-duration, 4s) ease-in-out infinite;
   animation-delay: var(--d, 0s);
 }
+
+/* troca entre Entrar / Criar conta / Empresa (View Transitions): o cartão muda de tamanho,
+   a pílula das abas desliza e o conteúdo sai para um lado e entra pelo outro.
+   O lado vem de data-auth-direction, gravado pelo AuthShell. */
+:root { --auth-shift: 32px; }
+:root[data-auth-direction="back"] { --auth-shift: -32px; }
+
+@keyframes auth-content-out { to { opacity: 0; transform: translateX(calc(var(--auth-shift) * -1)); } }
+@keyframes auth-content-in { from { opacity: 0; transform: translateX(var(--auth-shift)); } }
+@keyframes auth-fade-out { to { opacity: 0; } }
+@keyframes auth-fade-in { from { opacity: 0; } }
+
+::view-transition-group(auth-card),
+::view-transition-group(auth-tab),
+::view-transition-group(auth-type-pill) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+::view-transition-old(auth-card),
+::view-transition-new(auth-card) {
+  /* o fundo do cartão (só a caixa, sem texto) estica até o tamanho novo; quem troca é o conteúdo */
+  height: 100%;
+  animation: none;
+}
+::view-transition-old(auth-card) { opacity: 0; }
+/* o velho sai antes do novo entrar, para os dois textos não aparecerem sobrepostos */
+::view-transition-old(auth-content) { animation: auth-content-out 0.18s ease-in both; }
+::view-transition-new(auth-content) { animation: auth-content-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) 0.18s both; }
+::view-transition-group(auth-content) { animation-duration: 0.45s; }
+::view-transition-old(auth-aside),
+::view-transition-old(auth-type) { animation: auth-fade-out 0.15s ease both; }
+::view-transition-new(auth-aside),
+::view-transition-new(auth-type) { animation: auth-fade-in 0.3s ease 0.15s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
