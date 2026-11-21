@@ -2,6 +2,8 @@ import React, { useContext, useRef, useState } from "react";
 import Header from "@/app-components/Header";
 import Footer from "@/app-components/Footer";
 import Avatar from "@/app-components/Avatar";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { authFieldClass } from "@/app-components/auth/AuthShell";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { avatarColors, defaultAvatarColor, resizeAvatar } from "@/app-components/utilities/avatar";
@@ -130,14 +132,48 @@ const AccountSettings = () => {
       <Header />
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:py-12">
         {/* QUEM ESTÁ LOGADO */}
-        <section className="flex items-center gap-5">
-          <Avatar name={canEditName ? name || user?.name : user?.name} color={color} image={image} size="lg" />
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold sm:text-3xl">Configurações da conta</h1>
-            <p className="truncate text-content-secondary">
-              {user?.email} · {roleLabel[user?.role]}
-            </p>
+        <section className="flex flex-col gap-2">
+          <div className="flex items-center gap-5">
+            {/* a própria foto é o botão de trocar: clicar abre a escolha do arquivo */}
+            <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} className="hidden" />
+            <button
+              type="button"
+              onClick={() => fileInput.current?.click()}
+              disabled={busy === "foto"}
+              aria-label={image ? "Trocar foto de perfil" : "Escolher foto de perfil"}
+              title={image ? "Trocar foto" : "Escolher foto"}
+              className="group relative shrink-0 rounded-2xl disabled:cursor-wait"
+            >
+              <Avatar name={canEditName ? name || user?.name : user?.name} color={color} image={image} size="lg" />
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 rounded-2xl bg-black/0 transition group-hover:bg-black/30 group-focus-visible:bg-black/30"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-1.5 -right-1.5 flex size-8 items-center justify-center rounded-full border-2 border-surface bg-highlight text-sm text-surface shadow-lg transition group-hover:scale-110"
+              >
+                <FontAwesomeIcon icon={busy === "foto" ? faSpinner : faPen} spin={busy === "foto"} />
+              </span>
+            </button>
+            <div className="min-w-0">
+              <h1 className="truncate text-2xl font-bold sm:text-3xl">Configurações da conta</h1>
+              <p className="truncate text-content-secondary">
+                {user?.email} · {roleLabel[user?.role]}
+              </p>
+              {image && (
+                <button
+                  type="button"
+                  onClick={() => savePhoto("")}
+                  disabled={busy === "foto"}
+                  className="mt-1 text-sm font-medium text-content-secondary underline-offset-4 hover:text-danger hover:underline"
+                >
+                  Remover foto
+                </button>
+              )}
+            </div>
           </div>
+          <Feedback status={status.foto} />
         </section>
 
         {/* DADOS */}
@@ -187,36 +223,6 @@ const AccountSettings = () => {
             </div>
           )}
         </form>
-
-        {/* FOTO */}
-        <section className={panelClass}>
-          <div>
-            <h2 className="text-xl font-semibold">Foto de perfil</h2>
-            <p className="mt-1 text-sm text-content-secondary">
-              Aparece na barra do topo e no seu perfil. A imagem é recortada em quadrado.
-            </p>
-          </div>
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <Avatar name={user?.name} color={color} image={image} size="lg" className="sm:size-24" />
-            <div className="flex flex-wrap gap-3">
-              <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} className="hidden" />
-              <button type="button" onClick={() => fileInput.current?.click()} disabled={busy === "foto"} className={saveClass}>
-                {busy === "foto" ? "Enviando..." : image ? "Trocar foto" : "Escolher foto"}
-              </button>
-              {image && (
-                <button
-                  type="button"
-                  onClick={() => savePhoto("")}
-                  disabled={busy === "foto"}
-                  className="rounded-xl border border-white/15 px-5 py-2.5 font-semibold text-content transition hover:border-danger/60 hover:text-danger disabled:opacity-60"
-                >
-                  Remover foto
-                </button>
-              )}
-            </div>
-          </div>
-          <Feedback status={status.foto} />
-        </section>
 
         {/* COR DO AVATAR */}
         <section className={panelClass}>
