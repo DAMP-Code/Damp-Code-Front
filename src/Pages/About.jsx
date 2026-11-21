@@ -14,6 +14,8 @@ const team = [
     role: "Lorem ipsum dolor",
     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     focus: ["Lorem", "Ipsum", "Dolor"],
+    // caminho da foto (ex.: "/src/assets/equipe/diego.jpg"); sem foto aparece a letra
+    photo: null,
     github: "#",
     linkedin: "#",
   },
@@ -23,6 +25,7 @@ const team = [
     role: "Lorem ipsum dolor",
     bio: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     focus: ["Lorem", "Ipsum", "Dolor"],
+    photo: null,
     github: "#",
     linkedin: "#",
   },
@@ -32,6 +35,7 @@ const team = [
     role: "Lorem ipsum dolor",
     bio: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
     focus: ["Lorem", "Ipsum", "Dolor"],
+    photo: null,
     github: "#",
     linkedin: "#",
   },
@@ -41,6 +45,7 @@ const team = [
     role: "Lorem ipsum dolor",
     bio: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     focus: ["Lorem", "Ipsum", "Dolor"],
+    photo: null,
     github: "#",
     linkedin: "#",
   },
@@ -102,55 +107,70 @@ const About = () => {
             <p className="text-content-secondary">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
           </div>
 
-          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="flex flex-col gap-6">
             {team.map((person) => (
               <li
                 key={person.name}
                 id={person.name.toLowerCase()}
-                className="group relative flex scroll-mt-28 flex-col overflow-hidden rounded-3xl border border-white/10 bg-surface-light p-6 shadow-[0_20px_55px_rgba(0,0,0,0.24)] transition-colors target:border-highlight/60 hover:border-brand-light/40"
+                className="group flex scroll-mt-28 flex-col overflow-hidden rounded-3xl border border-white/10 bg-surface-light shadow-[0_20px_55px_rgba(0,0,0,0.24)] transition-colors target:border-highlight/60 hover:border-brand-light/40 md:flex-row"
               >
-                {/* letra gigante de fundo, cortada pelo cartão */}
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-4 -top-10 select-none text-[11rem] font-black leading-none text-white/[0.04] transition-colors group-hover:text-highlight/[0.08]"
-                >
-                  {person.letter}
-                </span>
-
-                <span className="relative flex size-14 items-center justify-center rounded-2xl bg-highlight text-2xl font-black text-surface">
-                  {person.letter}
-                </span>
-
-                <div className="relative mt-5 flex flex-col gap-1">
-                  <h3 className="text-xl font-bold">{person.name}</h3>
-                  <p className="text-sm font-medium text-brand-light">{person.role}</p>
+                {/* FOTO: enquanto não tem foto, a letra da pessoa ocupa o espaço */}
+                <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-[radial-gradient(circle_at_30%_20%,rgba(198,143,230,0.35),rgba(108,72,197,0.25)_45%,rgba(23,10,54,0.9))] md:aspect-auto md:w-72 lg:w-80">
+                  {person.photo ? (
+                    <img src={person.photo} alt={`Foto de ${person.name}`} className="size-full object-cover" />
+                  ) : (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 flex select-none items-center justify-center text-[9rem] font-black leading-none text-highlight/90 drop-shadow-[0_10px_40px_rgba(255,234,0,0.25)] transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none lg:text-[11rem]"
+                    >
+                      {person.letter}
+                    </span>
+                  )}
                 </div>
 
-                <p className="relative mt-4 flex-1 leading-relaxed text-content-secondary">{person.bio}</p>
+                {/* INFORMAÇÕES */}
+                <div className="flex flex-1 flex-col gap-5 p-6 sm:p-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-2xl font-bold sm:text-3xl">{person.name}</h3>
+                      <p className="font-medium text-brand-light">{person.role}</p>
+                    </div>
+                    <span
+                      aria-hidden="true"
+                      className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-highlight text-xl font-black text-surface"
+                    >
+                      {person.letter}
+                    </span>
+                  </div>
 
-                <ul className="relative mt-5 flex flex-wrap gap-2">
-                  {person.focus.map((item) => (
-                    <li key={item} className="rounded-full border border-white/15 px-3 py-1 text-xs font-medium text-content">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                  <p className="max-w-3xl flex-1 leading-relaxed text-content-secondary">{person.bio}</p>
 
-                <div className="relative mt-6 flex gap-2 border-t border-white/10 pt-5">
-                  <a
-                    href={person.github}
-                    aria-label={`GitHub de ${person.name}`}
-                    className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-lg text-content-secondary transition hover:bg-white/10 hover:text-content"
-                  >
-                    <FontAwesomeIcon icon={faGithub} />
-                  </a>
-                  <a
-                    href={person.linkedin}
-                    aria-label={`LinkedIn de ${person.name}`}
-                    className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-lg text-content-secondary transition hover:bg-white/10 hover:text-content"
-                  >
-                    <FontAwesomeIcon icon={faLinkedin} />
-                  </a>
+                  <div className="flex flex-col gap-5 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                    <ul className="flex flex-wrap gap-2">
+                      {person.focus.map((item) => (
+                        <li key={item} className="rounded-full border border-white/15 px-3 py-1 text-sm font-medium text-content">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="flex gap-2">
+                      <a
+                        href={person.github}
+                        aria-label={`GitHub de ${person.name}`}
+                        className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-lg text-content-secondary transition hover:bg-white/10 hover:text-content"
+                      >
+                        <FontAwesomeIcon icon={faGithub} />
+                      </a>
+                      <a
+                        href={person.linkedin}
+                        aria-label={`LinkedIn de ${person.name}`}
+                        className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-lg text-content-secondary transition hover:bg-white/10 hover:text-content"
+                      >
+                        <FontAwesomeIcon icon={faLinkedin} />
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </li>
             ))}
