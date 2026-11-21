@@ -1632,6 +1632,8 @@ function handlePublicResult(hackathonId, database, user) {
     return problem(HACKATHON_NOT_FOUND, 404);
   }
   const base = { hackathonId: hackathon.hackathonId, titulo: hackathon.titulo };
+  // como na API: sem nome cadastrado aparece "Participante", nunca o e-mail
+  const publicName = (accountId) => database.users.find((item) => item.id === accountId)?.name || "Participante";
   if (!hackathon.resultsPublishedAt) {
     return json({ ...base, resultadoPublicado: false, totalClassificados: 0, classificacao: [] });
   }
@@ -1651,9 +1653,9 @@ function handlePublicResult(hackathonId, database, user) {
       : null;
     return {
       posicao: submission.finalPosition,
-      nome: team ? team.nome : displayName(database, accountIds[0]),
+      nome: team ? team.nome : publicName(accountIds[0]),
       equipe: Boolean(team),
-      membros: accountIds.map((accountId) => displayName(database, accountId)),
+      membros: accountIds.map(publicName),
       nota: submission.score ?? null,
       premio: prize,
       voce: Boolean(user) && accountIds.includes(user.id),
