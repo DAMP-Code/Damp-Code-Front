@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../utilities/AuthContext";
+import { readableTextColor } from "../utilities/color";
 
 const API = "https://localhost:7092/api";
 
@@ -103,7 +104,8 @@ const JoinHackathon = ({ hackathon, onChanged }) => {
   // empresa não participa
   if (user && !isParticipant) return null;
 
-  const style = { backgroundColor: hackathon.corPrincipal };
+  // a cor do texto acompanha a cor principal da empresa para o botão continuar legível
+  const style = { backgroundColor: hackathon.corPrincipal, color: readableTextColor(hackathon.corPrincipal) };
 
   if (!user) {
     return isOpen ? (
@@ -168,6 +170,12 @@ const JoinHackathon = ({ hackathon, onChanged }) => {
 
   return (
     <div className="flex w-full flex-col gap-4">
+      <div>
+        <p className="text-lg font-semibold text-white">Participe em equipe</p>
+        <p className="text-sm text-content-secondary">
+          Equipes têm de 2 a 5 pessoas. Crie a sua e convide quem quiser, ou peça para entrar numa equipe aberta.
+        </p>
+      </div>
       {/* Criar equipe */}
       <form onSubmit={createTeam} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface/40 p-4">
         <label className="font-semibold">Criar equipe</label>

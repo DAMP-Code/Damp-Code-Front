@@ -1,5 +1,6 @@
 import React from 'react'
 import HackathonView from '@/app-components/hackathon-page/HackathonView'
+import { readableTextColor } from '@/app-components/utilities/color'
 
 // mesmos rótulos das opções de área do formulário
 const areaLabels = {
@@ -56,8 +57,8 @@ const PreviewSection = ({ hackathon }) => {
           <button
             type='button'
             disabled
-            style={{ backgroundColor: hackathon.corPrincipal }}
-            className='w-full cursor-default rounded-xl px-8 py-3 text-lg font-semibold text-white shadow-lg'
+            style={{ backgroundColor: hackathon.corPrincipal, color: readableTextColor(hackathon.corPrincipal) }}
+            className='w-full cursor-default rounded-xl px-8 py-3 text-lg font-semibold shadow-lg'
           >
             Participar
           </button>

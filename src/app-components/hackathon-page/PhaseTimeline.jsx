@@ -1,4 +1,5 @@
 import React from "react";
+import { readableTextColor } from "@/app-components/utilities/color";
 
 // etapa atual de cada fase da API (Rascunho e Publicado ainda estão nas inscrições)
 const stepByPhase = {
@@ -71,9 +72,9 @@ const PhaseTimeline = ({ hackathon, color, accent }) => {
           >
             <span className="flex items-center gap-2">
               <span
-                style={active || done ? { backgroundColor: color, borderColor: color } : undefined}
+                style={active || done ? { backgroundColor: color, borderColor: color, color: readableTextColor(color) } : undefined}
                 className={`flex size-7 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
-                  active || done ? "text-white" : "border-white/20 text-content-secondary"
+                  active || done ? "" : "border-white/20 text-content-secondary"
                 }`}
               >
                 {done ? "✓" : index + 1}

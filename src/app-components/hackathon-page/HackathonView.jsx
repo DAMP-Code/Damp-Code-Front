@@ -2,6 +2,7 @@ import React from "react";
 import PhaseTimeline from "./PhaseTimeline";
 import ModuleList from "./ModuleList";
 import { formatMoney, prizeLabel, totalPrize } from "@/app-components/utilities/prizes";
+import { readableTextColor } from "@/app-components/utilities/color";
 
 function getMethodDescription(method) {
   switch (method) {
@@ -130,9 +131,9 @@ const HackathonView = ({ hackathon, action, modules }) => {
                 {prizes.map((prize) => (
                   <li key={prize.posicao} className="flex items-start gap-3">
                     <span
-                      style={prize.posicao === 1 ? { backgroundColor: color } : undefined}
+                      style={prize.posicao === 1 ? { backgroundColor: color, color: readableTextColor(color) } : undefined}
                       className={`flex size-10 shrink-0 items-center justify-center rounded-xl font-bold ${
-                        prize.posicao === 1 ? "text-white" : "bg-white/10 text-content"
+                        prize.posicao === 1 ? "" : "bg-white/10 text-content"
                       }`}
                     >
                       {prize.posicao}º
