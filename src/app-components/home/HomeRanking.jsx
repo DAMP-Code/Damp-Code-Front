@@ -1,29 +1,74 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Title from '../Title'
+import ResultBoard from '../hackathon-page/ResultBoard'
+import { AuthContext } from '../utilities/AuthContext'
 
+const API = 'https://localhost:7092/api/Hackathons'
+
+// Ranking ao vivo: o pódio do resultado publicado mais recente, direto da API.
 const HomeRanking = () => {
+  const { user } = useContext(AuthContext)
+  const [latest, setLatest] = useState(null)
+  const [result, setResult] = useState(null)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const response = await fetch(API)
+        const hackathons = response.ok ? await response.json() : []
+        const published = (Array.isArray(hackathons) ? hackathons : [])
+          .filter((item) => item.resultadoPublicado)
+          .sort((a, b) => new Date(b.dataFimAvaliacao || 0) - new Date(a.dataFimAvaliacao || 0))
+        const first = published[0]
+        if (first) {
+          const resultResponse = await fetch(
+            `${API}/${encodeURIComponent(first.hackathonId)}/resultado`,
+            user?.token ? { headers: { Authorization: `Bearer ${user.token}` } } : undefined,
+          )
+          if (resultResponse.ok) {
+            setLatest(first)
+            setResult(await resultResponse.json())
+          }
+        }
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoaded(true)
+      }
+    }
+
+    load()
+  }, [user?.token])
+
   return (
-    <section className='flex h-auto w-full flex-col items-center bg-surface-light/25 py-12'>
-        <div className='flex w-9/10 max-w-7xl items-center justify-start'>
-            <Title text1={"Ranking ao"} text2={"vivo"} />
+    <section className='w-full border-y border-white/5 bg-surface-light/25 py-16 lg:py-20'>
+      <div className='mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 lg:px-8'>
+        <div className='flex flex-wrap items-end justify-between gap-4'>
+          <div>
+            <Title text1={'Ranking ao'} text2={'vivo'} />
+            {latest && (
+              <p className='text-content-secondary'>
+                Último resultado: <b className='text-content'>{latest.titulo}</b> · {latest.empresa}
+              </p>
+            )}
+          </div>
+          <Link to='/ranking' className='mb-1 shrink-0 rounded-lg px-3 py-2 text-sm font-semibold text-brand-light hover:bg-white/5 hover:text-highlight'>
+            Ver ranking completo
+          </Link>
         </div>
-        <div className='grid w-9/10 max-w-7xl grid-cols-1 gap-5 md:grid-cols-3'>
-            <div className='flex min-h-60 w-full flex-col items-center justify-center rounded-2xl border border-white/10 bg-surface-light p-6 text-center text-content shadow-xl xl:min-h-72'>
-                <h1 className='text-xl font-semibold'>Top 5 global</h1>
-                <p className='px-3'>Este é o top 5 de todas as competições, os mais dedicados.</p>
-                <h2 className='px-3 flex md:hidden xl:flex'>Os desenvolvedores mais consistentes e ativos da plataforma no momento.</h2>
-            </div>
-            <div className='flex min-h-60 w-full flex-col items-center justify-center rounded-2xl border border-highlight/25 bg-[linear-gradient(145deg,var(--color-surface-light),rgba(108,72,197,0.25))] p-6 text-center text-content shadow-xl xl:min-h-72'>
-                <h1 className='text-xl font-semibold'>Top 5 Foodlovers</h1>
-                <p className='px-3'>Este é o top 5 do nosso hackathon em parceria com a ifood.</p>
-                <h2 className='px-3 flex md:hidden xl:flex'>Se dedique nos hackathons em parceria com ifood e ganhe oportunidades.</h2>
-            </div>
-            <div className='flex min-h-60 w-full flex-col items-center justify-center rounded-2xl border border-white/10 bg-surface-light p-6 text-center text-content shadow-xl xl:min-h-72'>
-                <h1 className='text-xl font-semibold'>Top 5 Natives</h1>
-                <p className='px-3'>Este é o top 5 da competição da ferramenta react Native.</p>
-                <h2 className='px-3 flex md:hidden xl:flex'>Se torne um talento nativo e melhores suas habilidades no framework.</h2>
-            </div>
-        </div>
+
+        {result ? (
+          <ResultBoard result={result} limit={3} />
+        ) : (
+          loaded && (
+            <p className='rounded-2xl border border-white/10 bg-surface-light p-6 text-content-secondary'>
+              Quando uma empresa publicar o resultado de um Hackathon, o pódio aparece aqui.
+            </p>
+          )
+        )}
+      </div>
     </section>
   )
 }

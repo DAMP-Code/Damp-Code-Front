@@ -213,3 +213,25 @@ textarea::placeholder {
   overflow: hidden;
   z-index: 1;
 }
+
+/* faixa que rola sem parar na home (o conteúdo vem duplicado, então -50% emenda certinho) */
+@keyframes damp-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.damp-marquee {
+  animation: damp-marquee 40s linear infinite;
+}
+.damp-marquee-track:hover .damp-marquee {
+  animation-play-state: paused;
+}
+
+/* barra de progresso do passo atual em "Como funciona" */
+@keyframes damp-step-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.damp-step-progress {
+  transform-origin: left;
+  animation: damp-step-progress var(--step-duration, 5s) linear forwards;
+}

@@ -8,6 +8,8 @@ import CompanyBanner from '../app-components/home/CompanyBanner'
 import Game from '@/app-components/home/Game'
 import HomeCommunity from '@/app-components/home/HomeCommunity'
 import Footer from '@/app-components/Footer'
+import HomeTicker from '@/app-components/home/HomeTicker'
+import HomeSteps from '@/app-components/home/HomeSteps'
 
 const Home = () => {
   return (
@@ -18,8 +20,14 @@ const Home = () => {
         <Banner />
       </section>
 
+      <HomeTicker />
+
       <section id="explore">
         <Cards />
+      </section>
+
+      <section id="como-funciona">
+        <HomeSteps />
       </section>
 
       <section id="ranking">
