@@ -73,7 +73,26 @@ const PrizeChart = ({ hackathons }) => {
         formatter: (value) =>
           `R$ ${value.toLocaleString("pt-BR")}`
       }
-    }
+    },
+
+    // no celular os valores do eixo se sobrepõem; o valor já aparece em cada barra
+    responsive: [
+      {
+        breakpoint: 640,
+        options: {
+          xaxis: {
+            labels: {
+              show: false
+            }
+          },
+          yaxis: {
+            labels: {
+              maxWidth: 110
+            }
+          }
+        }
+      }
+    ]
   };
 
   const series = [
@@ -90,7 +109,8 @@ const PrizeChart = ({ hackathons }) => {
       className="
         bg-surface-light
         rounded-2xl
-        p-6
+        p-3
+        sm:p-6
         shadow-lg
         border
         border-brand

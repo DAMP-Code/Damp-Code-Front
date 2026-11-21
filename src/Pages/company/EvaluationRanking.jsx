@@ -6,6 +6,7 @@ import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
 import Title from "@/app-components/Title";
 import { prizeLabel } from "@/app-components/utilities/prizes";
+import { theadClass, tbodyClass, rowClass, cellClass, blockCellClass } from "@/app-components/utilities/responsiveTable";
 
 const API = "https://localhost:7092/api/Hackathons";
 
@@ -153,7 +154,7 @@ const EvaluationRanking = () => {
   }
 
   const prizeByPosition = Object.fromEntries((evaluation?.premios ?? []).map((prize) => [prize.posicao, prize]));
-  const selectClass = "rounded-xl border border-brand bg-surface p-2 text-content disabled:opacity-60";
+  const selectClass = "max-w-full rounded-xl border border-brand bg-surface p-2 text-content disabled:opacity-60";
 
   return (
     <div className="min-h-screen bg-surface">
@@ -176,8 +177,8 @@ const EvaluationRanking = () => {
             </p>
 
             <div className="overflow-x-auto">
-              <table className="min-w-[680px] w-full border-collapse">
-                <thead className="text-left text-sm uppercase tracking-wider">
+              <table className="w-full border-collapse lg:min-w-[680px]">
+                <thead className={`${theadClass} text-left text-sm uppercase tracking-wider`}>
                   <tr>
                     <th className="px-4 py-3">{published ? "Classificação" : "Posição"}</th>
                     <th className="px-4 py-3">Nome</th>
@@ -187,10 +188,10 @@ const EvaluationRanking = () => {
                     <th className="px-4 py-3">Código</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className={tbodyClass}>
                   {ordered.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-5 text-content-secondary">Nenhuma entrega ainda.</td>
+                    <tr className={rowClass}>
+                      <td colSpan={6} className={`${blockCellClass} py-4 text-content-secondary lg:px-4 lg:py-5`}>Nenhuma entrega ainda.</td>
                     </tr>
                   )}
                   {ordered.map((entry) => {
@@ -203,14 +204,14 @@ const EvaluationRanking = () => {
                     const free = evaluation.premios.filter((prize) => !taken.has(prize.posicao));
                     const prize = entry.posicaoPremio != null ? prizeByPosition[entry.posicaoPremio] : null;
                     return (
-                      <tr key={entry.submissionId} className="border-t border-border">
-                        <td className="px-4 py-4 font-semibold">{published ? `${entry.final}º` : `${entry.ranking}º`}</td>
-                        <td className="px-4 py-4">{entry.nome}</td>
-                        <td className="px-4 py-4 text-content-secondary">
+                      <tr key={entry.submissionId} className={`${rowClass} py-3 lg:py-0`}>
+                        <td data-label={published ? "Classificação" : "Posição"} className={`${cellClass} font-semibold lg:px-4 lg:py-4`}>{published ? `${entry.final}º` : `${entry.ranking}º`}</td>
+                        <td data-label="Nome" className={`${cellClass} lg:px-4 lg:py-4`}>{entry.nome}</td>
+                        <td data-label="Semelhança" className={`${cellClass} text-content-secondary lg:px-4 lg:py-4`}>
                           {entry.semelhanca != null ? `${entry.semelhanca}%` : "—"}
                         </td>
-                        <td className="px-4 py-4">{entry.nota != null ? entry.nota : <span className="text-content-secondary">Sem nota</span>}</td>
-                        <td className="px-4 py-4">
+                        <td data-label="Nota" className={`${cellClass} lg:px-4 lg:py-4`}>{entry.nota != null ? entry.nota : <span className="text-content-secondary">Sem nota</span>}</td>
+                        <td data-label="Prêmio" className={`${cellClass} lg:px-4 lg:py-4`}>
                           {canEdit ? (
                             <select
                               aria-label={`Prêmio de ${entry.nome}`}
@@ -232,7 +233,7 @@ const EvaluationRanking = () => {
                             <span className="text-content-secondary">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-4">
+                        <td className={`${blockCellClass} lg:px-4 lg:py-4`}>
                           <Link
                             to={`/dashboard/Empresa/entregas/${encodeURIComponent(id)}?entrega=${encodeURIComponent(entry.submissionId)}`}
                             className="font-medium text-highlight hover:underline"

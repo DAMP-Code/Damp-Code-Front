@@ -226,7 +226,11 @@ function handleLogoChange(e) {
             onChange={handleLogoChange}
             accept="image/png,image/jpeg,image/webp,image/gif"
             className="
+              w-full
+              max-w-full
+              text-sm
               text-content
+              file:mr-3
               file:bg-brand
               file:border-none
               file:px-4

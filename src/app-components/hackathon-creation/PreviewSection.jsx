@@ -4,7 +4,7 @@ import HackathonSubtitle from './HackathonSubtitle'
 
 const PreviewSection = ({ hackathon }) => {
   return (
-    <section style={{backgroundColor: hackathon.corFundo}} className='sticky top-20 hidden h-[calc(100vh-5rem)] w-1/2 flex-col gap-y-8 overflow-y-auto border-l border-white/10 bg-surface px-6 py-8 text-white md:flex lg:px-10'>
+    <section style={{backgroundColor: hackathon.corFundo}} className='sticky top-20 hidden h-[calc(100vh-5rem)] w-1/2 flex-col gap-y-8 overflow-y-auto overflow-x-hidden border-l border-white/10 bg-surface px-6 py-8 text-white md:flex lg:px-10'>
 
       {/* HEADER */}
       <div className='flex-col lg:flex justify-between items-start w-full'>
@@ -143,7 +143,7 @@ const PreviewSection = ({ hackathon }) => {
       </div>
 
       {/* FOOTER */}
-      <div style={{color: hackathon.corPrincipal}} className='hidden lg:flex align-top gap-x-8 font-semibold text-xl p-10 w-1/2'>
+      <div style={{color: hackathon.corPrincipal}} className='hidden lg:flex flex-wrap align-top gap-x-8 gap-y-3 font-semibold text-xl p-10 w-full'>
 
         <button className='hover:text-white transition-all'>
           Desafio

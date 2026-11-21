@@ -2,7 +2,7 @@ import React from 'react'
 
 const Title = ({ text1, text2 }) => {
   return (
-    <div className='flex items-start pb-5 text-left text-2xl font-bold tracking-tight sm:text-3xl'>
+    <div className='flex items-stretch pb-5 text-left text-2xl font-bold tracking-tight sm:text-3xl'>
       <h1 className='border-b-2 border-highlight py-4 text-highlight'>
         {text1}
       </h1>

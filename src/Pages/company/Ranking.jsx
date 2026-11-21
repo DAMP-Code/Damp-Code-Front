@@ -48,19 +48,19 @@ const Ranking = () => {
         <BackButton />
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-3">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-3">
 
-        <div className="rounded-2xl border border-white/10 bg-surface-light p-5 shadow-xl">
+        <div className="min-w-0 rounded-2xl border border-white/10 bg-surface-light p-3 shadow-xl sm:p-5">
           <StatusChart hackathons={hackathons} />
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-surface-light p-5 shadow-xl lg:col-span-2">
+        <div className="min-w-0 rounded-2xl border border-white/10 bg-surface-light p-3 shadow-xl sm:p-5 lg:col-span-2">
           <PrizeChart hackathons={hackathons} />
         </div>
 
       </div>
 
-      <div className="mx-auto mt-6 max-w-7xl rounded-2xl border border-white/10 bg-surface-light p-5 shadow-xl">
+      <div className="mx-auto mt-6 max-w-7xl rounded-2xl border border-white/10 bg-surface-light p-3 shadow-xl sm:p-5">
         <TechnologyChart hackathons={hackathons} />
       </div>
       </div>

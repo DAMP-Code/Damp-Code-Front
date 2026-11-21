@@ -106,7 +106,8 @@ const TechnologyChart = ({ hackathons }) => {
       className="
         bg-surface-light
         rounded-2xl
-        p-6
+        p-3
+        sm:p-6
         shadow-lg
         border
         border-brand
