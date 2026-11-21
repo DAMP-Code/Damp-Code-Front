@@ -1,6 +1,8 @@
 import React from "react";
 import PhaseTimeline from "./PhaseTimeline";
 import ModuleList from "./ModuleList";
+import ResultBoard from "./ResultBoard";
+import { Link } from "react-router-dom";
 import { formatMoney, prizeLabel, totalPrize } from "@/app-components/utilities/prizes";
 import { readableTextColor } from "@/app-components/utilities/color";
 
@@ -31,7 +33,7 @@ const phaseBadge = {
 
 // Página de um Hackathon. A mesma tela serve para a página pública e para a prévia do formulário,
 // por isso usa container queries (@...) em vez dos breakpoints da janela.
-const HackathonView = ({ hackathon, action, modules }) => {
+const HackathonView = ({ hackathon, action, modules, result }) => {
   const color = hackathon.corPrincipal || "#6C48C5";
   const accent = hackathon.corSecundaria || "#C68FE6";
   const prizes = [...(hackathon.premios || [])].sort((a, b) => a.posicao - b.posicao);
@@ -91,6 +93,27 @@ const HackathonView = ({ hackathon, action, modules }) => {
       <div className="grid grid-cols-1 gap-6 @4xl:grid-cols-3">
         {/* CONTEÚDO */}
         <div className="flex flex-col gap-6 @4xl:col-span-2">
+          {result?.resultadoPublicado && (
+            <section className="rounded-2xl border border-white/10 bg-surface/50 p-6 backdrop-blur-sm">
+              <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Resultado</h2>
+                  <p className="text-sm text-content-secondary">Classificação final publicada pela empresa.</p>
+                </div>
+                {result.classificacao.length > 5 && (
+                  <Link
+                    to={`/ranking?hackathon=${encodeURIComponent(hackathon.hackathonId)}`}
+                    style={{ color: accent }}
+                    className="text-sm font-semibold hover:underline"
+                  >
+                    Ver ranking completo
+                  </Link>
+                )}
+              </div>
+              <ResultBoard result={result} limit={5} />
+            </section>
+          )}
+
           <section className="rounded-2xl border border-white/10 bg-surface/50 p-6 backdrop-blur-sm">
             <h2 className="text-xl font-semibold text-white">Sobre o desafio</h2>
             <p className="mt-3 whitespace-pre-line leading-relaxed text-content-secondary wrap-break-word">

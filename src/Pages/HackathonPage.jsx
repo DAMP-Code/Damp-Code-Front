@@ -15,6 +15,7 @@ const HackathonPage = () => {
   const [hackathon, setHackathon] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [modules, setModules] = useState([]);
+  const [result, setResult] = useState(null);
   // recarrega a contagem de participantes depois de uma inscrição
   const [reload, setReload] = useState(0);
 
@@ -56,6 +57,25 @@ const HackathonPage = () => {
     loadModules();
   }, [id, user?.token]);
 
+  // classificação final, só depois que a empresa publica o resultado
+  useEffect(() => {
+    if (!hackathon?.resultadoPublicado) return;
+
+    async function loadResult() {
+      try {
+        const response = await fetch(
+          `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}/resultado`,
+          user?.token ? { headers: { Authorization: `Bearer ${user.token}` } } : undefined,
+        );
+        if (response.ok) setResult(await response.json());
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadResult();
+  }, [id, user?.token, hackathon?.resultadoPublicado]);
+
   if (!hackathon) {
     return (
       <div className="min-h-screen bg-surface">
@@ -90,7 +110,7 @@ const HackathonPage = () => {
       >
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
           <BackButton />
-          <HackathonView hackathon={hackathon} action={action} modules={modules} />
+          <HackathonView hackathon={hackathon} action={action} modules={modules} result={result} />
         </div>
       </section>
       <Footer />

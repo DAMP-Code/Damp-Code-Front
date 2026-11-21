@@ -20,6 +20,7 @@ import AdminVerification from "./Pages/admin/AdminVerification";
 import ManageModules from "./Pages/company/ManageModules";
 import About from "./Pages/About";
 import AccountSettings from "./Pages/AccountSettings";
+import ResultsRanking from "./Pages/ResultsRanking";
 import RequireRole from "./app-components/utilities/RequireRole";
 
 const App = () => {
@@ -28,6 +29,7 @@ const App = () => {
       <Route path="/" element={<Home />}></Route>
       <Route path="/explore" element={<Explore />}></Route>
       <Route path="/sobre" element={<About />} />
+      <Route path="/ranking" element={<ResultsRanking />} />
       <Route path="/conta" element={<RequireRole role={["participante", "empresa", "admin"]}><AccountSettings /></RequireRole>} />
       <Route path="/" element={<h1>Rota Não Encontrada!</h1>}></Route>
       <Route path="/cadastroUser" element={<CreateUser />}></Route>

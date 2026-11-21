@@ -12,7 +12,7 @@ const accountButtonClass =
 // links de cada tipo de visita: âncoras da home para quem não entrou, páginas próprias para quem entrou
 const visitorLinks = [
   { href: "/#explore", label: "Explorar" },
-  { href: "/#ranking", label: "Ranking" },
+  { to: "/ranking", label: "Ranking" },
   { href: "/#empresas", label: "Para empresas" },
   { to: "/sobre", label: "Sobre" },
   { to: "/loginUser", label: "Entrar" },
@@ -28,11 +28,13 @@ const linksByRole = {
   participante: [
     { to: "/", label: "Explorar", end: true },
     { to: "/dashboard/participante", label: "Meu painel" },
+    { to: "/ranking", label: "Ranking" },
     { to: "/sobre", label: "Sobre" },
   ],
   admin: [
     { to: "/", label: "Explorar", end: true },
     { to: "/admin", label: "Verificações" },
+    { to: "/ranking", label: "Ranking" },
     { to: "/sobre", label: "Sobre" },
   ],
 };

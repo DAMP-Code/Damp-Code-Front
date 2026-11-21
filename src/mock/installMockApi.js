@@ -1621,6 +1621,48 @@ function handleModules(path, method, body, database, user) {
   return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
 }
 
+// Resultado público do Hackathon (mesmas regras da API): classificação final depois da publicação,
+// sem comentários da empresa; "voce" marca a linha de quem está logado.
+function handlePublicResult(hackathonId, database, user) {
+  const hackathon = database.hackathons.find((item) => String(item.hackathonId) === hackathonId || item.slug === hackathonId);
+  if (!hackathon) return problem(HACKATHON_NOT_FOUND, 404);
+  const access = user ? managedCompany(database, user) : null;
+  const phase = phaseOf(hackathon);
+  if ((phase === "Draft" || phase === "Cancelled") && access?.companyId !== hackathon.companyId) {
+    return problem(HACKATHON_NOT_FOUND, 404);
+  }
+  const base = { hackathonId: hackathon.hackathonId, titulo: hackathon.titulo };
+  if (!hackathon.resultsPublishedAt) {
+    return json({ ...base, resultadoPublicado: false, totalClassificados: 0, classificacao: [] });
+  }
+
+  const ranked = database.submissions
+    .filter((item) => item.hackathonId === hackathon.hackathonId && item.finalPosition != null)
+    .sort((a, b) => a.finalPosition - b.finalPosition);
+  const total = Math.max(ranked.length, ...ranked.map((item) => item.finalPosition));
+
+  const classificacao = ranked.map((submission) => {
+    const team = submission.teamId && database.teams.find((item) => item.teamId === submission.teamId);
+    const accountIds = team
+      ? database.participations.filter((item) => item.teamId === team.teamId && !item.leftAt).map((item) => item.accountId)
+      : [database.participations.find((item) => item.id === submission.participationId)?.accountId].filter(Boolean);
+    const prize = submission.prizePosition
+      ? (hackathon.premios || []).find((item) => item.posicao === submission.prizePosition) ?? null
+      : null;
+    return {
+      posicao: submission.finalPosition,
+      nome: team ? team.nome : displayName(database, accountIds[0]),
+      equipe: Boolean(team),
+      membros: accountIds.map((accountId) => displayName(database, accountId)),
+      nota: submission.score ?? null,
+      premio: prize,
+      voce: Boolean(user) && accountIds.includes(user.id),
+    };
+  });
+
+  return json({ ...base, resultadoPublicado: true, totalClassificados: total, classificacao });
+}
+
 function handle(path, method, body, token) {
   const database = loadDatabase();
 
@@ -1628,6 +1670,8 @@ function handle(path, method, body, token) {
   if (path.startsWith("/api/Companies")) {
     return handleCompanies(path, method, body, database, currentUser);
   }
+  const publicResult = method === "GET" && path.match(/^\/api\/Hackathons\/([^/]+)\/resultado$/);
+  if (publicResult) return handlePublicResult(publicResult[1], database, currentUser);
   if (/^\/api\/Hackathons\/[^/]+\/modulos(\/|$)/.test(path)) {
     return handleModules(path, method, body, database, currentUser);
   }
