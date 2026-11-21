@@ -6,12 +6,21 @@ const CreateUser = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  // aviso só depois que a confirmação tem o tamanho da senha, para não reclamar enquanto a pessoa digita
+  const passwordsDiffer = confirmPassword.length >= password.length && confirmPassword !== "" && confirmPassword !== password;
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      // se o aviso embaixo do campo já está na tela, não repete a mensagem
+      setMessage(passwordsDiffer ? "" : "As senhas não são iguais. Digite a mesma senha nos dois campos.");
+      return;
+    }
 
     setLoading(true);
     setMessage("");
@@ -48,6 +57,7 @@ const CreateUser = () => {
       setName("");
       setEmail("");
       setPassword("");
+      setConfirmPassword("");
 
     } catch (error) {
       console.error(error);
@@ -106,11 +116,18 @@ const CreateUser = () => {
           name="confirm-password"
           autoComplete="new-password"
           placeholder="Repita a senha"
-          value={password}
+          value={confirmPassword}
           required
           minLength={10}
-          onChange={(e) => setPassword(e.target.value)}
+          aria-invalid={passwordsDiffer}
+          aria-describedby={passwordsDiffer ? "confirm-password-hint" : undefined}
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
+        {passwordsDiffer && (
+          <p id="confirm-password-hint" className="-mt-3 text-sm text-danger">
+            As senhas não são iguais.
+          </p>
+        )}
         <button type="submit" disabled={loading} className={authButtonClass}>
           {loading ? "Criando..." : "Criar conta"}
         </button>

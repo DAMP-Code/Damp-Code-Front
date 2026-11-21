@@ -18,6 +18,7 @@ import Ranking from "./Pages/company/Ranking";
 import Profile from "./Pages/participant/Profile";
 import AdminVerification from "./Pages/admin/AdminVerification";
 import ManageModules from "./Pages/company/ManageModules";
+import About from "./Pages/About";
 import RequireRole from "./app-components/utilities/RequireRole";
 
 const App = () => {
@@ -25,6 +26,7 @@ const App = () => {
     <Routes>
       <Route path="/" element={<Home />}></Route>
       <Route path="/explore" element={<Explore />}></Route>
+      <Route path="/sobre" element={<About />} />
       <Route path="/" element={<h1>Rota Não Encontrada!</h1>}></Route>
       <Route path="/cadastroUser" element={<CreateUser />}></Route>
       <Route path="/cadastroEmpresa" element={<CreateCompany />}></Route>

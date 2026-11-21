@@ -164,7 +164,8 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-:where(a, button, input, textarea, select):focus-visible {
+/* campos de texto mostram o foco pela cor da borda; o contorno extra fazia uma borda dupla */
+:where(a, button, select, input[type="checkbox"], input[type="radio"], input[type="file"]):focus-visible {
   outline: 3px solid rgba(255, 234, 0, 0.75);
   outline-offset: 3px;
 }

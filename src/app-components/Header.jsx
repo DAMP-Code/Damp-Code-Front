@@ -10,9 +10,10 @@ const accountButtonClass =
 
 // links de cada tipo de visita: âncoras da home para quem não entrou, páginas próprias para quem entrou
 const visitorLinks = [
-  { href: "#explore", label: "Explorar" },
-  { href: "#ranking", label: "Ranking" },
-  { href: "#empresas", label: "Para empresas" },
+  { href: "/#explore", label: "Explorar" },
+  { href: "/#ranking", label: "Ranking" },
+  { href: "/#empresas", label: "Para empresas" },
+  { to: "/sobre", label: "Sobre" },
   { to: "/loginUser", label: "Entrar" },
 ];
 
