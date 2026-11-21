@@ -112,9 +112,9 @@ const About = () => {
               <li
                 key={person.name}
                 id={person.name.toLowerCase()}
-                className="group flex scroll-mt-28 flex-col overflow-hidden rounded-3xl border border-white/10 bg-surface-light shadow-[0_20px_55px_rgba(0,0,0,0.24)] transition-colors target:border-highlight/60 hover:border-brand-light/40 md:flex-row"
+                className="group flex scroll-mt-28 flex-col overflow-hidden rounded-3xl border border-white/10 bg-surface-light shadow-[0_20px_55px_rgba(0,0,0,0.24)] transition-colors target:border-highlight/60 hover:border-brand-light/40 md:flex-row md:even:flex-row-reverse"
               >
-                {/* FOTO: enquanto não tem foto, a letra da pessoa ocupa o espaço */}
+                {/* FOTO: enquanto não tem foto, a letra da pessoa ocupa o espaço; no desktop o lado alterna (D esquerda, A direita...) */}
                 <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-[radial-gradient(circle_at_30%_20%,rgba(198,143,230,0.35),rgba(108,72,197,0.25)_45%,rgba(23,10,54,0.9))] md:aspect-auto md:w-72 lg:w-80">
                   {person.photo ? (
                     <img src={person.photo} alt={`Foto de ${person.name}`} className="size-full object-cover" />
