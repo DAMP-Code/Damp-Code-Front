@@ -1463,6 +1463,7 @@ function handleHackathons(path, method, body, database, user) {
 const MODULE_LIMIT = 20;
 const CONTENT_LIMIT = 30;
 const MODULES_LOCKED = "Hackathon encerrado ou cancelado não aceita mudanças nos módulos.";
+const MODULES_FORBIDDEN = "Apenas quem gerencia a empresa dona do Hackathon pode editar os módulos.";
 const CONTENT_TYPES = ["Texto", "Link", "Video"];
 
 function toModule(module) {
@@ -1537,7 +1538,7 @@ function handleModules(path, method, body, database, user) {
   if (method === "GET" && !moduleSegment) return json(ordered());
 
   if (!user) return json({ message: "Não autenticado" }, 401);
-  if (!manages) return problem(NO_COMPANY, 403);
+  if (!manages) return problem(MODULES_FORBIDDEN, 403);
   if (phase === "Closed" || phase === "Cancelled") return problem(MODULES_LOCKED, 409);
 
   // módulos
@@ -1545,7 +1546,7 @@ function handleModules(path, method, body, database, user) {
     if (method === "POST" && !moduleSegment) {
       const error = validateModule(body);
       if (error) return problem(error, 400);
-      if (modules.length >= MODULE_LIMIT) return problem(`O Hackathon já tem ${MODULE_LIMIT} módulos.`, 409);
+      if (modules.length >= MODULE_LIMIT) return problem(`O Hackathon já tem ${MODULE_LIMIT} módulos, o máximo permitido.`, 409);
       const module = {
         moduloId: `m-${database.nextModuleId++}`,
         hackathonId: hackathon.hackathonId,
@@ -1589,7 +1590,7 @@ function handleModules(path, method, body, database, user) {
   if (method === "POST" && !contentSegment) {
     const { error, value } = validateContent(body);
     if (error) return problem(error, 400);
-    if (module.conteudos.length >= CONTENT_LIMIT) return problem(`O módulo já tem ${CONTENT_LIMIT} conteúdos.`, 409);
+    if (module.conteudos.length >= CONTENT_LIMIT) return problem(`O módulo já tem ${CONTENT_LIMIT} conteúdos, o máximo permitido.`, 409);
     const content = { conteudoId: `ct-${database.nextContentId++}`, ...value, posicao: module.conteudos.length + 1 };
     module.conteudos.push(content);
     saveDatabase(database);
