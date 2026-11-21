@@ -8,12 +8,14 @@ import ReceivedInvitations from '@/app-components/participant-dashboard/Received
 import MyParticipations from '@/app-components/participant-dashboard/MyParticipations'
 import { AuthContext } from '@/app-components/utilities/AuthContext'
 import React, { useContext, useEffect, useState } from 'react'
+import { applyHackathonFilters, emptyFilters, hasActiveFilters } from '@/app-components/utilities/hackathonFilters'
 import { useNavigate } from 'react-router-dom'
 
 
 const ParticipantDashboard = () => {
   const [hackathons, setHackathons] = useState([])
   const [query, setQuery] = useState("")
+  const [filters, setFilters] = useState(emptyFilters)
   const [companyAccess, setCompanyAccess] = useState(null)
   const { user } = useContext(AuthContext)
   const navigate = useNavigate()
@@ -53,20 +55,14 @@ useEffect(() => {
   loadCompany()
 }, [user?.token])
 
-  const visibleHackathons = hackathons.filter((hackathon) => {
-    const term = query.trim().toLowerCase()
-    if (!term) return true
-    const haystack = [hackathon.titulo, hackathon.empresa, ...(hackathon.tecnologias || [])]
-      .join(" ")
-      .toLowerCase()
-    return haystack.includes(term)
-  })
+  const visibleHackathons = applyHackathonFilters(hackathons, filters, query)
+  const filtered = hasActiveFilters(filters) || query.trim() !== ""
 
   return (
     <div className='bg-surface w-full min-h-screen'>
         <Header />
         <div className='mx-auto flex w-full max-w-[1600px]'>
-          <Sidebar />
+          <Sidebar hackathons={hackathons} filters={filters} onChange={setFilters} />
           <div className='flex flex-col w-full'>
             {companyAccess && (
               <button
@@ -79,7 +75,7 @@ useEffect(() => {
             <ReceivedInvitations onAccepted={setCompanyAccess} />
             <MyParticipations />
             <Search onSearch={setQuery} />
-            <WeeklyHighlights hackathons={visibleHackathons} />
+            <WeeklyHighlights hackathons={visibleHackathons} filtered={filtered} onClear={() => setFilters(emptyFilters)} />
             <Levels />
           </div>
         </div>

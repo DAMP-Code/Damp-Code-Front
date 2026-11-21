@@ -1,8 +1,14 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Title from '../Title'
 import { Link } from 'react-router-dom'
+import { AuthContext } from '../utilities/AuthContext'
+import { createChallengeAction } from '../utilities/hackathonFilters'
 
 const CreateChallenge = () => {
+  const { user } = useContext(AuthContext)
+  // só empresa cria Hackathon; participante é levado ao cadastro de empresa
+  const action = createChallengeAction(user) || { to: '/cadastroEmpresa', label: 'Cadastrar minha empresa' }
+
   return (
     <section className='flex h-full w-full flex-col items-center py-10 md:h-2/4'>
         <div className='w-9/10 max-w-7xl'>
@@ -13,10 +19,10 @@ const CreateChallenge = () => {
             Publique um desafio para a comunidade, ou entre como empresa parceira e encontre quem resolve o problema.
           </p>
           <Link
-            to={"/cadastroHackaton"}
+            to={action.to}
             className='rounded-xl bg-highlight px-8 py-4 text-lg font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 sm:text-xl'
           >
-            Crie agora
+            {action.label}
           </Link>
         </div>
     </section>

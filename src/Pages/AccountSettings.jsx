@@ -1,9 +1,9 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Header from "@/app-components/Header";
 import Footer from "@/app-components/Footer";
 import Avatar from "@/app-components/Avatar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { faImage, faPen, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { authFieldClass } from "@/app-components/auth/AuthShell";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { avatarColors, defaultAvatarColor, resizeAvatar } from "@/app-components/utilities/avatar";
@@ -33,6 +33,25 @@ const AccountSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [image, setImage] = useState(user?.avatarImage || null);
   const fileInput = useRef(null);
+  const [photoMenu, setPhotoMenu] = useState(false);
+  const photoMenuRef = useRef(null);
+
+  // fecha o menu da foto com clique fora ou Esc
+  useEffect(() => {
+    if (!photoMenu) return;
+    function handleClick(e) {
+      if (photoMenuRef.current && !photoMenuRef.current.contains(e.target)) setPhotoMenu(false);
+    }
+    function handleKey(e) {
+      if (e.key === "Escape") setPhotoMenu(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [photoMenu]);
   const [busy, setBusy] = useState(null); // "nome" | "foto" | "cor" | "senha"
   const [status, setStatus] = useState({});
 
@@ -100,6 +119,7 @@ const AccountSettings = () => {
   }
 
   async function saveColor(value) {
+    if (busy === "cor") return;
     const previous = color;
     setColor(value);
     const data = await send("cor", API, { avatarColor: value });
@@ -131,49 +151,108 @@ const AccountSettings = () => {
     <div className="min-h-screen bg-surface text-content">
       <Header />
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:py-12">
-        {/* QUEM ESTÁ LOGADO */}
+        {/* QUEM ESTÁ LOGADO: clicar na foto abre o menu com foto e cor */}
         <section className="flex flex-col gap-2">
           <div className="flex items-center gap-5">
-            {/* a própria foto é o botão de trocar: clicar abre a escolha do arquivo */}
             <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} className="hidden" />
-            <button
-              type="button"
-              onClick={() => fileInput.current?.click()}
-              disabled={busy === "foto"}
-              aria-label={image ? "Trocar foto de perfil" : "Escolher foto de perfil"}
-              title={image ? "Trocar foto" : "Escolher foto"}
-              className="group relative shrink-0 rounded-2xl disabled:cursor-wait"
-            >
-              <Avatar name={canEditName ? name || user?.name : user?.name} color={color} image={image} size="lg" />
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 rounded-2xl bg-black/0 transition group-hover:bg-black/30 group-focus-visible:bg-black/30"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute -bottom-1.5 -right-1.5 flex size-8 items-center justify-center rounded-full border-2 border-surface bg-highlight text-sm text-surface shadow-lg transition group-hover:scale-110"
+            <div ref={photoMenuRef} className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setPhotoMenu(!photoMenu)}
+                disabled={busy === "foto"}
+                aria-haspopup="menu"
+                aria-expanded={photoMenu}
+                aria-label="Editar foto e cor do perfil"
+                title="Editar foto e cor"
+                className="group relative rounded-2xl disabled:cursor-wait"
               >
-                <FontAwesomeIcon icon={busy === "foto" ? faSpinner : faPen} spin={busy === "foto"} />
-              </span>
-            </button>
+                <Avatar name={canEditName ? name || user?.name : user?.name} color={color} image={image} size="lg" />
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-2xl bg-black/0 transition group-hover:bg-black/30 group-focus-visible:bg-black/30"
+                />
+                <span
+                  aria-hidden="true"
+                  className="absolute -bottom-1.5 -right-1.5 flex size-8 items-center justify-center rounded-full border-2 border-surface bg-highlight text-sm text-surface shadow-lg transition group-hover:scale-110"
+                >
+                  <FontAwesomeIcon icon={busy === "foto" ? faSpinner : faPen} spin={busy === "foto"} />
+                </span>
+              </button>
+
+              {photoMenu && (
+                <div
+                  role="menu"
+                  className="absolute left-0 top-full z-20 mt-3 w-72 rounded-2xl border border-white/10 bg-surface-light p-2 shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setPhotoMenu(false);
+                      fileInput.current?.click();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-content hover:bg-white/5"
+                  >
+                    <FontAwesomeIcon icon={faImage} className="w-4 text-brand-light" />
+                    {image ? "Trocar foto" : "Escolher foto"}
+                  </button>
+                  {image && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setPhotoMenu(false);
+                        savePhoto("");
+                      }}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-content hover:bg-white/5 hover:text-danger"
+                    >
+                      <FontAwesomeIcon icon={faTrash} className="w-4 text-content-secondary" />
+                      Remover foto
+                    </button>
+                  )}
+                  {/* sem "disabled" enquanto salva: desabilitar tiraria o foco do teclado da cor escolhida */}
+                  <fieldset className="mt-1 border-t border-white/10 px-3 pb-2 pt-3">
+                    <legend className="float-left w-full text-sm font-medium text-content">Cor das iniciais</legend>
+                    <p className="text-xs text-content-secondary">{image ? "Aparece quando você está sem foto." : "Fundo do círculo com as suas iniciais."}</p>
+                    <div className="mt-3 grid grid-cols-8 gap-1.5">
+                      {avatarColors.map((item) => {
+                        const selected = item.value.toLowerCase() === String(color).toLowerCase();
+                        return (
+                          <label key={item.value} className="cursor-pointer" title={item.label}>
+                            <input
+                              type="radio"
+                              name="avatar-color"
+                              value={item.value}
+                              checked={selected}
+                              onChange={() => saveColor(item.value)}
+                              className="peer sr-only"
+                            />
+                            <span
+                              style={{ backgroundColor: item.value, color: readableTextColor(item.value) }}
+                              className={`flex size-7 items-center justify-center rounded-full text-xs font-bold ring-offset-2 ring-offset-surface-light transition peer-focus-visible:ring-2 peer-focus-visible:ring-white ${
+                                selected ? "ring-2 ring-white" : "hover:scale-110"
+                              }`}
+                            >
+                              {selected ? "✓" : ""}
+                              <span className="sr-only">{item.label}</span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                </div>
+              )}
+            </div>
             <div className="min-w-0">
               <h1 className="truncate text-2xl font-bold sm:text-3xl">Configurações da conta</h1>
               <p className="truncate text-content-secondary">
                 {user?.email} · {roleLabel[user?.role]}
               </p>
-              {image && (
-                <button
-                  type="button"
-                  onClick={() => savePhoto("")}
-                  disabled={busy === "foto"}
-                  className="mt-1 text-sm font-medium text-content-secondary underline-offset-4 hover:text-danger hover:underline"
-                >
-                  Remover foto
-                </button>
-              )}
             </div>
           </div>
           <Feedback status={status.foto} />
+          <Feedback status={status.cor} />
         </section>
 
         {/* DADOS */}
@@ -223,45 +302,6 @@ const AccountSettings = () => {
             </div>
           )}
         </form>
-
-        {/* COR DO AVATAR */}
-        <section className={panelClass}>
-          <div>
-            <h2 className="text-xl font-semibold">Cor do avatar</h2>
-            <p className="mt-1 text-sm text-content-secondary">
-              {image ? "Aparece quando você está sem foto." : "É a cor do círculo com as suas iniciais na barra do topo."} Salva ao escolher.
-            </p>
-          </div>
-          <fieldset disabled={busy === "cor"} className="flex flex-wrap gap-3">
-            <legend className="sr-only">Escolha a cor do avatar</legend>
-            {avatarColors.map((item) => {
-              const selected = item.value.toLowerCase() === String(color).toLowerCase();
-              return (
-                <label key={item.value} className="cursor-pointer">
-                  <input
-                    type="radio"
-                    name="avatar-color"
-                    value={item.value}
-                    checked={selected}
-                    onChange={() => saveColor(item.value)}
-                    className="peer sr-only"
-                  />
-                  <span
-                    title={item.label}
-                    style={{ backgroundColor: item.value, color: readableTextColor(item.value) }}
-                    className={`flex size-12 items-center justify-center rounded-full text-lg font-bold ring-offset-4 ring-offset-surface-light transition peer-focus-visible:ring-2 peer-focus-visible:ring-white ${
-                      selected ? "ring-2 ring-white" : "hover:scale-105"
-                    }`}
-                  >
-                    {selected ? "✓" : ""}
-                    <span className="sr-only">{item.label}</span>
-                  </span>
-                </label>
-              );
-            })}
-          </fieldset>
-          <Feedback status={status.cor} />
-        </section>
 
         {/* SENHA */}
         <form onSubmit={savePassword} className={panelClass}>
