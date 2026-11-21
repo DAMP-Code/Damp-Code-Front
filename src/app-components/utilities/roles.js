@@ -2,5 +2,5 @@
 export const homeByRole = {
   empresa: "/dashboard/Empresa",
   participante: "/dashboard/participante",
-  admin: "/",
+  admin: "/admin",
 };

@@ -27,7 +27,10 @@ const linksByRole = {
     { to: "/dashboard/participante", label: "Meu painel" },
     { to: "/perfil", label: "Perfil" },
   ],
-  admin: [{ to: "/", label: "Explorar", end: true }],
+  admin: [
+    { to: "/", label: "Explorar", end: true },
+    { to: "/admin", label: "Verificações" },
+  ],
 };
 
 const Header = () => {

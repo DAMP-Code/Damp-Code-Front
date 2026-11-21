@@ -35,6 +35,12 @@ export const MOCK_ACCOUNTS = [
     role: "participante",
     label: "participante Diego",
   },
+  {
+    email: "admin@dampcode.dev",
+    password: "123456",
+    role: "admin",
+    label: "admin (verifica empresas)",
+  },
 ];
 
 // Sem lista de prêmios, o 1º lugar sai dos campos antigos (mesma regra da API).
@@ -52,7 +58,7 @@ export function legacyPrizes(hackathon) {
 }
 
 export const seedDatabase = {
-  nextUserId: 7,
+  nextUserId: 8,
   nextInvitationId: 1,
   nextHackathonId: 7,
   nextTeamId: 3,
@@ -110,6 +116,13 @@ export const seedDatabase = {
       role: "participante",
       tecnologias: ["Go", "Docker"],
     },
+    {
+      id: 7,
+      name: "Admin DampCode",
+      email: "admin@dampcode.dev",
+      password: "123456",
+      role: "admin",
+    },
   ],
   // Empresas e vínculos espelham as tabelas companies / company_memberships / company_invitations da API.
   companies: [
@@ -117,12 +130,18 @@ export const seedDatabase = {
       companyId: "c-ifood",
       accountId: 2,
       name: "iFood",
+      cnpj: "14380200000121",
+      area: "Delivery",
+      createdAt: "2026-08-01T12:00:00.000Z",
       verificationStatus: "Verified",
     },
     {
       companyId: "c-nubank",
       accountId: 3,
       name: "Nubank",
+      cnpj: "18236120000158",
+      area: "Banco digital",
+      createdAt: "2026-09-15T12:00:00.000Z",
       verificationStatus: "Pending",
     },
   ],

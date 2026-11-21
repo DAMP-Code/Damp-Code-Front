@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "@/app-components/utilities/AuthContext"
 import { MOCK_ACCOUNTS } from "@/mock/seed";
+import { homeByRole } from "@/app-components/utilities/roles";
 
 // 🧠 RESUMO DO FLUXO
 // Usuário envia form
@@ -62,14 +63,8 @@ export default function UserLogin() {
 
       setUser(data)
 
-      // 🔥 redireciona com base no tipo de usuário
-      if (data.role === "empresa") {
-        // se for empresa → vai para dashboard da empresa
-        navigate("/dashboard/Empresa");
-      } else {
-        // senão (participante) → vai para outro dashboard
-        navigate("/dashboard/participante");
-      }
+      // 🔥 redireciona para o painel do tipo de conta (empresa, participante ou admin)
+      navigate(homeByRole[data.role] || "/dashboard/participante");
     } catch (error) {
       // captura erros como falha de conexão com o servidor
       console.error(error);

@@ -58,6 +58,11 @@ function loadDatabase() {
     for (const hackathon of database.hackathons) {
       if (!hackathon.premios) hackathon.premios = legacyPrizes(hackathon);
     }
+    // empresas salvas antes da verificação pelo Admin ganham CNPJ, área e data do seed
+    for (const company of seedDatabase.companies) {
+      const saved = database.companies.find((item) => item.companyId === company.companyId);
+      if (saved && saved.cnpj === undefined) Object.assign(saved, { cnpj: company.cnpj, area: company.area, createdAt: company.createdAt });
+    }
     for (const user of seedDatabase.users) {
       if (!database.users.some((item) => item.email === user.email)) {
         database.users.push({ ...user, id: database.nextUserId++ });
@@ -130,6 +135,34 @@ function toInvitation(invitation) {
 function handleCompanies(path, method, body, database, user) {
   if (!user) return json({ message: "Não autenticado" }, 401);
   const primaryCompany = database.companies.find((item) => item.accountId === user.id);
+
+  // verificação de empresas: só o Admin (mesmas regras do CompanyService.UpdateVerificationAsync)
+  if (method === "GET" && path === "/api/Companies/pending-verification") {
+    if (user.role !== "admin") return problem("Apenas administradores podem verificar empresas.", 403);
+    return json(
+      database.companies
+        .filter((item) => item.verificationStatus === "Pending")
+        .map((item) => ({
+          id: item.companyId,
+          name: item.name,
+          cnpj: item.cnpj || "",
+          area: item.area || null,
+          createdAt: item.createdAt || null,
+        })),
+    );
+  }
+
+  const verificationMatch = path.match(/^\/api\/Companies\/([^/]+)\/verification$/);
+  if (method === "PATCH" && verificationMatch) {
+    if (user.role !== "admin") return problem("Apenas administradores podem verificar empresas.", 403);
+    const status = ["Verified", "Rejected"].find((item) => item.toLowerCase() === String(body?.status || "").toLowerCase());
+    if (!status) return problem("Status deve ser Verified ou Rejected.", 400);
+    const company = database.companies.find((item) => item.companyId === verificationMatch[1]);
+    if (!company) return problem("Empresa não encontrada.", 404);
+    company.verificationStatus = status;
+    saveDatabase(database);
+    return new Response(null, { status: 204 });
+  }
 
   if (method === "GET" && path === "/api/Companies/me") {
     const access = managedCompany(database, user);
@@ -1499,6 +1532,9 @@ function handle(path, method, body, token) {
       companyId: `c-${user.id}`,
       accountId: user.id,
       name: user.name,
+      cnpj: user.cnpj,
+      area: user.area,
+      createdAt: new Date().toISOString(),
       verificationStatus: "Pending",
     });
     saveDatabase(database);
