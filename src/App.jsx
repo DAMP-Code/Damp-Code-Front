@@ -15,6 +15,8 @@ import ParticipantDashboard from "./Pages/participant/ParticipantDashboard";
 import HackathonPage from "./Pages/HackathonPage";
 import SubmissionPage from "./Pages/SubmissionPage";
 import Ranking from "./Pages/company/Ranking";
+import Profile from "./Pages/participant/Profile";
+import RequireRole from "./app-components/utilities/RequireRole";
 
 const App = () => {
   return (
@@ -27,18 +29,19 @@ const App = () => {
       <Route path="/loginUser" element={<UserLogin />}></Route>
       <Route path="/escolha" element={<AccountTypeSelection />}></Route>
       <Route path="/cadastroEmpresa/detalhes" element={<CompanyDetails />} />
-      <Route path="/dashboard/Empresa" element={<CompanyDashboard />}></Route>
-      <Route path="/dashboard/Empresa/entregas/:id" element={<SubmissionsReview />}></Route>
-      <Route path="/dashboard/Empresa/avaliacao/:id" element={<EvaluationRanking />}></Route>
+      <Route path="/dashboard/Empresa" element={<RequireRole role="empresa"><CompanyDashboard /></RequireRole>}></Route>
+      <Route path="/dashboard/Empresa/entregas/:id" element={<RequireRole role="empresa"><SubmissionsReview /></RequireRole>}></Route>
+      <Route path="/dashboard/Empresa/avaliacao/:id" element={<RequireRole role="empresa"><EvaluationRanking /></RequireRole>}></Route>
       <Route
         path="/dashboard/participante"
-        element={<ParticipantDashboard />}
+        element={<RequireRole role="participante"><ParticipantDashboard /></RequireRole>}
       ></Route>
-      <Route path="/cadastroHackaton" element={<CreateHackathon key="novo" />}></Route>
-      <Route path="/cadastroHackaton/:id" element={<CreateHackathon key="editar" />}></Route>
+      <Route path="/cadastroHackaton" element={<RequireRole role="empresa"><CreateHackathon key="novo" /></RequireRole>}></Route>
+      <Route path="/cadastroHackaton/:id" element={<RequireRole role="empresa"><CreateHackathon key="editar" /></RequireRole>}></Route>
       <Route path="/hackathon/:id" element={<HackathonPage />} />
-      <Route path="/hackathon/:id/entrega" element={<SubmissionPage />} />
-      <Route path="/dashboard/ranking" element={<Ranking />} />
+      <Route path="/hackathon/:id/entrega" element={<RequireRole role="participante"><SubmissionPage /></RequireRole>} />
+      <Route path="/dashboard/ranking" element={<RequireRole role="empresa"><Ranking /></RequireRole>} />
+      <Route path="/perfil" element={<RequireRole role="participante"><Profile /></RequireRole>} />
     </Routes>
   );
 };
