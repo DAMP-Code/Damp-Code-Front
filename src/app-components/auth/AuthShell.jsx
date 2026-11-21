@@ -185,45 +185,35 @@ export function PasswordMeter({ value, min }) {
 }
 
 // Abas do topo do cartão: Entrar | Criar conta e, no cadastro, o tipo de conta.
-// A pílula amarela tem nome de transição próprio, então ela desliza de uma aba para a outra na troca de tela.
 function AuthSwitch({ mode }) {
   const signingUp = mode !== "login";
   const company = mode === "empresa" || mode === "empresa-detalhes";
 
   // a aba já marcada não troca de tela (o AuthLink ignora o clique na tela atual)
-  const tab = (to, label, current, pillName) => (
+  const tab = (to, label, current, pillColor) => (
     <AuthLink
       to={to}
       onClick={current ? (e) => e.preventDefault() : undefined}
       aria-current={current ? "page" : undefined}
       className={`relative flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors ${current ? "text-surface" : "text-content-secondary hover:text-content"}`}
     >
-      {current && (
-        <span
-          aria-hidden="true"
-          className={`absolute inset-0 rounded-lg ${pillName === "auth-tab" ? "bg-highlight" : "bg-brand-light"}`}
-          style={{ viewTransitionName: pillName }}
-        />
-      )}
-      {/* o texto tem nome próprio para ficar por cima da pílula durante a troca */}
-      <span className="relative" style={{ viewTransitionName: `auth-label-${label.toLowerCase().replace(/\s+/g, "-")}` }}>
-        {label}
-      </span>
+      {current && <span aria-hidden="true" className={`absolute inset-0 rounded-lg ${pillColor}`} />}
+      <span className="relative">{label}</span>
     </AuthLink>
   );
 
   return (
     <div className="flex flex-col gap-3">
       <nav aria-label="Acesso" className="flex gap-1 rounded-xl border border-white/10 bg-surface p-1">
-        {tab("/loginUser", "Entrar", !signingUp, "auth-tab")}
-        {tab("/cadastroUser", "Criar conta", signingUp, "auth-tab")}
+        {tab("/loginUser", "Entrar", !signingUp, "bg-highlight")}
+        {tab("/cadastroUser", "Criar conta", signingUp, "bg-highlight")}
       </nav>
       {signingUp && (
-        <nav aria-label="Tipo de conta" className="flex items-center gap-3 text-sm" style={{ viewTransitionName: "auth-type" }}>
+        <nav aria-label="Tipo de conta" className="flex items-center gap-3 text-sm">
           <span className="text-content-secondary">Conta de</span>
           <span className="flex flex-1 gap-1 rounded-xl bg-white/[0.04] p-1">
-            {tab("/cadastroUser", "Participante", !company, "auth-type-pill")}
-            {tab("/cadastroEmpresa", "Empresa", company, "auth-type-pill")}
+            {tab("/cadastroUser", "Participante", !company, "bg-brand-light")}
+            {tab("/cadastroEmpresa", "Empresa", company, "bg-brand-light")}
           </span>
         </nav>
       )}
@@ -270,29 +260,23 @@ const AuthShell = ({ title, lede, asideTitle, asideText, points = [], wide = fal
         </aside>
 
         <section className={`mx-auto w-full ${wide ? "max-w-xl" : "max-w-md"}`}>
-          <div className="relative p-5 sm:p-8">
-            {/* fundo do cartão em camada própria: na troca de tela ele estica sem deformar o texto */}
-            <span
-              aria-hidden="true"
-              className="absolute inset-0 rounded-3xl border border-white/10 bg-surface-light shadow-[0_24px_70px_rgba(0,0,0,0.28)]"
-              style={{ viewTransitionName: "auth-card" }}
-            />
-            <div className="relative" style={{ viewTransitionName: "auth-top" }}>
-              <div className="flex items-center justify-between gap-4">
-                <BackButton />
-                {step ? <span className="text-xs font-semibold text-content-secondary">Passo {step} de 2</span> : null}
+          {/* o cartão inteiro é uma peça só na troca de tela: o novo entra por cima do antigo, como num baralho */}
+          <div
+            className="rounded-3xl border border-white/10 bg-surface-light p-5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] sm:p-8"
+            style={{ viewTransitionName: "auth-card" }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <BackButton />
+              {step ? <span className="text-xs font-semibold text-content-secondary">Passo {step} de 2</span> : null}
+            </div>
+            {mode ? (
+              <div className="mt-5">
+                <AuthSwitch mode={mode} />
               </div>
-              {mode ? (
-                <div className="mt-5">
-                  <AuthSwitch mode={mode} />
-                </div>
-              ) : null}
-            </div>
-            <div className="relative" style={{ viewTransitionName: "auth-content" }}>
-              <h2 className="mt-6 text-3xl font-semibold text-content">{title}</h2>
-              {lede ? <p className="mt-2 leading-relaxed text-content-secondary">{lede}</p> : null}
-              <div className="mt-8">{children}</div>
-            </div>
+            ) : null}
+            <h2 className="mt-6 text-3xl font-semibold text-content">{title}</h2>
+            {lede ? <p className="mt-2 leading-relaxed text-content-secondary">{lede}</p> : null}
+            <div className="mt-8">{children}</div>
           </div>
         </section>
       </div>
