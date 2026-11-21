@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
@@ -55,6 +56,8 @@ const team = [
 const letterDelay = ["delay-0", "delay-150", "delay-300", "delay-500"];
 
 const About = () => {
+  const { user } = useContext(AuthContext);
+
   return (
     <div className="min-h-screen bg-surface text-content">
       <Header />
@@ -191,12 +194,14 @@ const About = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link
-                to="/escolha"
-                className="rounded-xl bg-highlight px-6 py-3 font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] transition hover:-translate-y-0.5 hover:brightness-110"
-              >
-                Criar conta
-              </Link>
+              {!user && (
+                <Link
+                  to="/escolha"
+                  className="rounded-xl bg-highlight px-6 py-3 font-bold text-surface shadow-[0_12px_30px_rgba(255,234,0,0.15)] transition hover:-translate-y-0.5 hover:brightness-110"
+                >
+                  Criar conta
+                </Link>
+              )}
               <Link to="/explore" className="rounded-xl border border-white/20 px-6 py-3 font-semibold transition hover:bg-white/5">
                 Ver Hackathons
               </Link>

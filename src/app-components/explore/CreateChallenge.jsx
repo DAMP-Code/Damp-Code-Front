@@ -6,8 +6,9 @@ import { createChallengeAction } from '../utilities/hackathonFilters'
 
 const CreateChallenge = () => {
   const { user } = useContext(AuthContext)
-  // só empresa cria Hackathon; participante é levado ao cadastro de empresa
-  const action = createChallengeAction(user) || { to: '/cadastroEmpresa', label: 'Cadastrar minha empresa' }
+  // só empresa (ou visitante, que vai para o cadastro de empresa) vê o convite para criar desafio
+  const action = createChallengeAction(user)
+  if (!action) return null
 
   return (
     <section className='flex h-full w-full flex-col items-center py-10 md:h-2/4'>

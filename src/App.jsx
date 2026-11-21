@@ -25,6 +25,7 @@ import NotFound from "./Pages/NotFound";
 import Terms from "./Pages/Terms";
 import Privacy from "./Pages/Privacy";
 import RequireRole from "./app-components/utilities/RequireRole";
+import RequireGuest from "./app-components/utilities/RequireGuest";
 
 const App = () => {
   return (
@@ -36,11 +37,11 @@ const App = () => {
       <Route path="/termos" element={<Terms />} />
       <Route path="/privacidade" element={<Privacy />} />
       <Route path="/conta" element={<RequireRole role={["participante", "empresa", "admin"]}><AccountSettings /></RequireRole>} />
-      <Route path="/cadastroUser" element={<CreateUser />}></Route>
-      <Route path="/cadastroEmpresa" element={<CreateCompany />}></Route>
-      <Route path="/loginUser" element={<UserLogin />}></Route>
-      <Route path="/escolha" element={<AccountTypeSelection />}></Route>
-      <Route path="/cadastroEmpresa/detalhes" element={<CompanyDetails />} />
+      <Route path="/cadastroUser" element={<RequireGuest><CreateUser /></RequireGuest>}></Route>
+      <Route path="/cadastroEmpresa" element={<RequireGuest><CreateCompany /></RequireGuest>}></Route>
+      <Route path="/loginUser" element={<RequireGuest><UserLogin /></RequireGuest>}></Route>
+      <Route path="/escolha" element={<RequireGuest><AccountTypeSelection /></RequireGuest>}></Route>
+      <Route path="/cadastroEmpresa/detalhes" element={<RequireGuest><CompanyDetails /></RequireGuest>} />
       <Route path="/dashboard/Empresa" element={<RequireRole role="empresa"><CompanyDashboard /></RequireRole>}></Route>
       <Route path="/dashboard/Empresa/entregas/:id" element={<RequireRole role="empresa"><SubmissionsReview /></RequireRole>}></Route>
       <Route path="/dashboard/Empresa/avaliacao/:id" element={<RequireRole role="empresa"><EvaluationRanking /></RequireRole>}></Route>

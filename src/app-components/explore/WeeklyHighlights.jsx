@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "../utilities/AuthContext";
 import Title from "../Title";
 import HackathonCard from "../HackathonCard";
 import EmptyState from "../EmptyState";
 
 const WeeklyHighlights = ({ hackathons = [], filtered = false, onClear }) => {
+  const { user } = useContext(AuthContext);
   const list = Array.isArray(hackathons) ? hackathons : [];
 
   return (
@@ -27,8 +29,8 @@ const WeeklyHighlights = ({ hackathons = [], filtered = false, onClear }) => {
           <EmptyState
             title="Nenhum destaque esta semana"
             text="Os hackathons publicados aparecem aqui. Enquanto isso, você pode criar uma conta e acompanhar os próximos desafios."
-            actionLabel="Criar conta"
-            to="/escolha"
+            actionLabel={user ? undefined : "Criar conta"}
+            to={user ? undefined : "/escolha"}
           />
         </div>
       ) : (

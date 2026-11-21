@@ -102,12 +102,9 @@ const Sidebar = ({ hackathons = [], filters = emptyFilters, onChange = () => {} 
           {action.label}
         </Link>
       ) : (
-        <div className='mt-2 rounded-xl border border-white/10 bg-surface/50 p-4 text-sm text-content-secondary'>
-          Desafios são publicados por empresas.{' '}
-          <Link to='/cadastroEmpresa' className='font-semibold text-highlight hover:underline'>
-            Cadastrar minha empresa
-          </Link>
-        </div>
+        <p className='mt-2 rounded-xl border border-white/10 bg-surface/50 p-4 text-sm text-content-secondary'>
+          Desafios são publicados pelas empresas parceiras. Escolha um aberto e participe.
+        </p>
       )}
     </div>
   )

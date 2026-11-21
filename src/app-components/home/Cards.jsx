@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../utilities/AuthContext";
 import { Link } from "react-router-dom";
 import Title from "../Title";
 import HackathonCard from "../HackathonCard";
 import EmptyState from "../EmptyState";
 
 const Cards = () => {
+  const { user } = useContext(AuthContext);
   const [hackathons, setHackathons] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,8 +54,8 @@ const Cards = () => {
           <EmptyState
             title="Nenhum hackathon em destaque"
             text="Quando houver desafios publicados, eles aparecem aqui com prêmio, tecnologias e empresa."
-            actionLabel="Criar conta"
-            to="/escolha"
+            actionLabel={user ? undefined : "Criar conta"}
+            to={user ? undefined : "/escolha"}
           />
         </div>
       ) : null}

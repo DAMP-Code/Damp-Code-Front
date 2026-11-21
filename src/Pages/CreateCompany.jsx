@@ -8,12 +8,22 @@ const CreateCompany = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
+  // aviso só depois que a confirmação tem o tamanho da senha, para não reclamar enquanto a pessoa digita
+  const passwordsDiffer = confirmPassword.length >= password.length && confirmPassword !== "" && confirmPassword !== password;
 
   const {registrationData, setRegistrationData} = useContext(RegistrationContext);
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      // se o aviso embaixo do campo já está na tela, não repete a mensagem
+      setMessage(passwordsDiffer ? "" : "As senhas não são iguais. Digite a mesma senha nos dois campos.");
+      return;
+    }
 
     const basicData  = {
       name,
@@ -74,6 +84,24 @@ const CreateCompany = () => {
           minLength={10}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <AuthField
+          label="Confirmar senha"
+          type="password"
+          name="confirm-password"
+          autoComplete="new-password"
+          placeholder="Repita a senha"
+          value={confirmPassword}
+          required
+          minLength={10}
+          aria-invalid={passwordsDiffer}
+          aria-describedby={passwordsDiffer ? "confirm-password-hint" : undefined}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        {passwordsDiffer && (
+          <p id="confirm-password-hint" className="-mt-3 text-sm text-danger">
+            As senhas não são iguais.
+          </p>
+        )}
         <button type="submit" className={authButtonClass}>
           Continuar
         </button>
@@ -81,6 +109,11 @@ const CreateCompany = () => {
           Já tenho conta. Fazer login.
         </Link>
       </form>
+      {message ? (
+        <p className="mt-5 rounded-xl border border-white/10 bg-surface px-4 py-3 text-center text-sm text-content">
+          {message}
+        </p>
+      ) : null}
     </AuthShell>
   );
 };

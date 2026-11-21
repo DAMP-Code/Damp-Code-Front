@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+import { AuthContext } from '@/app-components/utilities/AuthContext'
+import { homeByRole } from '@/app-components/utilities/roles'
 import { Link } from 'react-router-dom'
 import ColorBends from '@/app-components/ColorBends'
 import { formatMoney, totalPrize } from '@/app-components/utilities/prizes'
@@ -116,6 +118,7 @@ const TypedEditor = ({ snippet, typed }) => (
 )
 
 const Banner = () => {
+  const { user } = useContext(AuthContext)
   const reducedMotion = useReducedMotion()
   const [hackathons, setHackathons] = useState([])
   const [snippetIndex, setSnippetIndex] = useState(0)
@@ -206,11 +209,12 @@ const Banner = () => {
             Empresas publicam um problema de verdade. Você entrega o código, a empresa avalia e os melhores levam o prêmio.
           </p>
           <div className='pointer-events-auto flex flex-wrap gap-3'>
+            {/* quem já entrou vai para o próprio painel em vez de criar conta */}
             <Link
-              to='/escolha'
+              to={user ? homeByRole[user.role] || '/' : '/escolha'}
               className='rounded-xl bg-highlight px-7 py-4 text-lg font-bold text-surface shadow-[0_16px_35px_rgba(255,234,0,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110'
             >
-              Comece agora
+              {user ? 'Ir para o meu painel' : 'Comece agora'}
             </Link>
             <Link
               to='/explore'
