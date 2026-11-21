@@ -3,9 +3,57 @@ import { Link } from 'react-router-dom'
 import Header from '@/app-components/Header'
 import Footer from '@/app-components/Footer'
 
+// Trechos entre **asteriscos** viram negrito, como no texto original dos documentos.
+const Inline = ({ text }) =>
+  text.split(/(\*\*[^*]+\*\*)/).map((part, i) =>
+    part.startsWith('**') && part.endsWith('**') ? (
+      <strong key={i} className='font-semibold text-content'>
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      part
+    ),
+  )
+
+// Parágrafo que começa pelo número da cláusula ("2.4. ...") mostra o número destacado.
+const Paragraph = ({ text }) => {
+  const clause = text.match(/^(\d+\.\d+\.)\s(.*)$/s)
+  if (!clause) {
+    return (
+      <p>
+        <Inline text={text} />
+      </p>
+    )
+  }
+  return (
+    <p>
+      <span className='mr-1.5 font-semibold text-brand-light tabular-nums'>{clause[1]}</span>
+      <Inline text={clause[2]} />
+    </p>
+  )
+}
+
+// Cada bloco da seção é um parágrafo (texto), uma lista ({ list }) ou um subtítulo ({ subtitle }).
+const Block = ({ block }) => {
+  if (typeof block === 'string') return <Paragraph text={block} />
+  if (block.subtitle) return <h3 className='mt-2 text-lg font-semibold text-content'>{block.subtitle}</h3>
+  return (
+    <ul className='flex flex-col gap-2 pl-1'>
+      {block.list.map((item, i) => (
+        <li key={i} className='flex gap-3'>
+          <span aria-hidden='true' className='mt-2.5 size-1.5 shrink-0 rounded-full bg-highlight' />
+          <span>
+            <Inline text={item} />
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 // Página de texto legal (Termos, Privacidade): índice fixo ao lado que acompanha a leitura e seções numeradas.
-// sections: [{ id, title, paragraphs: [string] }]
-const LegalPage = ({ title, intro, updatedAt, sections, other }) => {
+// sections: [{ id, title, summary, blocks }], summary é a versão resumida da seção.
+const LegalPage = ({ title, intro, updatedAt, sections, closing, other }) => {
   const [current, setCurrent] = useState(sections[0]?.id)
 
   // marca no índice a seção que está na tela
@@ -40,10 +88,11 @@ const LegalPage = ({ title, intro, updatedAt, sections, other }) => {
         <header className='max-w-3xl'>
           <p className='text-sm font-semibold text-brand-light'>Damp Code · atualizado em {updatedAt}</p>
           <h1 className='mt-2 text-4xl font-bold tracking-tight sm:text-5xl'>{title}</h1>
-          <p className='mt-4 text-lg leading-relaxed text-content-secondary'>{intro}</p>
-          <p className='mt-6 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning'>
-            Texto provisório: o conteúdo definitivo será publicado em breve.
-          </p>
+          <div className='mt-4 flex flex-col gap-3 text-lg leading-relaxed text-content-secondary'>
+            {intro.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
         </header>
 
         <div className='mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[16rem_minmax(0,1fr)]'>
@@ -75,20 +124,31 @@ const LegalPage = ({ title, intro, updatedAt, sections, other }) => {
           </nav>
 
           {/* SEÇÕES */}
-          <div className='flex max-w-3xl flex-col gap-10'>
+          <div className='flex max-w-3xl flex-col gap-14'>
             {sections.map((section, index) => (
               <section key={section.id} id={section.id} className='scroll-mt-28'>
                 <h2 className='flex items-baseline gap-3 text-2xl font-bold'>
                   <span className='text-highlight tabular-nums'>{String(index + 1).padStart(2, '0')}</span>
                   {section.title}
                 </h2>
-                <div className='mt-4 flex flex-col gap-4 leading-relaxed text-content-secondary'>
-                  {section.paragraphs.map((paragraph, i) => (
-                    <p key={i}>{paragraph}</p>
+                {section.summary && (
+                  <div className='mt-4 rounded-xl border-l-2 border-highlight bg-white/[0.04] px-4 py-3'>
+                    <p className='text-sm font-semibold text-highlight'>Em resumo</p>
+                    <div className='mt-1 flex flex-col gap-2 text-sm leading-relaxed text-content'>
+                      {section.summary.map((block, i) => (
+                        <Block key={i} block={block} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className='mt-5 flex flex-col gap-4 leading-relaxed text-content-secondary'>
+                  {section.blocks.map((block, i) => (
+                    <Block key={i} block={block} />
                   ))}
                 </div>
               </section>
             ))}
+            {closing && <p className='border-t border-white/10 pt-8 text-content-secondary'>{closing}</p>}
           </div>
         </div>
       </main>
