@@ -143,7 +143,7 @@ const Header = () => {
                 aria-label={`Conta de ${user.name}`}
                 className="flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-white/5"
               >
-                <Avatar name={user.name} color={user.avatarColor} />
+                <Avatar name={user.name} color={user.avatarColor} image={user.avatarImage} />
                 <FontAwesomeIcon
                   icon={faChevronDown}
                   className={`text-xs text-content-secondary transition-transform ${isAccountOpen ? "rotate-180" : ""}`}
@@ -156,7 +156,7 @@ const Header = () => {
                   className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-white/10 bg-surface-light p-2 shadow-[0_24px_60px_rgba(0,0,0,0.45)]"
                 >
                   <div className="flex items-center gap-3 border-b border-white/10 px-3 pb-3 pt-2">
-                    <Avatar name={user.name} color={user.avatarColor} size="md" />
+                    <Avatar name={user.name} color={user.avatarColor} image={user.avatarImage} size="md" />
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-content">{user.name}</p>
                       <p className="truncate text-sm text-content-secondary">{user.email}</p>
@@ -198,7 +198,7 @@ const Header = () => {
         {/* conta no topo do menu do celular */}
         {user && (
           <div className="mb-1 flex items-center gap-3 rounded-xl bg-white/5 p-3">
-            <Avatar name={user.name} color={user.avatarColor} size="md" />
+            <Avatar name={user.name} color={user.avatarColor} image={user.avatarImage} size="md" />
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-content">{user.name}</p>
               <p className="truncate text-sm text-content-secondary">{user.email}</p>

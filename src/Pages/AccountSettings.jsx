@@ -1,10 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import Header from "@/app-components/Header";
 import Footer from "@/app-components/Footer";
 import Avatar from "@/app-components/Avatar";
 import { authFieldClass } from "@/app-components/auth/AuthShell";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
-import { avatarColors, defaultAvatarColor } from "@/app-components/utilities/avatar";
+import { avatarColors, defaultAvatarColor, resizeAvatar } from "@/app-components/utilities/avatar";
 import { readableTextColor } from "@/app-components/utilities/color";
 
 const API = "https://localhost:7092/api/Auth/me";
@@ -29,7 +29,9 @@ const AccountSettings = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [busy, setBusy] = useState(null); // "nome" | "cor" | "senha"
+  const [image, setImage] = useState(user?.avatarImage || null);
+  const fileInput = useRef(null);
+  const [busy, setBusy] = useState(null); // "nome" | "foto" | "cor" | "senha"
   const [status, setStatus] = useState({});
 
   const canEditName = user?.role === "participante";
@@ -67,6 +69,34 @@ const AccountSettings = () => {
     setStatus((current) => ({ ...current, nome: { ok: true, text: "Nome salvo." } }));
   }
 
+  // foto escolhida: recorta e reduz no navegador antes de mandar
+  async function choosePhoto(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      setStatus((current) => ({ ...current, foto: { ok: false, text: "Envie uma imagem PNG, JPG ou WebP." } }));
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setStatus((current) => ({ ...current, foto: { ok: false, text: "A imagem tem mais de 10 MB. Escolha uma menor." } }));
+      return;
+    }
+    try {
+      await savePhoto(await resizeAvatar(file));
+    } catch (error) {
+      setStatus((current) => ({ ...current, foto: { ok: false, text: error.message } }));
+    }
+  }
+
+  async function savePhoto(value) {
+    const data = await send("foto", API, { avatarImage: value });
+    if (!data) return;
+    setImage(data.avatarImage || null);
+    updateUser({ avatarImage: data.avatarImage || null });
+    setStatus((current) => ({ ...current, foto: { ok: true, text: value ? "Foto salva." : "Foto removida." } }));
+  }
+
   async function saveColor(value) {
     const previous = color;
     setColor(value);
@@ -101,7 +131,7 @@ const AccountSettings = () => {
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 lg:py-12">
         {/* QUEM ESTÁ LOGADO */}
         <section className="flex items-center gap-5">
-          <Avatar name={canEditName ? name || user?.name : user?.name} color={color} size="lg" />
+          <Avatar name={canEditName ? name || user?.name : user?.name} color={color} image={image} size="lg" />
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-bold sm:text-3xl">Configurações da conta</h1>
             <p className="truncate text-content-secondary">
@@ -158,11 +188,43 @@ const AccountSettings = () => {
           )}
         </form>
 
+        {/* FOTO */}
+        <section className={panelClass}>
+          <div>
+            <h2 className="text-xl font-semibold">Foto de perfil</h2>
+            <p className="mt-1 text-sm text-content-secondary">
+              Aparece na barra do topo e no seu perfil. A imagem é recortada em quadrado.
+            </p>
+          </div>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <Avatar name={user?.name} color={color} image={image} size="lg" className="sm:size-24" />
+            <div className="flex flex-wrap gap-3">
+              <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} className="hidden" />
+              <button type="button" onClick={() => fileInput.current?.click()} disabled={busy === "foto"} className={saveClass}>
+                {busy === "foto" ? "Enviando..." : image ? "Trocar foto" : "Escolher foto"}
+              </button>
+              {image && (
+                <button
+                  type="button"
+                  onClick={() => savePhoto("")}
+                  disabled={busy === "foto"}
+                  className="rounded-xl border border-white/15 px-5 py-2.5 font-semibold text-content transition hover:border-danger/60 hover:text-danger disabled:opacity-60"
+                >
+                  Remover foto
+                </button>
+              )}
+            </div>
+          </div>
+          <Feedback status={status.foto} />
+        </section>
+
         {/* COR DO AVATAR */}
         <section className={panelClass}>
           <div>
             <h2 className="text-xl font-semibold">Cor do avatar</h2>
-            <p className="mt-1 text-sm text-content-secondary">É a cor do círculo com as suas iniciais na barra do topo. Salva ao escolher.</p>
+            <p className="mt-1 text-sm text-content-secondary">
+              {image ? "Aparece quando você está sem foto." : "É a cor do círculo com as suas iniciais na barra do topo."} Salva ao escolher.
+            </p>
           </div>
           <fieldset disabled={busy === "cor"} className="flex flex-wrap gap-3">
             <legend className="sr-only">Escolha a cor do avatar</legend>

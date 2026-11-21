@@ -87,6 +87,7 @@ function publicUser(user) {
     email: user.email,
     role: user.role,
     avatarColor: user.avatarColor || null,
+    avatarImage: user.avatarImage || null,
     // token falso: o mock só precisa saber quem está chamando
     token: `mock-${user.id}`,
   };
@@ -1669,6 +1670,12 @@ function handle(path, method, body, token) {
         const color = String(body.avatarColor).trim();
         if (color && !/^#[0-9A-Fa-f]{6}$/.test(color)) return problem("Cor inválida. Use o formato #RRGGBB.", 400);
         currentUser.avatarColor = color || null;
+      }
+      if (body?.avatarImage !== null && body?.avatarImage !== undefined) {
+        const image = String(body.avatarImage);
+        const validPrefix = /^data:image\/(png|jpeg|webp);base64,/.test(image);
+        if (image && (!validPrefix || image.length > 400000)) return problem("Foto inválida. Envie PNG, JPG ou WebP de até 300 KB.", 400);
+        currentUser.avatarImage = image || null;
       }
       saveDatabase(database);
       return json(accountResponse());

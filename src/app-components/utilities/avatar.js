@@ -18,3 +18,28 @@ export function initials(name) {
   if (parts.length === 0) return "?";
   return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
+
+// Recorta a foto no centro em quadrado e reduz para size×size (JPEG), devolvendo um data URL pequeno.
+// Assim uma foto de celular de vários MB vira algo perto de 30 KB antes de ir para a API.
+export function resizeAvatar(file, size = 256) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("Este arquivo não é uma imagem válida."));
+      image.onload = () => {
+        const side = Math.min(image.width, image.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        canvas
+          .getContext("2d")
+          .drawImage(image, (image.width - side) / 2, (image.height - side) / 2, side, side, 0, 0, size, size);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}

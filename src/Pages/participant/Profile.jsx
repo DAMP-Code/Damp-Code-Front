@@ -94,7 +94,7 @@ const Profile = () => {
         {/* IDENTIDADE */}
         <section className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-surface-light p-6 shadow-[0_20px_55px_rgba(0,0,0,0.24)] sm:p-8 md:flex-row md:items-center md:justify-between">
           <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-            <Avatar name={user?.name} color={user?.avatarColor} size="lg" />
+            <Avatar name={user?.name} color={user?.avatarColor} image={user?.avatarImage} size="lg" />
             <div className="flex min-w-0 flex-col gap-1">
               <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">{user?.name}</h1>
               <p className="truncate text-content-secondary">{user?.email}</p>
