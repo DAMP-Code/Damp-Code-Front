@@ -16,8 +16,8 @@ const team = [
     focus: ["Lorem", "Ipsum", "Dolor"],
     // caminho da foto (ex.: "/src/assets/equipe/diego.jpg"); sem foto aparece a letra
     photo: null,
-    github: "#",
-    linkedin: "#",
+    github: "https://github.com/DiegoLopes-da-Silva",
+    linkedin: "https://www.linkedin.com/in/diego-lopes-da-silva-833b67352/",
   },
   {
     letter: "A",
@@ -26,8 +26,8 @@ const team = [
     bio: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     focus: ["Lorem", "Ipsum", "Dolor"],
     photo: null,
-    github: "#",
-    linkedin: "#",
+    github: "https://github.com/juninh0-dev",
+    linkedin: "https://www.linkedin.com/in/altairgodoi/",
   },
   {
     letter: "M",
@@ -36,8 +36,8 @@ const team = [
     bio: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
     focus: ["Lorem", "Ipsum", "Dolor"],
     photo: null,
-    github: "#",
-    linkedin: "#",
+    github: "https://github.com/betzfer",
+    linkedin: "https://www.linkedin.com/in/miguel-rodrigues-de-oliveira-184036353/",
   },
   {
     letter: "P",
@@ -46,8 +46,8 @@ const team = [
     bio: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     focus: ["Lorem", "Ipsum", "Dolor"],
     photo: null,
-    github: "#",
-    linkedin: "#",
+    github: "https://github.com/PietroDub",
+    linkedin: "https://www.linkedin.com/in/pietro-vito/",
   },
 ];
 
@@ -157,14 +157,18 @@ const About = () => {
                     <div className="flex gap-2">
                       <a
                         href={person.github}
-                        aria-label={`GitHub de ${person.name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`GitHub de ${person.name} (abre em nova aba)`}
                         className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-lg text-content-secondary transition hover:bg-white/10 hover:text-content"
                       >
                         <FontAwesomeIcon icon={faGithub} />
                       </a>
                       <a
                         href={person.linkedin}
-                        aria-label={`LinkedIn de ${person.name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`LinkedIn de ${person.name} (abre em nova aba)`}
                         className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-lg text-content-secondary transition hover:bg-white/10 hover:text-content"
                       >
                         <FontAwesomeIcon icon={faLinkedin} />
