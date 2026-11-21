@@ -1,94 +1,32 @@
 import Chart from "react-apexcharts";
+import { barChartHeight, horizontalBarOptions } from "./chartTheme";
 
+// ordem em que as fases acontecem
+const phases = ["Rascunho", "Publicado", "Ativo", "Em avaliação", "Encerrado", "Cancelado"];
+
+// Quantos Hackathons da empresa estão em cada fase (só as fases que têm algum).
 const StatusChart = ({ hackathons }) => {
-  const activeCount = hackathons.filter(h => h.status).length;
-  const inactiveCount = hackathons.filter(h => !h.status).length;
+  const counts = phases
+    .map((phase) => [phase, hackathons.filter((h) => h.fase === phase).length])
+    .filter(([, count]) => count > 0);
 
-  hackathons.forEach(h => {
-  console.log(h.titulo, h.status, typeof h.status);
-});
+  const categories = counts.map(([phase]) => phase);
+  const values = counts.map(([, count]) => count);
 
-  const series = [activeCount, inactiveCount];
-
-  const options = {
-    chart: {
-      background: "transparent",
-      toolbar: {
-        show: false
-      }
-    },
-
-    labels: ["Ativos", "Inativos"],
-
-    colors: [
-      "#C68FE6", // roxo claro
-      "#FFEA00"  // amarelo
-    ],
-
-    legend: {
-      position: "bottom",
-      labels: {
-        colors: "#FFFFFF"
-      },
-      fontSize: "14px"
-    },
-
-    dataLabels: {
-      enabled: true,
-      style: {
-        fontSize: "16px",
-        fontWeight: "bold"
-      }
-    },
-
-    stroke: {
-      width: 3,
-      colors: ["#170A36"]
-    },
-
-    plotOptions: {
-      pie: {
-        expandOnClick: true,
-        donut: {
-          size: "55%"
-        }
-      }
-    },
-
-    tooltip: {
-      theme: "dark"
-    },
-
-    title: {
-      text: "Status dos Hackathons",
-      align: "center",
-      style: {
-        color: "#FFFFFF",
-        fontSize: "20px",
-        fontWeight: 700
-      }
-    }
-  };
+  const options = horizontalBarOptions({
+    labels: categories,
+    values,
+    formatValue: (value) => `${value} Hackathon${value === 1 ? "" : "s"}`,
+    integer: true,
+  });
 
   return (
-    <div
-      className="
-        bg-surface-light
-        rounded-2xl
-        p-3
-        sm:p-6
-        shadow-lg
-        border
-        border-brand
-      "
-    >
-      <Chart
-        options={options}
-        series={series}
-        type="donut"
-        height={350}
-      />
-    </div>
+    <Chart
+      options={options}
+      series={[{ name: "Hackathons", data: values }]}
+      type="bar"
+      height={barChartHeight(values.length)}
+    />
   );
 };
 

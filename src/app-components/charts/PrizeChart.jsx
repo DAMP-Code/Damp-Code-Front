@@ -1,128 +1,32 @@
 import Chart from "react-apexcharts";
+import { barChartHeight, horizontalBarOptions } from "./chartTheme";
+import { totalPrize } from "@/app-components/utilities/prizes";
 
+const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+// Total em dinheiro dos prêmios de cada Hackathon, do maior para o menor.
 const PrizeChart = ({ hackathons }) => {
+  const rows = hackathons
+    .map((h) => [h.titulo, totalPrize(h)])
+    .filter(([, value]) => value > 0)
+    .sort((a, b) => b[1] - a[1]);
 
-  const options = {
-    chart: {
-      type: "bar",
-      background: "transparent",
-      toolbar: {
-        show: false
-      }
-    },
+  const categories = rows.map(([title]) => title);
+  const values = rows.map(([, value]) => value);
 
-    colors: ["#C68FE6"],
-
-    title: {
-      text: "Premiação por Hackathon",
-      align: "center",
-      style: {
-        color: "#FFFFFF",
-        fontSize: "20px",
-        fontWeight: 700
-      }
-    },
-
-    plotOptions: {
-      bar: {
-        horizontal: true,
-        borderRadius: 8,
-        borderRadiusApplication: "end",
-        distributed: false
-      }
-    },
-
-    dataLabels: {
-      enabled: true,
-      formatter: (val) => `R$ ${val.toLocaleString("pt-BR")}`,
-      style: {
-        colors: ["#FFFFFF"],
-        fontWeight: 600
-      }
-    },
-
-    xaxis: {
-      categories: hackathons.map(
-        h => h.titulo
-      ),
-      labels: {
-        style: {
-          colors: "#FFFFFF"
-        },
-        formatter: (value) =>
-          `R$ ${Number(value).toLocaleString("pt-BR")}`
-      }
-    },
-
-    yaxis: {
-      labels: {
-        style: {
-          colors: "#FFFFFF"
-        }
-      }
-    },
-
-    grid: {
-      borderColor: "#6C48C5",
-      strokeDashArray: 5
-    },
-
-    tooltip: {
-      theme: "dark",
-      y: {
-        formatter: (value) =>
-          `R$ ${value.toLocaleString("pt-BR")}`
-      }
-    },
-
-    // no celular os valores do eixo se sobrepõem; o valor já aparece em cada barra
-    responsive: [
-      {
-        breakpoint: 640,
-        options: {
-          xaxis: {
-            labels: {
-              show: false
-            }
-          },
-          yaxis: {
-            labels: {
-              maxWidth: 110
-            }
-          }
-        }
-      }
-    ]
-  };
-
-  const series = [
-    {
-      name: "Premiação",
-      data: hackathons.map(
-        h => h.premiacao
-      )
-    }
-  ];
+  const options = horizontalBarOptions({
+    labels: categories,
+    values,
+    formatValue: (value) => money.format(value),
+  });
 
   return (
-    <div
-      className="
-        bg-surface-light
-        rounded-2xl
-        p-3
-        sm:p-6
-        shadow-lg
-        border
-        border-brand
-      "
-    >
-      <Chart
-        options={options}
-        series={series}
-        type="bar"
-        height={400}
-      />
-    </div>
+    <Chart
+      options={options}
+      series={[{ name: "Premiação", data: values }]}
+      type="bar"
+      height={barChartHeight(values.length)}
+    />
   );
 };
 

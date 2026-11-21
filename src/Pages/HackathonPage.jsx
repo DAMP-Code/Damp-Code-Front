@@ -1,31 +1,13 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import JoinHackathon from "@/app-components/hackathon-page/JoinHackathon";
 import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
-import HackathonTitle from "@/app-components/hackathon-creation/HackathonTitle";
-import { prizeLabel } from "@/app-components/utilities/prizes";
-import HackathonSubtitle from "@/app-components/hackathon-creation/HackathonSubtitle";
+import HackathonView from "@/app-components/hackathon-page/HackathonView";
 
 const HackathonPage = () => {
-  function getMethodDescription(method) {
-    switch (method) {
-      case "Autodata":
-        return "O desempenho dos participantes será avaliado automaticamente com base em métricas de atividade, entregas e engajamento na plataforma.";
-
-      case "Avaliação IA":
-        return "Uma inteligência artificial analisará os projetos enviados, considerando qualidade, inovação e aderência ao desafio.";
-
-      case "Avaliação Manual":
-        return "Os projetos serão avaliados manualmente por uma equipe especializada da empresa.";
-
-      default:
-        return method;
-    }
-  }
-
   const { id } = useParams();
 
   const { user } = useContext(AuthContext);
@@ -56,10 +38,6 @@ const HackathonPage = () => {
     loadHackathon();
   }, [id, user?.token, reload]);
 
-  function formatDate(date) {
-    return date ? new Date(date).toLocaleDateString("pt-BR") : "—";
-  }
-
   if (!hackathon) {
     return (
       <div className="min-h-screen bg-surface">
@@ -72,154 +50,31 @@ const HackathonPage = () => {
     );
   }
 
+  // a empresa (ou o admin) vê a página como o participante veria, com o atalho para o painel
+  const isParticipantView = !user || user.role === "participante";
+  const action = isParticipantView ? (
+    <JoinHackathon hackathon={hackathon} onChanged={() => setReload((value) => value + 1)} />
+  ) : user.role === "empresa" ? (
+    <div className="flex flex-col gap-3">
+      <p className="text-content-secondary">Você está vendo a página como os participantes veem.</p>
+      <Link to="/dashboard/Empresa" className="font-semibold text-highlight hover:underline">
+        Gerenciar no painel
+      </Link>
+    </div>
+  ) : null;
+
   return (
     <div className="min-h-screen bg-surface">
       <Header />
-    <section
-      style={{ backgroundColor: hackathon.corFundo }}
-      className="
-      w-full
-      min-h-screen
-      text-white
-      px-5
-      lg:px-10
-      py-8
-      flex
-      flex-col
-      gap-y-8
-      overflow-hidden
-    "
-    >
-      {/* VOLTAR */}
-      <div className="mx-auto w-full max-w-7xl">
-        <BackButton />
-      </div>
-
-      {/* HEADER */}
-      <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-8 rounded-3xl border border-white/10 bg-surface/40 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:flex-row lg:items-center">
-        <div className="flex w-full flex-col items-start gap-5 sm:flex-row sm:items-center lg:w-3/4">
-          <img
-            className="max-h-36 w-32 rounded-2xl object-contain lg:w-52"
-            src={hackathon.logo || "/src/assets/DAMPCode.svg"}
-            alt={hackathon.titulo || "Damp Code"}
-          />
-
-          <HackathonTitle
-            text1={hackathon.titulo}
-            text2={` - ${hackathon.empresa}`}
-            color1={hackathon.corPrincipal}
-            color2={hackathon.corSecundaria}
-          />
+      <section
+        style={{ backgroundColor: hackathon.corFundo }}
+        className="flex min-h-screen w-full flex-col gap-6 overflow-hidden px-4 py-8 sm:px-6 lg:px-10"
+      >
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+          <BackButton />
+          <HackathonView hackathon={hackathon} action={action} />
         </div>
-
-        <JoinHackathon hackathon={hackathon} onChanged={() => setReload((value) => value + 1)} />
-      </div>
-
-      {/* INFO */}
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap gap-3 border-b border-white/10 pb-6 text-sm text-content-secondary [&_p]:rounded-full [&_p]:border [&_p]:border-white/10 [&_p]:bg-surface/40 [&_p]:px-4 [&_p]:py-2">
-        <p>
-          Área:
-          <b>{hackathon.area}</b>
-        </p>
-
-        <p>{hackathon.participantes || "X pessoas já entraram"}</p>
-
-        {hackathon.premios?.length > 0 ? (
-          <div className="w-full rounded-2xl border border-white/10 bg-surface/40 px-4 py-3">
-            <p className="!border-0 !bg-transparent !p-0 font-semibold text-content">Prêmios</p>
-            <ul className="mt-1 flex flex-col gap-1">
-              {hackathon.premios.map((prize) => (
-                <li key={prize.posicao}>
-                  <b>{prize.posicao}º lugar</b> — {prizeLabel(prize)}
-                  {prize.descricao && ` · ${prize.descricao}`}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <p>
-            Premiação:
-            <b> R$ {hackathon.premiacao}</b>
-          </p>
-        )}
-
-        {hackathon.fase === "Publicado" ? (
-          <p>
-            <b>Inscrições abertas</b> · começa em{" "}
-            {new Date(hackathon.dataInicio).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
-          </p>
-        ) : (
-          hackathon.fase && <p>{hackathon.fase}</p>
-        )}
-
-        <p>Início: {formatDate(hackathon.dataInicio)}</p>
-
-        <p>Fim das submissões: {formatDate(hackathon.dataFinal)}</p>
-
-        <p>Fim da avaliação: {formatDate(hackathon.dataFimAvaliacao)}</p>
-      </div>
-
-      {/* CONTEÚDO */}
-      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* ESQUERDA */}
-        <div className="flex flex-col gap-y-6">
-          <div className="rounded-2xl border border-white/10 bg-surface/40 p-6 backdrop-blur-sm">
-            <HackathonSubtitle
-              text1="DESCRIÇÃO"
-              text2=" DO HACKATHON"
-              color1={hackathon.corPrincipal}
-              color2={hackathon.corSecundaria}
-            />
-
-            <p className="text-content-secondary leading-relaxed mt-3">
-              {hackathon.descricao}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-surface/40 p-6 backdrop-blur-sm">
-            <HackathonSubtitle
-              text1="MÉTODO DE"
-              text2=" AVALIAÇÃO"
-              color1={hackathon.corPrincipal}
-              color2={hackathon.corSecundaria}
-            />
-
-            <p className="text-content-secondary mt-3">
-              {getMethodDescription(hackathon.metodo)}
-            </p>
-          </div>
-        </div>
-
-        {/* DIREITA */}
-        <div className="rounded-2xl border border-white/10 bg-surface/40 p-6 backdrop-blur-sm">
-          <HackathonSubtitle
-            text1="TECNOLOGIAS"
-            text2=" UTILIZADAS"
-            color1={hackathon.corPrincipal}
-            color2={hackathon.corSecundaria}
-          />
-
-          <div className="flex flex-wrap gap-4 mt-5">
-            {hackathon.tecnologias?.map((technology, index) => (
-              <span
-                key={index}
-                style={{
-                  borderColor: hackathon.corPrincipal,
-                }}
-                className="
-                border
-                px-4
-                py-2
-                rounded-full bg-surface/40
-              "
-              >
-                {technology}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
       <Footer />
     </div>
   );

@@ -1,172 +1,68 @@
 import React from 'react'
-import HackathonTitle from './HackathonTitle'
-import HackathonSubtitle from './HackathonSubtitle'
+import HackathonView from '@/app-components/hackathon-page/HackathonView'
+
+// mesmos rótulos das opções de área do formulário
+const areaLabels = {
+  tech: 'Tech Geral',
+  web: 'Desenvolvimento Web',
+  dados: 'Ciência de Dados',
+  ia: 'Inteligência Artificial',
+}
+
+// Converte o estado do formulário (Titulo, Premios...) no formato que a página do Hackathon recebe da API.
+function toPagePreview(hackathon) {
+  return {
+    titulo: hackathon.Titulo || 'Nome do Hackathon',
+    empresa: hackathon.Empresa,
+    area: areaLabels[hackathon.Area] || hackathon.Area,
+    formato: hackathon.Formato,
+    descricao: hackathon.Descricao,
+    metodo: hackathon.Metodo,
+    tecnologias: hackathon.Tecnologias,
+    premios: (hackathon.Premios || [])
+      .filter((prize) => prize.Tipo)
+      .map((prize) => ({
+        posicao: prize.Posicao,
+        tipo: prize.Tipo,
+        valor: prize.Valor === '' ? null : Number(prize.Valor),
+        descricao: prize.Descricao,
+      })),
+    corPrincipal: hackathon.corPrincipal,
+    corSecundaria: hackathon.corSecundaria,
+    logo: hackathon.Logo,
+    dataInicio: hackathon.DataInicio || null,
+    dataFinal: hackathon.DataFinal || null,
+    dataFimAvaliacao: hackathon.DataFimAvaliacao || null,
+    // a prévia mostra a página como ela fica depois de publicada
+    fase: 'Publicado',
+    participantes: '0 pessoas já entraram',
+  }
+}
 
 const PreviewSection = ({ hackathon }) => {
   return (
-    <section style={{backgroundColor: hackathon.corFundo}} className='sticky top-20 hidden h-[calc(100vh-5rem)] w-1/2 flex-col gap-y-8 overflow-y-auto overflow-x-hidden border-l border-white/10 bg-surface px-6 py-8 text-white md:flex lg:px-10'>
+    <section
+      style={{ backgroundColor: hackathon.corFundo }}
+      aria-label='Prévia da página do Hackathon'
+      className='sticky top-20 hidden h-[calc(100vh-5rem)] w-1/2 flex-col gap-4 overflow-y-auto overflow-x-hidden border-l border-white/10 bg-surface px-5 py-6 text-white md:flex lg:px-8'
+    >
+      <p className='text-sm text-content-secondary'>
+        Prévia: é assim que os participantes vão ver a página depois de publicada.
+      </p>
 
-      {/* HEADER */}
-      <div className='flex-col lg:flex justify-between items-start w-full'>
-
-        <div className='flex items-center gap-x-5 w-full lg:w-3/4 pb-5'>
-          <img className='w-1/3' src={hackathon.Logo || "/src/assets/DAMPCode.svg"} alt={hackathon.Titulo || "Damp Code"} />
-
-          {/* TITULO */}
-          <HackathonTitle
-            text1={hackathon.Titulo}
-            text2={` - ${hackathon.Empresa}`}
-            color1={hackathon.corPrincipal}
-            color2={hackathon.corSecundaria}
-          /> 
-
-        </div>
-
-        {/* BOTÃO */}
-        <button style={{backgroundColor: hackathon.corPrincipal}} className='transition-all duration-300 px-8 py-3 rounded-xl font-semibold text-lg shadow-lg'>
-          Iniciar agora
-        </button>
-
-      </div>
-
-      {/* INFORMAÇÕES */}
-      <div className='flex flex-wrap gap-x-10 text-sm text-content-secondary border-b border-white/10 pb-6'>
-
-        <p>Área:<b>{hackathon.Area}</b></p>
-
-        {/* PARTICIPANTES */}
-        <p>
-          {hackathon.participantes || 'X pessoas já entraram'}
-        </p>
-
-        {/* PRÊMIOS */}
-        <p>
-          Prêmios:{' '}
-          {hackathon.Premios?.filter((prize) => prize.Tipo).map((prize) => (
-            <span key={prize.Posicao} className='mr-3'>
-              <b>{prize.Posicao}º</b>{' '}
-              {prize.Tipo === 'Dinheiro' ? `R$ ${prize.Valor}` : 'Entrevista'}
-              {prize.Descricao && ` · ${prize.Descricao}`}
-            </span>
-          ))}
-        </p>
-
-        {/* DATA */}
-        <p>
-          Termina {hackathon.Data}
-        </p>
-
-      </div>
-
-      {/* CONTEÚDO */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-16'>
-
-        {/* ESQUERDA */}
-        <div className='flex flex-col gap-y-10'>
-
-          <div>
-            <HackathonSubtitle
-                text1="DESCRIÇÃO "
-                text2={"DO HACKATON"}
-                color1={hackathon.corPrincipal}
-                color2={hackathon.corSecundaria}
-            />
-
-            <p className='text-content-secondary leading-relaxed mt-3 text-base wrap-break-word max-w-full'>
-              {hackathon.Descricao}
-            </p>
-          </div>
-
-          <div>
-            <HackathonSubtitle
-                text1="MÉTODO DE"
-                text2={"AVALIAÇÃO"}
-                color1={hackathon.corPrincipal}
-                color2={hackathon.corSecundaria}
-            />
-
-            <p className='text-content-secondary leading-relaxed mt-3 text-base'>
-              {hackathon.Metodo}
-            </p>
-          </div>
-
-        </div>
-
-        {/* DIREITA */}
-        <div className='flex flex-col gap-y-10'>
-          <div>
-            <HackathonSubtitle
-                text1="QUAL É A SUA"
-                text2={"OPORTUNIDADE"}
-                color1={hackathon.corPrincipal}
-                color2={hackathon.corSecundaria}
-            />
-
-            <p className='text-content-secondary leading-relaxed mt-3 text-base'>
-              Nesse hackathon, está escolhido o top{' '}
-              <span style={{color: hackathon.corPrincipal}} className=' font-bold'>100</span>,
-              os 100 mais dedicados terão os benefícios,
-              de mais de{' '}
-              <span style={{color: hackathon.corPrincipal}} className=' font-bold'>
-                R$ 10000
-              </span>{' '}
-              distribuídos, e oportunidades na empresa.
-            </p>
-          </div>
-
-          <div>
-
-            <HackathonSubtitle
-                text1="LISTA DE"
-                text2={"TECNOLOGIAS"}
-                color1={hackathon.corPrincipal}
-                color2={hackathon.corSecundaria}
-            />
-
-            <div className='flex flex-wrap items-center gap-x-5 mt-5'>
-
-              {hackathon.tecnologias?.map((technology, index) => (
-                // <img
-                //   key={index}
-                //   src={tec}
-                //   alt="Tecnologia"
-                //   className='w-10 h-10 object-contain'
-                // />
-                <p key={index}>{technology}</p>
-              ))}
-
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* FOOTER */}
-      <div style={{color: hackathon.corPrincipal}} className='hidden lg:flex flex-wrap align-top gap-x-8 gap-y-3 font-semibold text-xl p-10 w-full'>
-
-        <button className='hover:text-white transition-all'>
-          Desafio
-        </button>
-
-        <button className='hover:text-white transition-all'>
-          Ranking
-        </button>
-
-        <button className='hover:text-white transition-all'>
-          Comunidade
-        </button>
-
-        <button className='hover:text-white transition-all'>
-          Conteúdos
-        </button>
-
-        <button className='hover:text-white transition-all'>
-          Certificado
-        </button>
-
-      </div>
-          
+      <HackathonView
+        hackathon={toPagePreview(hackathon)}
+        action={
+          <button
+            type='button'
+            disabled
+            style={{ backgroundColor: hackathon.corPrincipal }}
+            className='w-full cursor-default rounded-xl px-8 py-3 text-lg font-semibold text-white shadow-lg'
+          >
+            Participar
+          </button>
+        }
+      />
     </section>
   )
 }

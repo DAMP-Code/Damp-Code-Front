@@ -117,7 +117,7 @@ const JoinHackathon = ({ hackathon, onChanged }) => {
 
   if (participation) {
     return (
-      <div className="flex flex-col items-start gap-3 lg:items-end">
+      <div className="flex flex-col items-stretch gap-3 text-center">
         <p className="rounded-xl border border-success/40 bg-success/10 px-5 py-3 font-semibold text-success">
           {participation.equipe ? `Sua equipe: ${participation.equipe.nome}` : "Inscrito ✓"}
         </p>
@@ -152,7 +152,7 @@ const JoinHackathon = ({ hackathon, onChanged }) => {
 
   if (!isTeam) {
     return (
-      <div className="flex flex-col items-start gap-3 lg:items-end">
+      <div className="flex flex-col items-stretch gap-3 text-center">
         <button
           style={style}
           className={buttonClass}
@@ -167,7 +167,7 @@ const JoinHackathon = ({ hackathon, onChanged }) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-4 lg:w-96">
+    <div className="flex w-full flex-col gap-4">
       {/* Criar equipe */}
       <form onSubmit={createTeam} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface/40 p-4">
         <label className="font-semibold">Criar equipe</label>
