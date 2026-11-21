@@ -235,3 +235,39 @@ textarea::placeholder {
   transform-origin: left;
   animation: damp-step-progress var(--step-duration, 5s) linear forwards;
 }
+
+/* cada página ocupa pelo menos a tela inteira e o rodapé fica colado no fim, mesmo com pouco conteúdo
+   (a raiz de cada página é filha direta de #root: os providers não criam elementos) */
+#root > * {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+#root > * > footer {
+  margin-top: auto;
+}
+/* o respiro de antes (mt-10 do rodapé) passa para o bloco logo acima, já que a margem do rodapé agora é "auto" */
+#root > * > :has(+ footer) {
+  margin-bottom: 2.5rem;
+}
+
+/* animações das mini telas de "Como funciona"; --d é o atraso de cada peça para montar a sequência */
+@keyframes damp-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes damp-fade-out { to { opacity: 0; transform: scale(0.9); } }
+@keyframes damp-fade-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+@keyframes damp-grow-up { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes damp-cursor-click {
+  0% { opacity: 0; transform: translate(-110px, 70px); }
+  15% { opacity: 1; }
+  55% { transform: translate(0, 0) scale(1); }
+  63% { transform: translate(0, 0) scale(0.75); }
+  72% { transform: translate(0, 0) scale(1); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(0, 0); }
+}
+.damp-seq { opacity: 0; animation: damp-rise 0.45s ease forwards; animation-delay: var(--d, 0s); }
+.damp-out { animation: damp-fade-out 0.3s ease forwards; animation-delay: var(--d, 0s); }
+.damp-in { opacity: 0; animation: damp-fade-in 0.35s ease forwards; animation-delay: var(--d, 0s); }
+.damp-grow { transform: scaleY(0); transform-origin: bottom; animation: damp-grow-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; animation-delay: var(--d, 0s); }
+.damp-cursor { opacity: 0; animation: damp-cursor-click 2.2s ease forwards; animation-delay: var(--d, 0s); }

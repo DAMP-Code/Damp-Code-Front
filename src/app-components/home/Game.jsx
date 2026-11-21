@@ -67,6 +67,14 @@ const XpVisual = () => (
 
 const visuals = [LevelVisual, BadgesVisual, RankingVisual, XpVisual]
 
+// uma frase por cartão (o texto completo continua em timelineData)
+const summaries = [
+  'Cada desafio entregue sobe seu nível.',
+  'Conquistas por vencer, ajudar e manter sequência.',
+  'Os mais ativos do mês ganham destaque.',
+  'Pontos por participar, entregar e interagir.',
+]
+
 const Game = () => {
   return (
     <section className='w-full py-16 lg:py-20'>
@@ -87,7 +95,7 @@ const Game = () => {
                 {Visual && <Visual />}
                 <div className='mt-auto flex flex-col gap-2'>
                   <h3 className='text-xl font-bold text-content'>{item.title}</h3>
-                  <p className='leading-relaxed text-content-secondary'>{item.content}</p>
+                  <p className='text-content-secondary'>{summaries[index] || item.content}</p>
                 </div>
               </li>
             )

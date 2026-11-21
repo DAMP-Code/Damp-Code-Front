@@ -103,7 +103,7 @@ const ManageChallenges = () => {
   const actionClass = "rounded-lg px-4 py-2 text-sm font-medium transition";
 
   return (
-    <div className="min-h-screen w-full max-w-7xl bg-surface px-4 py-8 text-content sm:px-6 lg:p-8">
+    <div className="w-full max-w-7xl bg-surface px-4 py-8 text-content sm:px-6 lg:p-8">
       <button
         onClick={generatePdf}
         className="
