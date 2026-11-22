@@ -172,7 +172,7 @@ const SubmissionPage = () => {
         ) : (
           <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 lg:grid-cols-3">
             {/* EDITOR */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-surface/40 p-6 backdrop-blur-sm lg:col-span-2">
+            <form onSubmit={handleSubmit} className="flex min-w-0 flex-col gap-4 rounded-2xl border border-white/10 bg-surface/40 p-4 backdrop-blur-sm sm:p-6 lg:col-span-2">
               <HackathonSubtitle text1="CÓDIGO" text2=" DA ENTREGA" color1={colors.principal} color2={colors.secundaria} />
 
               <div className="flex flex-wrap items-center gap-4">
@@ -191,7 +191,7 @@ const SubmissionPage = () => {
                   accept=".js,.py,.cs,.java,.sql,.txt"
                   onChange={handleFile}
                   disabled={!open}
-                  className="text-content file:mr-3 file:rounded-lg file:border-none file:bg-brand file:px-4 file:py-2 file:text-white"
+                  className="w-full max-w-full text-sm text-content sm:w-auto file:mr-3 file:rounded-lg file:border-none file:bg-brand file:px-4 file:py-2 file:text-white"
                 />
                 {fileName && !viewing && <span className="text-sm text-content-secondary">{fileName}</span>}
               </div>

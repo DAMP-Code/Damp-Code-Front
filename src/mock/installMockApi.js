@@ -26,6 +26,7 @@ function loadDatabase() {
       "teams", "participations", "teamInvitations", "teamJoinRequests",
       "nextTeamId", "nextParticipationId", "nextTeamInvitationId", "nextTeamJoinRequestId",
       "submissions", "submissionVersions", "nextSubmissionId", "nextSubmissionVersionId",
+      "modules", "nextModuleId", "nextContentId",
     ]) {
       if (database[key] === undefined) database[key] = structuredClone(seedDatabase[key]);
     }
@@ -58,6 +59,11 @@ function loadDatabase() {
     for (const hackathon of database.hackathons) {
       if (!hackathon.premios) hackathon.premios = legacyPrizes(hackathon);
     }
+    // empresas salvas antes da verificação pelo Admin ganham CNPJ, área e data do seed
+    for (const company of seedDatabase.companies) {
+      const saved = database.companies.find((item) => item.companyId === company.companyId);
+      if (saved && saved.cnpj === undefined) Object.assign(saved, { cnpj: company.cnpj, area: company.area, createdAt: company.createdAt });
+    }
     for (const user of seedDatabase.users) {
       if (!database.users.some((item) => item.email === user.email)) {
         database.users.push({ ...user, id: database.nextUserId++ });
@@ -80,6 +86,8 @@ function publicUser(user) {
     name: user.name,
     email: user.email,
     role: user.role,
+    avatarColor: user.avatarColor || null,
+    avatarImage: user.avatarImage || null,
     // token falso: o mock só precisa saber quem está chamando
     token: `mock-${user.id}`,
   };
@@ -130,6 +138,34 @@ function toInvitation(invitation) {
 function handleCompanies(path, method, body, database, user) {
   if (!user) return json({ message: "Não autenticado" }, 401);
   const primaryCompany = database.companies.find((item) => item.accountId === user.id);
+
+  // verificação de empresas: só o Admin (mesmas regras do CompanyService.UpdateVerificationAsync)
+  if (method === "GET" && path === "/api/Companies/pending-verification") {
+    if (user.role !== "admin") return problem("Apenas administradores podem verificar empresas.", 403);
+    return json(
+      database.companies
+        .filter((item) => item.verificationStatus === "Pending")
+        .map((item) => ({
+          id: item.companyId,
+          name: item.name,
+          cnpj: item.cnpj || "",
+          area: item.area || null,
+          createdAt: item.createdAt || null,
+        })),
+    );
+  }
+
+  const verificationMatch = path.match(/^\/api\/Companies\/([^/]+)\/verification$/);
+  if (method === "PATCH" && verificationMatch) {
+    if (user.role !== "admin") return problem("Apenas administradores podem verificar empresas.", 403);
+    const status = ["Verified", "Rejected"].find((item) => item.toLowerCase() === String(body?.status || "").toLowerCase());
+    if (!status) return problem("Status deve ser Verified ou Rejected.", 400);
+    const company = database.companies.find((item) => item.companyId === verificationMatch[1]);
+    if (!company) return problem("Empresa não encontrada.", 404);
+    company.verificationStatus = status;
+    saveDatabase(database);
+    return new Response(null, { status: 204 });
+  }
 
   if (method === "GET" && path === "/api/Companies/me") {
     const access = managedCompany(database, user);
@@ -1425,12 +1461,221 @@ function handleHackathons(path, method, body, database, user) {
   return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
 }
 
+// Módulos e conteúdos do Hackathon (mesmas regras do HackathonModuleService da API).
+const MODULE_LIMIT = 20;
+const CONTENT_LIMIT = 30;
+const MODULES_LOCKED = "Hackathon encerrado ou cancelado não aceita mudanças nos módulos.";
+const MODULES_FORBIDDEN = "Apenas quem gerencia a empresa dona do Hackathon pode editar os módulos.";
+const CONTENT_TYPES = ["Texto", "Link", "Video"];
+
+function toModule(module) {
+  return {
+    moduloId: module.moduloId,
+    titulo: module.titulo,
+    descricao: module.descricao,
+    posicao: module.posicao,
+    conteudos: [...module.conteudos].sort((a, b) => a.posicao - b.posicao),
+  };
+}
+
+function validateModule(body) {
+  const titulo = String(body?.titulo || "").trim();
+  if (!titulo) return "Informe o título do módulo.";
+  if (titulo.length > 120) return "O título do módulo tem no máximo 120 caracteres.";
+  if (String(body?.descricao || "").length > 1000) return "A descrição do módulo tem no máximo 1.000 caracteres.";
+  return null;
+}
+
+function validateContent(body) {
+  const tipo = CONTENT_TYPES.find((item) => item.toLowerCase() === String(body?.tipo || "").toLowerCase());
+  if (!tipo) return { error: "Tipo de conteúdo deve ser Texto, Link ou Video." };
+  const titulo = String(body?.titulo || "").trim();
+  if (!titulo) return { error: "Informe o título do conteúdo." };
+  if (titulo.length > 160) return { error: "O título do conteúdo tem no máximo 160 caracteres." };
+  const texto = String(body?.texto || "").trim();
+  const url = String(body?.url || "").trim();
+  if (tipo === "Texto") {
+    if (!texto) return { error: "Escreva o texto do conteúdo." };
+    if (texto.length > 20000) return { error: "O texto tem no máximo 20.000 caracteres." };
+    return { value: { tipo, titulo, texto, url: null } };
+  }
+  if (!/^https?:\/\/\S+$/i.test(url) || url.length > 2048) return { error: "Informe uma URL que comece com http:// ou https://." };
+  if (texto.length > 1000) return { error: "A descrição do link tem no máximo 1.000 caracteres." };
+  return { value: { tipo, titulo, texto: texto || null, url } };
+}
+
+// posições 1, 2, 3... sem buracos, na ordem atual
+function renumber(items) {
+  [...items].sort((a, b) => a.posicao - b.posicao).forEach((item, index) => {
+    item.posicao = index + 1;
+  });
+}
+
+// a lista de ordem precisa ter exatamente os mesmos ids, sem repetir
+function applyOrder(items, ids, idKey) {
+  if (!Array.isArray(ids) || ids.length !== items.length || new Set(ids).size !== ids.length) return false;
+  if (!ids.every((id) => items.some((item) => item[idKey] === id))) return false;
+  ids.forEach((id, index) => {
+    items.find((item) => item[idKey] === id).posicao = index + 1;
+  });
+  return true;
+}
+
+function handleModules(path, method, body, database, user) {
+  const match = path.match(/^\/api\/Hackathons\/([^/]+)\/modulos(?:\/([^/]+))?(?:\/conteudos(?:\/([^/]+))?)?$/);
+  if (!match) return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  const [, hackathonId, moduleSegment, contentSegment] = match;
+  const isContentRoute = path.includes("/conteudos");
+
+  const hackathon = database.hackathons.find((item) => String(item.hackathonId) === hackathonId);
+  if (!hackathon) return problem(HACKATHON_NOT_FOUND, 404);
+  const access = user ? managedCompany(database, user) : null;
+  const manages = access?.companyId === hackathon.companyId;
+  const phase = phaseOf(hackathon);
+  if ((phase === "Draft" || phase === "Cancelled") && !manages) return problem(HACKATHON_NOT_FOUND, 404);
+
+  const modules = database.modules.filter((item) => String(item.hackathonId) === String(hackathon.hackathonId));
+  const ordered = () => [...modules].sort((a, b) => a.posicao - b.posicao).map(toModule);
+
+  if (method === "GET" && !moduleSegment) return json(ordered());
+
+  if (!user) return json({ message: "Não autenticado" }, 401);
+  if (!manages) return problem(MODULES_FORBIDDEN, 403);
+  if (phase === "Closed" || phase === "Cancelled") return problem(MODULES_LOCKED, 409);
+
+  // módulos
+  if (!isContentRoute) {
+    if (method === "POST" && !moduleSegment) {
+      const error = validateModule(body);
+      if (error) return problem(error, 400);
+      if (modules.length >= MODULE_LIMIT) return problem(`O Hackathon já tem ${MODULE_LIMIT} módulos, o máximo permitido.`, 409);
+      const module = {
+        moduloId: `m-${database.nextModuleId++}`,
+        hackathonId: hackathon.hackathonId,
+        posicao: modules.length + 1,
+        titulo: String(body.titulo).trim(),
+        descricao: String(body?.descricao || "").trim() || null,
+        conteudos: [],
+      };
+      database.modules.push(module);
+      saveDatabase(database);
+      return json(toModule(module), 201);
+    }
+    if (method === "PUT" && moduleSegment === "ordem") {
+      if (!applyOrder(modules, body?.ids, "moduloId")) return problem("A nova ordem precisa ter todos os módulos, sem repetir.", 400);
+      saveDatabase(database);
+      return json(ordered());
+    }
+    const module = modules.find((item) => item.moduloId === moduleSegment);
+    if (!module) return problem("Módulo não encontrado.", 404);
+    if (method === "PUT") {
+      const error = validateModule(body);
+      if (error) return problem(error, 400);
+      module.titulo = String(body.titulo).trim();
+      module.descricao = String(body?.descricao || "").trim() || null;
+      saveDatabase(database);
+      return json(toModule(module));
+    }
+    if (method === "DELETE") {
+      database.modules = database.modules.filter((item) => item !== module);
+      renumber(modules.filter((item) => item !== module));
+      saveDatabase(database);
+      return new Response(null, { status: 204 });
+    }
+    return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+  }
+
+  // conteúdos de um módulo
+  const module = modules.find((item) => item.moduloId === moduleSegment);
+  if (!module) return problem("Módulo não encontrado.", 404);
+
+  if (method === "POST" && !contentSegment) {
+    const { error, value } = validateContent(body);
+    if (error) return problem(error, 400);
+    if (module.conteudos.length >= CONTENT_LIMIT) return problem(`O módulo já tem ${CONTENT_LIMIT} conteúdos, o máximo permitido.`, 409);
+    const content = { conteudoId: `ct-${database.nextContentId++}`, ...value, posicao: module.conteudos.length + 1 };
+    module.conteudos.push(content);
+    saveDatabase(database);
+    return json(content, 201);
+  }
+  if (method === "PUT" && contentSegment === "ordem") {
+    if (!applyOrder(module.conteudos, body?.ids, "conteudoId")) return problem("A nova ordem precisa ter todos os conteúdos, sem repetir.", 400);
+    saveDatabase(database);
+    return json(toModule(module));
+  }
+  const content = module.conteudos.find((item) => item.conteudoId === contentSegment);
+  if (!content) return problem("Conteúdo não encontrado.", 404);
+  if (method === "PUT") {
+    const { error, value } = validateContent(body);
+    if (error) return problem(error, 400);
+    Object.assign(content, value);
+    saveDatabase(database);
+    return json(content);
+  }
+  if (method === "DELETE") {
+    module.conteudos = module.conteudos.filter((item) => item !== content);
+    renumber(module.conteudos);
+    saveDatabase(database);
+    return new Response(null, { status: 204 });
+  }
+  return json({ message: `Rota mock não encontrada: ${method} ${path}` }, 404);
+}
+
+// Resultado público do Hackathon (mesmas regras da API): classificação final depois da publicação,
+// sem comentários da empresa; "voce" marca a linha de quem está logado.
+function handlePublicResult(hackathonId, database, user) {
+  const hackathon = database.hackathons.find((item) => String(item.hackathonId) === hackathonId || item.slug === hackathonId);
+  if (!hackathon) return problem(HACKATHON_NOT_FOUND, 404);
+  const access = user ? managedCompany(database, user) : null;
+  const phase = phaseOf(hackathon);
+  if ((phase === "Draft" || phase === "Cancelled") && access?.companyId !== hackathon.companyId) {
+    return problem(HACKATHON_NOT_FOUND, 404);
+  }
+  const base = { hackathonId: hackathon.hackathonId, titulo: hackathon.titulo };
+  // como na API: sem nome cadastrado aparece "Participante", nunca o e-mail
+  const publicName = (accountId) => database.users.find((item) => item.id === accountId)?.name || "Participante";
+  if (!hackathon.resultsPublishedAt) {
+    return json({ ...base, resultadoPublicado: false, totalClassificados: 0, classificacao: [] });
+  }
+
+  const ranked = database.submissions
+    .filter((item) => item.hackathonId === hackathon.hackathonId && item.finalPosition != null)
+    .sort((a, b) => a.finalPosition - b.finalPosition);
+  const total = Math.max(ranked.length, ...ranked.map((item) => item.finalPosition));
+
+  const classificacao = ranked.map((submission) => {
+    const team = submission.teamId && database.teams.find((item) => item.teamId === submission.teamId);
+    const accountIds = team
+      ? database.participations.filter((item) => item.teamId === team.teamId && !item.leftAt).map((item) => item.accountId)
+      : [database.participations.find((item) => item.id === submission.participationId)?.accountId].filter(Boolean);
+    const prize = submission.prizePosition
+      ? (hackathon.premios || []).find((item) => item.posicao === submission.prizePosition) ?? null
+      : null;
+    return {
+      posicao: submission.finalPosition,
+      nome: team ? team.nome : publicName(accountIds[0]),
+      equipe: Boolean(team),
+      membros: accountIds.map(publicName),
+      nota: submission.score ?? null,
+      premio: prize,
+      voce: Boolean(user) && accountIds.includes(user.id),
+    };
+  });
+
+  return json({ ...base, resultadoPublicado: true, totalClassificados: total, classificacao });
+}
+
 function handle(path, method, body, token) {
   const database = loadDatabase();
 
   const currentUser = database.users.find((item) => `mock-${item.id}` === token);
   if (path.startsWith("/api/Companies")) {
     return handleCompanies(path, method, body, database, currentUser);
+  }
+  const publicResult = method === "GET" && path.match(/^\/api\/Hackathons\/([^/]+)\/resultado$/);
+  if (publicResult) return handlePublicResult(publicResult[1], database, currentUser);
+  if (/^\/api\/Hackathons\/[^/]+\/modulos(\/|$)/.test(path)) {
+    return handleModules(path, method, body, database, currentUser);
   }
   if (/^\/api\/Hackathons\/[^/]+\/(avaliacao|vencedores|resultado|entregas\/[^/]+\/avaliacao)$/.test(path)) {
     return handleEvaluation(path, method, body, database, currentUser);
@@ -1447,6 +1692,51 @@ function handle(path, method, body, token) {
   }
   if (path.startsWith("/api/Hackathons")) {
     return handleHackathons(path, method, body, database, currentUser);
+  }
+
+  // configurações da conta (mesmas regras do AuthService da API)
+  if (path === "/api/Auth/me" || path === "/api/Auth/me/senha") {
+    if (!currentUser) return json({ message: "Não autenticado" }, 401);
+    const accountResponse = () => {
+      const { token: _token, ...rest } = publicUser(currentUser);
+      return { ...rest, level: currentUser.role === "participante" ? 1 : null, xp: currentUser.role === "participante" ? 0 : null };
+    };
+
+    if (method === "GET" && path === "/api/Auth/me") return json(accountResponse());
+
+    if (method === "PUT" && path === "/api/Auth/me") {
+      if (body?.name !== null && body?.name !== undefined) {
+        if (currentUser.role === "empresa") return problem("O nome da empresa não pode ser mudado por aqui.", 400);
+        if (currentUser.role === "admin") return problem("Esta conta não tem nome para editar.", 400);
+        const name = String(body.name).trim();
+        if (name.length < 2 || name.length > 150) return problem("O nome precisa ter entre 2 e 150 caracteres.", 400);
+        currentUser.name = name;
+      }
+      if (body?.avatarColor !== null && body?.avatarColor !== undefined) {
+        const color = String(body.avatarColor).trim();
+        if (color && !/^#[0-9A-Fa-f]{6}$/.test(color)) return problem("Cor inválida. Use o formato #RRGGBB.", 400);
+        currentUser.avatarColor = color || null;
+      }
+      if (body?.avatarImage !== null && body?.avatarImage !== undefined) {
+        const image = String(body.avatarImage);
+        const validPrefix = /^data:image\/(png|jpeg|webp);base64,/.test(image);
+        if (image && (!validPrefix || image.length > 400000)) return problem("Foto inválida. Envie PNG, JPG ou WebP de até 300 KB.", 400);
+        currentUser.avatarImage = image || null;
+      }
+      saveDatabase(database);
+      return json(accountResponse());
+    }
+
+    if (method === "PUT" && path === "/api/Auth/me/senha") {
+      if (String(body?.senhaAtual || "") !== currentUser.password) return problem("Senha atual incorreta.", 400);
+      const next = String(body?.novaSenha || "");
+      if (next.length < 10 || next.length > 128) return problem("A nova senha precisa ter entre 10 e 128 caracteres.", 400);
+      if (next === currentUser.password) return problem("A nova senha precisa ser diferente da atual.", 400);
+      currentUser.password = next;
+      saveDatabase(database);
+      // a API devolve um token novo; no mock o token não muda
+      return json(publicUser(currentUser));
+    }
   }
 
   if (method === "POST" && path === "/api/Auth/login") {
@@ -1499,6 +1789,9 @@ function handle(path, method, body, token) {
       companyId: `c-${user.id}`,
       accountId: user.id,
       name: user.name,
+      cnpj: user.cnpj,
+      area: user.area,
+      createdAt: new Date().toISOString(),
       verificationStatus: "Pending",
     });
     saveDatabase(database);

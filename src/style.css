@@ -164,7 +164,8 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-:where(a, button, input, textarea, select):focus-visible {
+/* campos de texto mostram o foco pela cor da borda; o contorno extra fazia uma borda dupla */
+:where(a, button, select, input[type="checkbox"], input[type="radio"], input[type="file"]):focus-visible {
   outline: 3px solid rgba(255, 234, 0, 0.75);
   outline-offset: 3px;
 }
@@ -211,4 +212,137 @@ textarea::placeholder {
   height: 100%;
   overflow: hidden;
   z-index: 1;
+}
+
+/* faixa que rola sem parar na home (o conteúdo vem duplicado, então -50% emenda certinho) */
+@keyframes damp-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.damp-marquee {
+  animation: damp-marquee var(--marquee-duration, 40s) linear infinite;
+}
+.damp-marquee-track:hover .damp-marquee {
+  animation-play-state: paused;
+}
+
+/* barra de progresso do passo atual em "Como funciona" */
+@keyframes damp-step-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.damp-step-progress {
+  transform-origin: left;
+  animation: damp-step-progress var(--step-duration, 5s) linear forwards;
+}
+
+/* cada página ocupa pelo menos a tela inteira e o rodapé fica colado no fim, mesmo com pouco conteúdo
+   (a raiz de cada página é filha direta de #root: os providers não criam elementos) */
+#root > * {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+#root > * > footer {
+  margin-top: auto;
+}
+/* o respiro de antes (mt-10 do rodapé) passa para o bloco logo acima, já que a margem do rodapé agora é "auto" */
+#root > * > :has(+ footer) {
+  margin-bottom: 2.5rem;
+}
+
+/* animações das mini telas de "Como funciona"; --d é o atraso de cada peça para montar a sequência */
+@keyframes damp-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes damp-fade-out { to { opacity: 0; transform: scale(0.9); } }
+@keyframes damp-fade-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+@keyframes damp-grow-up { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes damp-cursor-click {
+  0% { opacity: 0; transform: translate(-110px, 70px); }
+  15% { opacity: 1; }
+  55% { transform: translate(0, 0) scale(1); }
+  63% { transform: translate(0, 0) scale(0.75); }
+  72% { transform: translate(0, 0) scale(1); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate(0, 0); }
+}
+.damp-seq { opacity: 0; animation: damp-rise 0.45s ease forwards; animation-delay: var(--d, 0s); }
+.damp-out { animation: damp-fade-out 0.3s ease forwards; animation-delay: var(--d, 0s); }
+.damp-in { opacity: 0; animation: damp-fade-in 0.35s ease forwards; animation-delay: var(--d, 0s); }
+.damp-grow { transform: scaleY(0); transform-origin: bottom; animation: damp-grow-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; animation-delay: var(--d, 0s); }
+.damp-cursor { opacity: 0; animation: damp-cursor-click 2.2s ease forwards; animation-delay: var(--d, 0s); }
+
+/* tecnologias flutuando no cartão "Comunidades por tecnologia" */
+@keyframes damp-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.damp-float {
+  animation: damp-float var(--float-duration, 4s) ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* troca entre Entrar / Criar conta / Empresa (View Transitions), como num baralho:
+   indo para a frente, o cartão novo é jogado por cima e o antigo afunda e escurece atrás;
+   voltando, o cartão de cima sai pela direita e o anterior sobe de trás.
+   O lado vem de data-auth-direction, gravado pelo AuthShell. */
+@keyframes auth-card-deal-in {
+  from { transform: translate(55%, 18%) rotate(9deg); opacity: 0; }
+  35% { opacity: 1; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes auth-card-sink {
+  to { transform: translateY(-4%) scale(0.88); opacity: 0; filter: brightness(0.5); }
+}
+@keyframes auth-card-rise {
+  from { transform: translateY(-4%) scale(0.88); opacity: 0; filter: brightness(0.5); }
+  to { transform: none; opacity: 1; filter: none; }
+}
+@keyframes auth-card-throw-out {
+  from { transform: none; opacity: 1; }
+  65% { opacity: 1; }
+  to { transform: translate(60%, 14%) rotate(10deg); opacity: 0; }
+}
+@keyframes auth-fade-out { to { opacity: 0; } }
+@keyframes auth-fade-in { from { opacity: 0; } }
+
+::view-transition-group(auth-card) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+::view-transition-image-pair(auth-card) { isolation: auto; }
+::view-transition-old(auth-card),
+::view-transition-new(auth-card) {
+  /* sem a mistura padrão de cores, para os dois cartões não clarearem onde se cruzam */
+  mix-blend-mode: normal;
+  transform-origin: 50% 0;
+}
+
+/* para a frente: o novo por cima */
+::view-transition-old(auth-card) { animation: auth-card-sink 0.55s cubic-bezier(0.4, 0, 0.2, 1) both; }
+::view-transition-new(auth-card) {
+  transform-origin: 100% 100%;
+  animation: auth-card-deal-in 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.05) both;
+}
+
+/* para trás: o antigo (que estava em cima) sai e o anterior sobe */
+:root[data-auth-direction="back"]::view-transition-old(auth-card) {
+  z-index: 1;
+  transform-origin: 100% 100%;
+  animation: auth-card-throw-out 0.5s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+:root[data-auth-direction="back"]::view-transition-new(auth-card) {
+  transform-origin: 50% 0;
+  animation: auth-card-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.08s both;
+}
+
+::view-transition-old(auth-aside) { animation: auth-fade-out 0.15s ease both; }
+::view-transition-new(auth-aside) { animation: auth-fade-in 0.3s ease 0.15s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }

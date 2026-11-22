@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { theadClass, tbodyClass, rowClass, cellClass, blockCellClass } from "@/app-components/utilities/responsiveTable";
 
 const API = "https://localhost:7092/api/Hackathons";
 
@@ -102,7 +103,7 @@ const ManageChallenges = () => {
   const actionClass = "rounded-lg px-4 py-2 text-sm font-medium transition";
 
   return (
-    <div className="min-h-screen w-full max-w-7xl bg-surface px-4 py-8 text-content sm:px-6 lg:p-8">
+    <div className="w-full max-w-7xl bg-surface px-4 py-8 text-content sm:px-6 lg:p-8">
       <button
         onClick={generatePdf}
         className="
@@ -123,8 +124,8 @@ const ManageChallenges = () => {
         <p className="mb-5 rounded-xl border border-danger/40 bg-danger/10 px-5 py-3 text-danger">{error}</p>
       )}
       <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface-light shadow-[0_20px_55px_rgba(0,0,0,0.24)]">
-        <table className="min-w-[760px] w-full border-collapse">
-          <thead className="bg-surface text-content">
+        <table className="w-full border-collapse lg:min-w-[760px]">
+          <thead className={`${theadClass} bg-surface text-content`}>
             <tr className="text-left text-sm uppercase tracking-wider">
               <th className="px-6 py-4">Nome</th>
               <th className="px-6 py-4">Status</th>
@@ -134,16 +135,16 @@ const ManageChallenges = () => {
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className={tbodyClass}>
             {hackathons.map((hackathon) => (
               <tr
                 key={hackathon.hackathonId}
-                className="border-t border-border transition hover:bg-white/5"
+                className={`${rowClass} p-4 transition hover:bg-white/5 lg:p-0`}
               >
-                <td className="px-6 py-5 font-medium">{hackathon.titulo}</td>
-                <td className="px-6 py-5">
+                <td className={`${blockCellClass} pb-2 text-lg font-medium lg:px-6 lg:py-5 lg:text-base`}>{hackathon.titulo}</td>
+                <td data-label="Status" className={`${cellClass} lg:px-6 lg:py-5`}>
                   <span
-                    className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                    className={`whitespace-nowrap rounded-full px-3 py-1 text-sm font-semibold ${
                       phaseStyles[hackathon.fase] || phaseStyles.Rascunho
                     }`}
                   >
@@ -151,14 +152,14 @@ const ManageChallenges = () => {
                   </span>
                 </td>
 
-                <td className="px-6 py-5 text-content-secondary">{hackathon.participantes}</td>
+                <td data-label="Participantes" className={`${cellClass} text-content-secondary lg:px-6 lg:py-5`}>{hackathon.participantes}</td>
 
-                <td className="px-6 py-5 text-content-secondary">
+                <td data-label="Data Final" className={`${cellClass} text-content-secondary lg:px-6 lg:py-5`}>
                   {hackathon.dataFinal
                     ? new Date(hackathon.dataFinal).toLocaleDateString("pt-BR")
                     : "—"}
                 </td>
-                <td className="px-6 py-5">
+                <td className={`${blockCellClass} pt-3 lg:px-6 lg:py-5`}>
                   <div className="flex flex-wrap gap-2">
                     {["Rascunho", "Publicado", "Ativo"].includes(hackathon.fase) && (
                       <button
@@ -166,6 +167,15 @@ const ManageChallenges = () => {
                         onClick={() => navigate(`/cadastroHackaton/${hackathon.hackathonId}`)}
                       >
                         Editar
+                      </button>
+                    )}
+
+                    {["Rascunho", "Publicado", "Ativo", "Em avaliação"].includes(hackathon.fase) && (
+                      <button
+                        className={`${actionClass} bg-brand/20 text-brand-light hover:bg-brand hover:text-white`}
+                        onClick={() => navigate(`/cadastroHackaton/${encodeURIComponent(hackathon.hackathonId)}/modulos`)}
+                      >
+                        Módulos
                       </button>
                     )}
 

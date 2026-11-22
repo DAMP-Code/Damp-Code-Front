@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../utilities/AuthContext";
 import Title from "../Title";
+import { theadClass, tbodyClass, rowClass, cellClass, blockCellClass } from "../utilities/responsiveTable";
 
 const API = "https://localhost:7092/api/Companies";
 
@@ -178,8 +179,8 @@ const ManageEmployees = ({ companyAccess }) => {
       )}
 
       <div className="overflow-x-auto rounded-2xl border border-white/10 bg-surface-light shadow-[0_20px_55px_rgba(0,0,0,0.24)]">
-        <table className="min-w-[640px] w-full border-collapse">
-          <thead className="bg-surface text-content">
+        <table className="w-full border-collapse lg:min-w-[640px]">
+          <thead className={`${theadClass} bg-surface text-content`}>
             <tr className="text-left text-sm uppercase tracking-wider">
               <th className="px-6 py-4">Nome</th>
               <th className="px-6 py-4">E-mail</th>
@@ -188,24 +189,24 @@ const ManageEmployees = ({ companyAccess }) => {
               {isPrimaryAccount && <th className="px-6 py-4">Ações</th>}
             </tr>
           </thead>
-          <tbody>
+          <tbody className={tbodyClass}>
             {employees.length === 0 && (
-              <tr className="border-t border-border">
-                <td colSpan={5} className="px-6 py-5 text-content-secondary">
+              <tr className={`${rowClass} p-4 lg:p-0`}>
+                <td colSpan={5} className={`${blockCellClass} text-content-secondary lg:px-6 lg:py-5`}>
                   Nenhum funcionário ainda.
                 </td>
               </tr>
             )}
             {employees.map((employee) => (
-              <tr key={employee.accountId} className="border-t border-border transition hover:bg-white/5">
-                <td className="px-6 py-5 font-medium">{employee.name}</td>
-                <td className="px-6 py-5 text-content-secondary">{employee.email}</td>
-                <td className="px-6 py-5 text-content-secondary">{employee.jobTitle || "-"}</td>
-                <td className="px-6 py-5 text-content-secondary">
+              <tr key={employee.accountId} className={`${rowClass} p-4 transition hover:bg-white/5 lg:p-0`}>
+                <td className={`${blockCellClass} pb-2 text-lg font-medium lg:px-6 lg:py-5 lg:text-base`}>{employee.name}</td>
+                <td data-label="E-mail" className={`${cellClass} break-all text-content-secondary lg:px-6 lg:py-5`}>{employee.email}</td>
+                <td data-label="Cargo" className={`${cellClass} text-content-secondary lg:px-6 lg:py-5`}>{employee.jobTitle || "-"}</td>
+                <td data-label="Desde" className={`${cellClass} text-content-secondary lg:px-6 lg:py-5`}>
                   {new Date(employee.startedAt).toLocaleDateString("pt-BR")}
                 </td>
                 {isPrimaryAccount && (
-                  <td className="px-6 py-5">
+                  <td className={`${blockCellClass} pt-3 lg:px-6 lg:py-5`}>
                     <button
                       onClick={() => handleRemove(employee)}
                       className="rounded-lg bg-danger/20 px-4 py-2 text-sm font-medium text-danger transition hover:bg-danger hover:text-white"

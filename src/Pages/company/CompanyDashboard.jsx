@@ -33,7 +33,9 @@ const CompanyDashboard = () => {
           <div className='flex flex-col w-full h-full items-center'>
             {companyAccess && companyAccess.verificationStatus !== "Verified" && (
               <div className='mt-8 w-9/10 max-w-6xl rounded-2xl border border-warning/40 bg-warning/10 px-6 py-4 text-warning'>
-                Sua empresa ainda não foi verificada. Você pode criar rascunhos, mas só poderá publicar depois da verificação.
+                {companyAccess.verificationStatus === "Rejected"
+                  ? "A verificação da sua empresa foi recusada. Você pode criar rascunhos, mas não pode publicar. Fale com o suporte para revisar o cadastro."
+                  : "Sua empresa ainda não foi verificada. Você pode criar rascunhos, mas só poderá publicar depois da verificação."}
               </div>
             )}
             {/* 🔥 Criar Hackathon */}

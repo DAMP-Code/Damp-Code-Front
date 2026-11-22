@@ -1,3 +1,4 @@
+import AuthLink from "@/app-components/auth/AuthLink";
 import AuthShell, { authButtonClass, authFieldClass } from "@/app-components/auth/AuthShell";
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
@@ -61,15 +62,16 @@ const CompanyDetails = () => {
   if (!registrationData?.email) {
     return (
       <AuthShell
+        mode="empresa-detalhes"
         title="Cadastro incompleto"
         lede="Os dados de acesso ainda não foram preenchidos."
         asideTitle="A conta de empresa começa pelo acesso."
         asideText="Nome, email e senha ficam guardados neste navegador até você concluir o cadastro."
         points={["Volte um passo", "Preencha nome, email e senha", "Depois informe a empresa"]}
       >
-        <Link to="/cadastroEmpresa" className={authButtonClass}>
+        <AuthLink to="/cadastroEmpresa" className={authButtonClass}>
           Voltar ao cadastro
-        </Link>
+        </AuthLink>
       </AuthShell>
     );
   }
@@ -77,6 +79,8 @@ const CompanyDetails = () => {
   return (
     <AuthShell
       wide
+      mode="empresa-detalhes"
+      step={2}
       title="Dados da empresa"
       lede="Esses dados completam a conta. Nome e email já vieram do passo anterior."
       asideTitle="Falta o perfil da empresa."

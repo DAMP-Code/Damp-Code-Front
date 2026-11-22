@@ -35,6 +35,12 @@ export const MOCK_ACCOUNTS = [
     role: "participante",
     label: "participante Diego",
   },
+  {
+    email: "admin@dampcode.dev",
+    password: "123456",
+    role: "admin",
+    label: "admin (verifica empresas)",
+  },
 ];
 
 // Sem lista de prêmios, o 1º lugar sai dos campos antigos (mesma regra da API).
@@ -52,7 +58,7 @@ export function legacyPrizes(hackathon) {
 }
 
 export const seedDatabase = {
-  nextUserId: 7,
+  nextUserId: 8,
   nextInvitationId: 1,
   nextHackathonId: 7,
   nextTeamId: 3,
@@ -61,6 +67,8 @@ export const seedDatabase = {
   nextTeamJoinRequestId: 1,
   nextSubmissionId: 9,
   nextSubmissionVersionId: 10,
+  nextModuleId: 3,
+  nextContentId: 5,
   users: [
     {
       id: 1,
@@ -110,6 +118,13 @@ export const seedDatabase = {
       role: "participante",
       tecnologias: ["Go", "Docker"],
     },
+    {
+      id: 7,
+      name: "Admin DampCode",
+      email: "admin@dampcode.dev",
+      password: "123456",
+      role: "admin",
+    },
   ],
   // Empresas e vínculos espelham as tabelas companies / company_memberships / company_invitations da API.
   companies: [
@@ -117,12 +132,18 @@ export const seedDatabase = {
       companyId: "c-ifood",
       accountId: 2,
       name: "iFood",
+      cnpj: "14380200000121",
+      area: "Delivery",
+      createdAt: "2026-08-01T12:00:00.000Z",
       verificationStatus: "Verified",
     },
     {
       companyId: "c-nubank",
       accountId: 3,
       name: "Nubank",
+      cnpj: "18236120000158",
+      area: "Banco digital",
+      createdAt: "2026-09-15T12:00:00.000Z",
       verificationStatus: "Pending",
     },
   ],
@@ -340,6 +361,60 @@ export const seedDatabase = {
       submittedBy,
       submittedAt: `2026-10-2${index + 1}T14:00:00.000Z`,
     })),
+  ],
+  // Módulos e conteúdos espelham as tabelas hackathon_modules / hackathon_module_contents.
+  // O Hackathon 4 (Nubank) já vem com material de apoio.
+  modules: [
+    {
+      moduloId: "m-1",
+      hackathonId: 4,
+      posicao: 1,
+      titulo: "Comece por aqui",
+      descricao: "O que a Nubank espera da entrega e como o fluxo de pagamento funciona hoje.",
+      conteudos: [
+        {
+          conteudoId: "ct-1",
+          tipo: "Texto",
+          titulo: "Como ler o desafio",
+          texto: "O foco é o fluxo de pagamento em poucas telas. Pense em quem segura o celular com uma mão só: botões ao alcance do polegar, nada de formulário longo.\n\nA entrega é o código das telas principais e um README curto explicando as escolhas.",
+          url: null,
+          posicao: 1,
+        },
+        {
+          conteudoId: "ct-2",
+          tipo: "Video",
+          titulo: "Aula de abertura",
+          texto: "Gravação da conversa com o time de produto.",
+          url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          posicao: 2,
+        },
+      ],
+    },
+    {
+      moduloId: "m-2",
+      hackathonId: 4,
+      posicao: 2,
+      titulo: "Cursos recomendados",
+      descricao: null,
+      conteudos: [
+        {
+          conteudoId: "ct-3",
+          tipo: "Link",
+          titulo: "Guia de acessibilidade no Android",
+          texto: "Documentação oficial com exemplos de tamanho de toque e contraste.",
+          url: "https://developer.android.com/guide/topics/ui/accessibility",
+          posicao: 1,
+        },
+        {
+          conteudoId: "ct-4",
+          tipo: "Link",
+          titulo: "Curso de React Native",
+          texto: null,
+          url: "https://reactnative.dev/docs/getting-started",
+          posicao: 2,
+        },
+      ],
+    },
   ],
   hackathons: [
     {

@@ -1,8 +1,10 @@
+import AuthLink from "@/app-components/auth/AuthLink";
 import AuthShell, { AuthField, authButtonClass } from "@/app-components/auth/AuthShell";
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "@/app-components/utilities/AuthContext"
 import { MOCK_ACCOUNTS } from "@/mock/seed";
+import { homeByRole } from "@/app-components/utilities/roles";
 
 // 🧠 RESUMO DO FLUXO
 // Usuário envia form
@@ -62,14 +64,8 @@ export default function UserLogin() {
 
       setUser(data)
 
-      // 🔥 redireciona com base no tipo de usuário
-      if (data.role === "empresa") {
-        // se for empresa → vai para dashboard da empresa
-        navigate("/dashboard/Empresa");
-      } else {
-        // senão (participante) → vai para outro dashboard
-        navigate("/dashboard/participante");
-      }
+      // 🔥 redireciona para o painel do tipo de conta (empresa, participante ou admin)
+      navigate(homeByRole[data.role] || "/dashboard/participante");
     } catch (error) {
       // captura erros como falha de conexão com o servidor
       console.error(error);
@@ -81,6 +77,7 @@ export default function UserLogin() {
 
   return (
     <AuthShell
+      mode="login"
       title="Entrar"
       lede="O mesmo acesso vale para participante e empresa."
       asideTitle="Volte para os desafios de onde parou."
@@ -109,22 +106,38 @@ export default function UserLogin() {
         <button type="submit" className={authButtonClass}>
           Entrar
         </button>
-        <Link to="/cadastroUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
+        <AuthLink to="/cadastroUser" className="text-center text-sm font-medium text-brand-light hover:text-highlight">
           Não tenho uma conta. Cadastre-se.
-        </Link>
-        <Link to="/cadastroEmpresa" className="text-center text-sm font-medium text-content-secondary hover:text-content">
+        </AuthLink>
+        <AuthLink to="/cadastroEmpresa" className="text-center text-sm font-medium text-content-secondary hover:text-content">
           Quero publicar como empresa.
-        </Link>
+        </AuthLink>
       </form>
       {import.meta.env.DEV && import.meta.env.VITE_USE_MOCK !== "false" ? (
-        <div className="mt-6 rounded-xl border border-white/10 bg-surface px-4 py-3 text-sm leading-relaxed text-content-secondary">
-          <p className="font-medium text-content">Contas de teste</p>
-          {MOCK_ACCOUNTS.map((account) => (
-            <p key={account.email}>
-              {account.label}: {account.email} / {account.password}
-            </p>
-          ))}
-        </div>
+        // contas do mock: um clique preenche o formulário
+        <details className="group mt-6 rounded-xl border border-white/10 bg-surface text-sm text-content-secondary">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 font-medium text-content [&::-webkit-details-marker]:hidden">
+            Contas de teste
+            <span className="text-xs text-content-secondary group-open:hidden">clique para preencher</span>
+          </summary>
+          <div className="flex flex-col gap-1 px-2 pb-2">
+            {MOCK_ACCOUNTS.map((account) => (
+              <button
+                key={account.email}
+                type="button"
+                onClick={() => {
+                  setEmail(account.email);
+                  setPassword(account.password);
+                  setMessage("");
+                }}
+                className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-white/5 hover:text-content"
+              >
+                <span className="truncate">{account.email}</span>
+                <span className="shrink-0 text-xs text-brand-light">{account.label}</span>
+              </button>
+            ))}
+          </div>
+        </details>
       ) : null}
       {message ? <p className="mt-4 text-sm font-semibold text-danger">{message}</p> : null}
     </AuthShell>
