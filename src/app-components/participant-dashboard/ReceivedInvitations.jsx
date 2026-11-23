@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../utilities/AuthContext";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Companies";
+const API = `${API_URL}/api/Companies`;
 
 // horas que faltam para o convite expirar (convites valem 24h)
 function hoursLeft(expiresAt) {

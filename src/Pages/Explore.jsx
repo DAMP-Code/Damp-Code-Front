@@ -7,6 +7,7 @@ import Header from '@/app-components/Header'
 import CreateChallenge from '@/app-components/explore/CreateChallenge'
 import React, { useEffect, useState } from 'react'
 import { applyHackathonFilters, emptyFilters, hasActiveFilters } from '@/app-components/utilities/hackathonFilters'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
 const Explore = () => {
   const [hackathons, setHackathons] = useState([])
@@ -18,7 +19,7 @@ const Explore = () => {
 
     async function loadHackathons() {
       try {
-        const response = await fetch("https://localhost:7092/api/Hackathons")
+        const response = await fetch(`${API_URL}/api/Hackathons`)
         const data = await response.json()
         if (!cancelled) setHackathons(Array.isArray(data) ? data : [])
       } catch {

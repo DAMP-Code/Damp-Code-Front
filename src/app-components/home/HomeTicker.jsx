@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCode, faFire, faTrophy } from '@fortawesome/free-solid-svg-icons'
 import { formatMoney, totalPrize } from '@/app-components/utilities/prizes'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
-const API = 'https://localhost:7092/api/Hackathons'
+const API = `${API_URL}/api/Hackathons`
 
 // velocidade constante da faixa, em pixels por segundo (mais itens não deixam a faixa mais rápida)
 const SPEED = 45

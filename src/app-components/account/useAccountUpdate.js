@@ -1,7 +1,8 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-export const ACCOUNT_API = "https://localhost:7092/api/Auth/me";
+export const ACCOUNT_API = `${API_URL}/api/Auth/me`;
 
 // Envio das configurações da conta (PUT /api/Auth/me e /me/senha) com estado de "salvando" e mensagem por seção.
 export function useAccountUpdate() {

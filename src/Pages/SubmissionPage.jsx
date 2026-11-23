@@ -6,8 +6,9 @@ import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
 import HackathonTitle from "@/app-components/hackathon-creation/HackathonTitle";
 import HackathonSubtitle from "@/app-components/hackathon-creation/HackathonSubtitle";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Hackathons";
+const API = `${API_URL}/api/Hackathons`;
 const languages = ["JavaScript", "Python", "C#", "Java", "SQL", "Outra"];
 const MAX_CODE_LENGTH = 100 * 1024;
 

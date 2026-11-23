@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import Title from '../Title'
 import ResultBoard from '../hackathon-page/ResultBoard'
 import { AuthContext } from '../utilities/AuthContext'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
-const API = 'https://localhost:7092/api/Hackathons'
+const API = `${API_URL}/api/Hackathons`
 
 // Ranking ao vivo: o pódio do resultado publicado mais recente, direto da API.
 const HomeRanking = () => {

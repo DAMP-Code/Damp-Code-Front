@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "@/app-components/utilities/AuthContext"
 import { MOCK_ACCOUNTS } from "@/mock/seed";
 import { homeByRole } from "@/app-components/utilities/roles";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 // 🧠 RESUMO DO FLUXO
 // Usuário envia form
@@ -38,7 +39,7 @@ export default function UserLogin() {
 
     try {
       // faz uma requisição POST para sua API de login
-      const response = await fetch("https://localhost:7092/api/Auth/login", {
+      const response = await fetch(`${API_URL}/api/Auth/login`, {
         method: "POST", // tipo da requisição
         headers: {
           "Content-Type": "application/json", // informa que o corpo é JSON

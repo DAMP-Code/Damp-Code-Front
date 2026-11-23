@@ -6,6 +6,7 @@ import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
 import HackathonView from "@/app-components/hackathon-page/HackathonView";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 const HackathonPage = () => {
   const { id } = useParams();
@@ -23,7 +24,7 @@ const HackathonPage = () => {
     async function loadHackathon() {
       // com token, a empresa dona também consegue ver o próprio rascunho
       const response = await fetch(
-        `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}`,
+        `${API_URL}/api/Hackathons/${encodeURIComponent(id)}`,
         user?.token ? { headers: { Authorization: `Bearer ${user.token}` } } : undefined,
       );
 
@@ -45,7 +46,7 @@ const HackathonPage = () => {
     async function loadModules() {
       try {
         const response = await fetch(
-          `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}/modulos`,
+          `${API_URL}/api/Hackathons/${encodeURIComponent(id)}/modulos`,
           user?.token ? { headers: { Authorization: `Bearer ${user.token}` } } : undefined,
         );
         if (response.ok) setModules(await response.json());
@@ -64,7 +65,7 @@ const HackathonPage = () => {
     async function loadResult() {
       try {
         const response = await fetch(
-          `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}/resultado`,
+          `${API_URL}/api/Hackathons/${encodeURIComponent(id)}/resultado`,
           user?.token ? { headers: { Authorization: `Bearer ${user.token}` } } : undefined,
         );
         if (response.ok) setResult(await response.json());

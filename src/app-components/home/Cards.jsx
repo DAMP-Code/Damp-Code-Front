@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Title from "../Title";
 import HackathonCard from "../HackathonCard";
 import EmptyState from "../EmptyState";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 const Cards = () => {
   const { user } = useContext(AuthContext);
@@ -15,7 +16,7 @@ const Cards = () => {
 
     async function loadHackathons() {
       try {
-        const response = await fetch("https://localhost:7092/api/Hackathons");
+        const response = await fetch(`${API_URL}/api/Hackathons`);
         const data = await response.json();
         if (!cancelled) {
           setHackathons(Array.isArray(data) ? data.slice(0, 4) : []);

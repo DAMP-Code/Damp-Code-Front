@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { theadClass, tbodyClass, rowClass, cellClass, blockCellClass } from "@/app-components/utilities/responsiveTable";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Hackathons";
+const API = `${API_URL}/api/Hackathons`;
 
 // cor do selo de cada fase
 const phaseStyles = {

@@ -9,6 +9,7 @@ import Header from "@/app-components/Header";
 import { formatMoney, totalPrize } from "@/app-components/utilities/prizes";
 import { useReducedMotion } from "@/app-components/utilities/useReducedMotion";
 import { markTransitionReady } from "@/app-components/utilities/viewTransition";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 // ordem das telas de acesso: decide para que lado o conteúdo desliza na troca
 const SCREEN_ORDER = { login: 0, participante: 1, empresa: 2, "empresa-detalhes": 3 };
@@ -30,7 +31,7 @@ function OpenHackathons() {
   useEffect(() => {
     async function load() {
       try {
-        const response = await fetch("https://localhost:7092/api/Hackathons");
+        const response = await fetch(`${API_URL}/api/Hackathons`);
         if (!response.ok) return;
         const data = await response.json();
         cachedHackathons = (Array.isArray(data) ? data : []).filter((h) => ["Publicado", "Ativo"].includes(h.fase)).slice(0, 3);

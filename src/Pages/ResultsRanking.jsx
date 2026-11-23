@@ -6,8 +6,9 @@ import Title from "@/app-components/Title";
 import EmptyState from "@/app-components/EmptyState";
 import ResultBoard from "@/app-components/hackathon-page/ResultBoard";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Hackathons";
+const API = `${API_URL}/api/Hackathons`;
 
 // Ranking dos Hackathons com resultado publicado: escolha o desafio e veja a classificação final.
 const ResultsRanking = () => {
