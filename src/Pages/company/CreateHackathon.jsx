@@ -7,6 +7,7 @@ import { toDateTimeLocal, toIsoDate } from '@/app-components/utilities/hackathon
 import { m } from 'motion/react'
 import React, {useContext, useEffect, useState} from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
 
 const CreateHackathon = () => {
@@ -52,7 +53,7 @@ const [hackathon, setHackathon] = useState({
   useEffect(() => {
     async function loadCompany() {
       try {
-        const response = await fetch("https://localhost:7092/api/Companies/me", {
+        const response = await fetch(`${API_URL}/api/Companies/me`, {
           headers: { Authorization: `Bearer ${user?.token}` },
         })
         if (!response.ok) return
@@ -72,7 +73,7 @@ const [hackathon, setHackathon] = useState({
 
     async function loadHackathon() {
       try {
-        const response = await fetch(`https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}`, {
+        const response = await fetch(`${API_URL}/api/Hackathons/${encodeURIComponent(id)}`, {
           headers: { Authorization: `Bearer ${user?.token}` },
         })
         if (!response.ok) {
@@ -108,7 +109,7 @@ const [hackathon, setHackathon] = useState({
         }))
 
         // a solução de referência não vem na resposta pública; só quem gerencia a empresa lê
-        const referenceResponse = await fetch(`https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}/referencia`, {
+        const referenceResponse = await fetch(`${API_URL}/api/Hackathons/${encodeURIComponent(id)}/referencia`, {
           headers: { Authorization: `Bearer ${user?.token}` },
         })
         if (referenceResponse.ok) {
@@ -173,8 +174,8 @@ const [hackathon, setHackathon] = useState({
 
     const response = await fetch(
       id
-        ? `https://localhost:7092/api/Hackathons/${encodeURIComponent(id)}`
-        : "https://localhost:7092/api/Hackathons/register/Hackathon",
+        ? `${API_URL}/api/Hackathons/${encodeURIComponent(id)}`
+        : `${API_URL}/api/Hackathons/register/Hackathon`,
       {
         method: id ? "PUT" : "POST",
         headers: {
@@ -223,7 +224,7 @@ const [hackathon, setHackathon] = useState({
       const saved = await saveHackathon();
 
       const response = await fetch(
-        `https://localhost:7092/api/Hackathons/${encodeURIComponent(saved.hackathonId)}/publicar`,
+        `${API_URL}/api/Hackathons/${encodeURIComponent(saved.hackathonId)}/publicar`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${user?.token}` },

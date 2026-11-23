@@ -3,8 +3,9 @@ import Header from "@/app-components/Header";
 import Footer from "@/app-components/Footer";
 import Title from "@/app-components/Title";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Companies";
+const API = `${API_URL}/api/Companies`;
 
 // 14380200000121 -> 14.380.200/0001-21
 function formatCnpj(value) {

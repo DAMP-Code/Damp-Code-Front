@@ -6,6 +6,7 @@ import Footer from '@/app-components/Footer'
 import Header from '@/app-components/Header'
 import { AuthContext } from '@/app-components/utilities/AuthContext'
 import React, { useContext, useEffect, useState } from 'react'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
 const CompanyDashboard = () => {
   const { user } = useContext(AuthContext)
@@ -14,7 +15,7 @@ const CompanyDashboard = () => {
   useEffect(() => {
     async function loadCompany() {
       try {
-        const response = await fetch("https://localhost:7092/api/Companies/me", {
+        const response = await fetch(`${API_URL}/api/Companies/me`, {
           headers: { Authorization: `Bearer ${user?.token}` },
         })
         if (!response.ok) return

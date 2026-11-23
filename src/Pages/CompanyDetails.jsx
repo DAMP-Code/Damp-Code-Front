@@ -3,6 +3,7 @@ import AuthShell, { authButtonClass, authFieldClass } from "@/app-components/aut
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { RegistrationContext } from "@/app-components/utilities/RegistrationContext";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 const CompanyDetails = () => {
   // pega um contexto e usa
@@ -30,7 +31,7 @@ const CompanyDetails = () => {
 
     try {
       const response = await fetch(
-        "https://localhost:7092/api/Auth/register/empresa",
+        `${API_URL}/api/Auth/register/empresa`,
         {
           method: "POST",
           headers: {

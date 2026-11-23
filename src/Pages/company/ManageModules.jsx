@@ -5,8 +5,9 @@ import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
 import Title from "@/app-components/Title";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Hackathons";
+const API = `${API_URL}/api/Hackathons`;
 
 const inputClass = "w-full rounded-xl border border-border bg-surface px-4 py-3 text-content outline-none focus:border-brand";
 const primaryClass = "rounded-xl bg-highlight px-5 py-2.5 font-semibold text-surface transition hover:brightness-110 disabled:opacity-60";

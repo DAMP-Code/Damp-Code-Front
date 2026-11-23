@@ -7,8 +7,9 @@ import Header from "@/app-components/Header";
 import Title from "@/app-components/Title";
 import { prizeLabel } from "@/app-components/utilities/prizes";
 import { theadClass, tbodyClass, rowClass, cellClass, blockCellClass } from "@/app-components/utilities/responsiveTable";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Hackathons";
+const API = `${API_URL}/api/Hackathons`;
 
 const panelClass = "flex min-w-0 flex-col gap-3 rounded-2xl border border-white/10 bg-surface-light p-5 shadow-[0_20px_55px_rgba(0,0,0,0.24)]";
 

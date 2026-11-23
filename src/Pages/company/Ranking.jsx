@@ -11,6 +11,7 @@ import Title from "@/app-components/Title";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { totalPrize } from "@/app-components/utilities/prizes";
 import React, { useContext, useEffect, useState } from "react";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 const runningPhases = ["Publicado", "Ativo", "Em avaliação"];
 
@@ -28,7 +29,7 @@ const Ranking = () => {
     async function loadHackathons() {
       try {
         // todos os Hackathons da empresa (inclusive rascunhos); vale também para funcionários
-        const response = await fetch("https://localhost:7092/api/Hackathons/empresa", {
+        const response = await fetch(`${API_URL}/api/Hackathons/empresa`, {
           headers: { Authorization: `Bearer ${user?.token}` },
         });
         if (!response.ok) {

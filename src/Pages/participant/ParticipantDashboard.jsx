@@ -10,6 +10,7 @@ import { AuthContext } from '@/app-components/utilities/AuthContext'
 import React, { useContext, useEffect, useState } from 'react'
 import { applyHackathonFilters, emptyFilters, hasActiveFilters } from '@/app-components/utilities/hackathonFilters'
 import { useNavigate } from 'react-router-dom'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
 
 const ParticipantDashboard = () => {
@@ -23,7 +24,7 @@ const ParticipantDashboard = () => {
   async function fetchHackathons() {
   try {
     const response = await fetch(
-      "https://localhost:7092/api/Hackathons"
+      `${API_URL}/api/Hackathons`
     )
 
     const data = await response.json()
@@ -42,7 +43,7 @@ useEffect(() => {
 useEffect(() => {
   async function loadCompany() {
     try {
-      const response = await fetch("https://localhost:7092/api/Companies/me", {
+      const response = await fetch(`${API_URL}/api/Companies/me`, {
         headers: { Authorization: `Bearer ${user?.token}` },
       })
       if (!response.ok) return

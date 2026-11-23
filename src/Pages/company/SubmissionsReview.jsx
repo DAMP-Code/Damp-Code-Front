@@ -5,8 +5,9 @@ import BackButton from "@/app-components/BackButton";
 import Footer from "@/app-components/Footer";
 import Header from "@/app-components/Header";
 import Title from "@/app-components/Title";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api/Hackathons";
+const API = `${API_URL}/api/Hackathons`;
 
 function formatDateTime(date) {
   if (!date) return "";

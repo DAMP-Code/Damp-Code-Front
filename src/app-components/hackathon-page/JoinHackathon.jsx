@@ -2,8 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../utilities/AuthContext";
 import { readableTextColor } from "../utilities/color";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api";
+const API = `${API_URL}/api`;
 
 const buttonClass = `
   px-8

@@ -2,8 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../utilities/AuthContext";
 import { prizeLabel } from "../utilities/prizes";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api";
+const API = `${API_URL}/api`;
 
 const acceptClass = "rounded-lg bg-success/20 px-4 py-2 text-sm font-medium text-success transition hover:bg-success hover:text-white";
 const dangerClass = "rounded-lg bg-danger/20 px-4 py-2 text-sm font-medium text-danger transition hover:bg-danger hover:text-white";

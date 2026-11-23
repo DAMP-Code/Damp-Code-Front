@@ -8,8 +8,9 @@ import AccountForms from "@/app-components/account/AccountForms";
 import ScoreChart from "@/app-components/charts/ScoreChart";
 import { AuthContext } from "@/app-components/utilities/AuthContext";
 import { prizeLabel } from "@/app-components/utilities/prizes";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092/api";
+const API = `${API_URL}/api`;
 
 // cor do selo de cada fase (mesmas cores do painel da empresa)
 const phaseStyles = {

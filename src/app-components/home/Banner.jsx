@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import ColorBends from '@/app-components/ColorBends'
 import { formatMoney, totalPrize } from '@/app-components/utilities/prizes'
 import { useReducedMotion } from '@/app-components/utilities/useReducedMotion'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
 // "em 12 dias", "amanhã", "hoje"
 function daysLeft(value) {
@@ -128,7 +129,7 @@ const Banner = () => {
   useEffect(() => {
     async function load() {
       try {
-        const response = await fetch('https://localhost:7092/api/Hackathons')
+        const response = await fetch(`${API_URL}/api/Hackathons`)
         if (!response.ok) return
         const data = await response.json()
         setHackathons(Array.isArray(data) ? data : [])

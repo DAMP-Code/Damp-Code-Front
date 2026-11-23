@@ -2,6 +2,7 @@ import AuthLink from "@/app-components/auth/AuthLink";
 import AuthShell, { AuthField, PasswordMeter, authButtonClass } from "@/app-components/auth/AuthShell";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 const CreateUser = () => {
   const [name, setName] = useState("");
@@ -38,7 +39,7 @@ const CreateUser = () => {
 
     try {
       const response = await fetch(
-        "https://localhost:7092/api/Auth/register/participante",
+        `${API_URL}/api/Auth/register/participante`,
         {
           method: "POST",
           headers: {

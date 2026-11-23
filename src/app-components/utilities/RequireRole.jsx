@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import { homeByRole } from "./roles";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
 // Protege uma rota pelo tipo de conta. Sem login vai para o login; com a conta errada volta para o próprio painel.
 // Funcionário de empresa entra com conta de participante, então nas rotas da empresa ele passa se /Companies/me responder.
@@ -16,7 +17,7 @@ const RequireRole = ({ role, children }) => {
 
     async function checkCompany() {
       try {
-        const response = await fetch("https://localhost:7092/api/Companies/me", {
+        const response = await fetch(`${API_URL}/api/Companies/me`, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
         if (active) setIsEmployee(response.ok);

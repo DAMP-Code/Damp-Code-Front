@@ -6,6 +6,7 @@ import Title from '../Title'
 import { useInView } from '../utilities/useInView'
 import { useReducedMotion } from '../utilities/useReducedMotion'
 import { formatMoney, totalPrize } from '../utilities/prizes'
+import { API_URL } from "@/app-components/utilities/apiUrl"
 
 const cardClass = 'flex flex-col gap-5 overflow-hidden rounded-3xl border border-white/10 bg-surface-light p-6 transition hover:border-brand-light/40'
 
@@ -143,7 +144,7 @@ const CtaTerminal = ({ active, reducedMotion }) => {
   useEffect(() => {
     async function load() {
       try {
-        const response = await fetch('https://localhost:7092/api/Hackathons')
+        const response = await fetch(`${API_URL}/api/Hackathons`)
         const data = response.ok ? await response.json() : []
         const list = (Array.isArray(data) ? data : []).filter((h) => ['Publicado', 'Ativo'].includes(h.fase))
         const top = [...list].sort((a, b) => totalPrize(b) - totalPrize(a))[0]

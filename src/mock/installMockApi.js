@@ -1,6 +1,7 @@
 import { legacyPrizes, seedDatabase } from "./seed";
+import { API_URL } from "@/app-components/utilities/apiUrl";
 
-const API = "https://localhost:7092";
+const API = API_URL;
 const STORAGE_KEY = "damp-mock-db";
 
 function json(data, status = 200) {
