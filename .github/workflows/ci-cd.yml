@@ -1,0 +1,112 @@
+# CI/CD do front
+#
+#   Pull Request ou push  → build do Vite + lint + build da imagem (sem publicar)
+#   push na main          → publica a imagem no GHCR (tags :<sha> e :latest)
+#                         → se a variável K8S_DEPLOY = true: deploy no Kubernetes
+#
+# Configuração no GitHub (Settings → Secrets and variables → Actions):
+#   Secret   KUBE_CONFIG  kubeconfig do cluster em base64
+#   Variable K8S_DEPLOY   true para liberar o deploy
+# Manifests do cluster: repositório DAMP-Code/DAMPCode-Base, pasta k8s/.
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/damp-code/damp-code-front
+
+jobs:
+  build:
+    name: Build e lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # O lint ainda tem erros antigos: roda e mostra, mas não bloqueia.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+  imagem:
+    name: Imagem Docker
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PUBLICAR: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login no GitHub Container Registry
+        if: env.PUBLICAR == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build (e push na main)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ env.PUBLICAR == 'true' }}
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy no Kubernetes
+    needs: imagem
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.K8S_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    environment: producao
+    concurrency:
+      group: deploy-front
+      cancel-in-progress: false
+    steps:
+      - name: Manifests do cluster (DAMPCode-Base)
+        uses: actions/checkout@v4
+        with:
+          repository: DAMP-Code/DAMPCode-Base
+          path: base
+
+      - uses: azure/setup-kubectl@v4
+
+      - name: Acesso ao cluster
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          echo "$KUBE_CONFIG" | base64 -d > "$RUNNER_TEMP/kubeconfig"
+          chmod 600 "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+
+      - name: Usa a imagem deste commit
+        run: sed -i "s|${IMAGE}:latest|${IMAGE}:${GITHUB_SHA}|" base/k8s/front.yaml
+
+      - name: Deploy do front
+        run: |
+          kubectl -n dampcode apply -f base/k8s/front.yaml
+          kubectl -n dampcode rollout status deployment/dampcode-front --timeout=300s
