@@ -176,12 +176,21 @@ const SubmissionPage = () => {
             <form onSubmit={handleSubmit} className="flex min-w-0 flex-col gap-4 rounded-2xl border border-white/10 bg-surface/40 p-4 backdrop-blur-sm sm:p-6 lg:col-span-2">
               <HackathonSubtitle text1="CÓDIGO" text2=" DA ENTREGA" color1={colors.principal} color2={colors.secundaria} />
 
+              {/* sem este aviso a página parece travada: tudo fica desabilitado fora da fase Ativa */}
+              {submission && !open && (
+                <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
+                  {notStarted
+                    ? `As entregas ainda não abriram. O editor libera em ${formatDateTime(submission.dataInicio)}.`
+                    : "As entregas deste Hackathon estão encerradas. Você ainda pode ver as versões enviadas ao lado."}
+                </p>
+              )}
+
               <div className="flex flex-wrap items-center gap-4">
                 <select
                   value={viewing ? viewing.linguagem : language}
                   onChange={(e) => setLanguage(e.target.value)}
                   disabled={!open || Boolean(viewing)}
-                  className="rounded-xl border border-brand bg-surface-light p-3 text-content"
+                  className="rounded-xl border border-brand bg-surface-light p-3 text-content disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {languages.map((item) => (
                     <option key={item} value={item}>{item}</option>
@@ -192,7 +201,7 @@ const SubmissionPage = () => {
                   accept=".js,.py,.cs,.java,.sql,.txt"
                   onChange={handleFile}
                   disabled={!open}
-                  className="w-full max-w-full text-sm text-content sm:w-auto file:mr-3 file:rounded-lg file:border-none file:bg-brand file:px-4 file:py-2 file:text-white"
+                  className="w-full max-w-full text-sm text-content sm:w-auto disabled:cursor-not-allowed disabled:opacity-50 file:mr-3 file:rounded-lg file:border-none file:bg-brand file:px-4 file:py-2 file:text-white"
                 />
                 {fileName && !viewing && <span className="text-sm text-content-secondary">{fileName}</span>}
               </div>
@@ -212,7 +221,7 @@ const SubmissionPage = () => {
                 readOnly={!open || Boolean(viewing)}
                 spellCheck={false}
                 rows={20}
-                placeholder="Digite ou cole seu código aqui"
+                placeholder={open ? "Digite ou cole seu código aqui" : "Entregas fechadas neste momento"}
                 className="min-h-[420px] resize-y rounded-xl border border-brand bg-surface p-4 font-mono text-sm text-content outline-none focus:border-highlight"
               />
 

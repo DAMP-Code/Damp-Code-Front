@@ -248,7 +248,7 @@ const MyParticipations = () => {
                         to={`/hackathon/${encodeURIComponent(participation.hackathonId)}/entrega`}
                         className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-hover"
                       >
-                        Entregar código
+                        {participation.fase === "Ativo" ? "Entregar código" : "Ver entrega"}
                       </Link>
                     )}
                     {!participation.equipe && participation.fase === "Publicado" && (
