@@ -5,28 +5,31 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import Header from "@/app-components/Header";
 import Footer from "@/app-components/Footer";
+import diegoPhoto from "@/assets/equipe/diego.jpg";
+import altairPhoto from "@/assets/equipe/altair.jpg";
+import miguelPhoto from "@/assets/equipe/miguel.png";
+import pietroPhoto from "@/assets/equipe/pietro.png";
 
 // D-A-M-P: uma letra do nome da plataforma para cada pessoa da equipe.
-// Textos provisórios (lorem ipsum) até a equipe mandar as informações de verdade.
 const team = [
   {
     letter: "D",
     name: "Diego",
-    role: "Lorem ipsum dolor",
-    bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    focus: ["Lorem", "Ipsum", "Dolor"],
-    // foto em src/assets/equipe; sem o arquivo aparece a letra
-    photo: "/src/assets/equipe/diego.jpg",
+    role: "Documentação",
+    bio: "Membro responsável pela elaboração da documentação do site, além de ser parcialmente responsável pela auditoria de UX do aplicativo e parte criativa.",
+    focus: ["Documentação", "Auditoria de UX", "Criação"],
+    // fotos em src/assets/equipe (importadas para entrarem no build); sem foto aparece a letra
+    photo: diegoPhoto,
     github: "https://github.com/DiegoLopes-da-Silva",
     linkedin: "https://www.linkedin.com/in/diego-lopes-da-silva-833b67352/",
   },
   {
     letter: "A",
     name: "Altair",
-    role: "Lorem ipsum dolor",
-    bio: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    focus: ["Lorem", "Ipsum", "Dolor"],
-    photo: "/src/assets/equipe/altair.jpg",
+    role: "Frontend",
+    bio: "Membro responsável majoritariamente pela elaboração do frontend e sua programação, também auxiliou na auditoria de UX do aplicativo e apresentações necessárias para entrega.",
+    focus: ["Frontend", "Auditoria de UX", "Apresentações"],
+    photo: altairPhoto,
     // selfie em pé: enquadra mais para cima para mostrar o rosto
     photoPosition: "50% 22%",
     github: "https://github.com/juninh0-dev",
@@ -35,20 +38,23 @@ const team = [
   {
     letter: "M",
     name: "Miguel",
-    role: "Lorem ipsum dolor",
-    bio: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    focus: ["Lorem", "Ipsum", "Dolor"],
-    photo: null,
+    role: "Database",
+    bio: "Membro responsável pela elaboração de todo banco de dados relacional e não relacional do site e grande entendedor de suas regras de negócio.",
+    focus: ["Banco relacional", "Banco não relacional", "Regras de negócio"],
+    photo: miguelPhoto,
+    // foto redonda com fundo transparente: aparece inteira, sem cortar
+    photoFit: "contain",
     github: "https://github.com/betzfer",
     linkedin: "https://www.linkedin.com/in/miguel-rodrigues-de-oliveira-184036353/",
   },
   {
     letter: "P",
     name: "Pietro",
-    role: "Lorem ipsum dolor",
-    bio: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    focus: ["Lorem", "Ipsum", "Dolor"],
-    photo: null,
+    role: "Scrum Master",
+    bio: "Responsável pela elaboração de ideias, organização do projeto, distribuição de funções, reuniões, grande parte do código backend e frontend, auxiliando relevantemente em todas as funções.",
+    focus: ["Scrum", "Backend", "Frontend"],
+    photo: pietroPhoto,
+    photoFit: "contain",
     github: "https://github.com/PietroDub",
     linkedin: "https://www.linkedin.com/in/pietro-vito/",
   },
@@ -68,7 +74,7 @@ const TeamPhoto = ({ person }) => {
         alt={`Foto de ${person.name}`}
         onError={() => setFailed(true)}
         style={{ objectPosition: person.photoPosition || "50% 50%" }}
-        className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
+        className={`absolute inset-0 size-full ${person.photoFit === "contain" ? "object-contain p-6" : "object-cover"} transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none`}
       />
     );
   }
@@ -124,8 +130,8 @@ const About = () => {
                 Quatro pessoas, uma letra cada.
               </h1>
               <p className="text-lg leading-relaxed text-content-secondary">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus,
-                posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla.
+                O Damp Code nasceu na Fatec Jahu, no curso de Desenvolvimento de Software Multiplataforma: uma plataforma
+                de Hackathons para quem quer aprender na prática e chegar mais perto do mercado de trabalho.
               </p>
             </div>
           </div>
@@ -135,7 +141,7 @@ const About = () => {
         <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6 lg:py-20">
           <div className="flex max-w-2xl flex-col gap-2">
             <h2 className="text-2xl font-bold sm:text-3xl">Quem faz o Damp Code</h2>
-            <p className="text-content-secondary">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <p className="text-content-secondary">Documentação, frontend, banco de dados e organização: cada um puxou uma frente, e todos ajudaram em tudo.</p>
           </div>
 
           <ul className="flex flex-col gap-6">
@@ -207,9 +213,9 @@ const About = () => {
         <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:pb-24">
           <div className="flex flex-col items-start gap-6 rounded-3xl border border-white/10 bg-[linear-gradient(120deg,rgba(108,72,197,0.35),rgba(23,10,54,0.2))] p-8 sm:p-10 md:flex-row md:items-center md:justify-between">
             <div className="flex max-w-xl flex-col gap-2">
-              <h2 className="text-2xl font-bold">Lorem ipsum dolor sit amet</h2>
+              <h2 className="text-2xl font-bold">Bora para o próximo Hackathon?</h2>
               <p className="text-content-secondary">
-                Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                Crie sua conta, participe dos desafios e mostre o que você sabe fazer para a comunidade e para as empresas.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
